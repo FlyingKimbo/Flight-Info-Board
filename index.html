@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flight Status</title>
+<style>
+body { font-family: Arial, sans-serif; }
+table { width: 100%; }
+th, td { text-align: center; }
+.blinking { animation: blinker 2s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<table border='1'>
+<tr>
+<th>Aircraft</th>
+<th>Registration</th>
+<th>Departure/Location</th>
+<th>Flight Status</th>
+<th>Destination</th>
+</tr>
+<tr>
+<tr>
+<td>Boeing748</td>
+<td>Kimbo701</td>
+<td>EBBR Brussels National </td>
+<td class='blinking' style='background-color:red;'>Delayed</td>
+<td>EHAM Schiphol, Amsterdam </td>
+</tr>
+
+
+</table>
+</body>
+</html>
