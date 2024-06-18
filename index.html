@@ -3,46 +3,131 @@
 <head>
 <title>Flight Status</title>
 <script>
-setInterval(function() { location.reload(); }, 40000);
+document.addEventListener("DOMContentLoaded", function() {
+    // Restore sort state
+    var sortColumnIndex = localStorage.getItem('sortColumnIndex');
+    var sortDirection = localStorage.getItem('sortDirection');
+    if (sortColumnIndex !== null && sortDirection !== null) {
+        sortTable(parseInt(sortColumnIndex), sortDirection);
+    }
+});
+
+setInterval(function() {
+    var sortColumnIndex = localStorage.getItem('sortColumnIndex');
+    var sortDirection = localStorage.getItem('sortDirection');
+    localStorage.setItem('sortColumnIndex', sortColumnIndex);
+    localStorage.setItem('sortDirection', sortDirection);
+    location.reload();
+}, 40000);
+
+function sortTable(columnIndex, dir = 'asc') {
+    var table = document.getElementById("flightTable");
+    var rows = table.rows;
+    var switching = true;
+    var shouldSwitch, i;
+    var switchcount = 0;
+
+    // Clear existing sort indicators
+    var headers = table.getElementsByTagName("th");
+    for (i = 0; i < headers.length; i++) {
+        headers[i].classList.remove("sort-asc", "sort-desc");
+    }
+
+    while (switching) {
+        switching = false;
+        var rowsArray = Array.prototype.slice.call(rows, 1); // Skip the header row
+
+        for (i = 0; i < rowsArray.length - 1; i++) {
+            shouldSwitch = false;
+            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
+            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
+
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+
+    // Add sort indicator to the sorted column header
+    if (dir == "asc") {
+        headers[columnIndex].classList.add("sort-asc");
+    } else {
+        headers[columnIndex].classList.add("sort-desc");
+    }
+
+    // Save sort state
+    localStorage.setItem('sortColumnIndex', columnIndex);
+    localStorage.setItem('sortDirection', dir);
+}
 </script>
 <style>
 body { font-family: Arial, sans-serif; 
-background-color: rgb(100, 100, 100); /* Set the background color to RGB(50, 50, 50) */
+background-color: rgb(100, 100, 100); /* Set the background color to RGB(100, 100, 100) */
 color: white; /* Optional: Set the text color to white for better contrast */} 
 table { width: 100%; }
 th, td { text-align: center; }
 .blinking { animation: blinker 2s linear infinite; }
 @keyframes blinker { 50% { background-color: transparent; } }
+th.sort-asc:after {
+    content: " ▲";
+}
+th.sort-desc:after {
+    content: " ▼";
+}
 </style>
 </head>
 <body>
-<table border='1'>
-<tr><th>Aircraft</th>
-<th>Flight Number</th>
-<th>Departure/Location</th>
-<th>Flight Status</th>
-<th>Destination</th>
+<table id="flightTable" border='1'>
+<tr><th onclick="sortTable(0)">Aircraft</th>
+    <th onclick="sortTable(1)">Flight Number</th>
+    <th onclick="sortTable(2)">Departure/Location</th>
+    <th onclick="sortTable(3)">Flight Status</th>
+    <th onclick="sortTable(4)">Destination</th>
 </tr>
 <tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
-<td>KIMBO707</td>
-<td class='' style=''>VIDP Indira Gandhi International, Delhi </td>
-<td class='' style=''>-</td>
-<td class='' style=''>-</td>
+    <td>KIMBO707</td>
+    <td class='' style=''>VIDP Indira Gandhi International, Delhi </td>
+    <td class='' style=''>-</td>
+    <td class='' style=''>-</td>
 </tr>
-
 <tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
-<td>KIMBO706</td>
-<td class='' style=''>LFPO Orly, Paris </td>
+    <td>KIMBO706</td>
+    <td class='' style=''>LEIB Ibiza </td>
+    <td class='' style=''>-</td>
+    <td class='' style=''>-</tr>
+<tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Boeing748.png' alt='Aircraft Image' style='width:100px;height:auto;'> Boeing748</td>
+<td>KIMBO702</td>
+<td class='' style=''>KJFK Kennedy, New York </td>
 <td class='' style=''>-</td>
 <td class='' style=''>-</td>
 </tr>
 
 
-
-
-
-
-
+<tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Longitude.png' alt='Aircraft Image' style='width:100px;height:auto;'> Longitude</td>
+<td>KIMBO701</td>
+<td class='' style=''>KSAN San Diego Intl</td>
+<td class='' style=''>-</td>
+<td class='' style=''>-</td>
+</tr>
 
 </table>
 </body>
