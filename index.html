@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         eteBar.style.width = '100%';
                         eteBar.style.opacity = 0;
                     } else if (ete > 0) {
-                        const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                        const etePercentage = Math.max((ete / initialETE) * 100, 0);
                         eteBar.style.width = etePercentage + '%';
                         eteBar.style.opacity = 1;
                     } else {
@@ -139,11 +139,6 @@ document.addEventListener("DOMContentLoaded", function() {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
             updateETEbars();
         }, 2000);
-
-        // Refresh the entire page every 2000 milliseconds
-        setInterval(function() {
-            location.reload();
-        }, 2000);
     }
 
     initialize();
@@ -219,7 +214,6 @@ th.sort-desc:after {
 <td class='blinking' style='background-color:red;'>Delayed</td>
 <td class='blinking' style='background-color:red;'>KSAN San Diego Intl</td>
 </tr>
-
 </table>
 </body>
 </html>
