@@ -140,8 +140,12 @@ document.addEventListener("DOMContentLoaded", function() {
         // Automatically sort by Flight Status every 20000 milliseconds
         setInterval(function() {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
-            updateETEbars();
         }, 20000);
+
+	// Refresh the Greenbar function every 100 milliseconds
+	setInterval(function() {
+           updateETEbars();
+    	}, 2000);
 
         // Refresh the entire page every 20000 milliseconds
         setInterval(function() {
