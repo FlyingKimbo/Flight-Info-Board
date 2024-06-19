@@ -90,24 +90,26 @@ function updateETEbars() {
         .then(response => response.text())
         .then(data => {
             const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
-            if (initialETEmaxValue === null && eteData.length > 0) {
-                initialETEmaxValue = Math.max(...eteData.filter(ete => ete > 0));
-            }
-            const maxETE = initialETEmaxValue || 1; // Use initial max value or default to 1 to avoid division by zero
-            const eteBar = document.getElementById('ete-bar');
-            if (eteBar) {
-                const ete = eteData[0]; // Assuming the first line corresponds to the ETE value
+            if (eteData.length > 0) {
+                if (initialETEmaxValue === null) {
+                    initialETEmaxValue = Math.max(...eteData.filter(ete => ete > 0));
+                }
+                const maxETE = initialETEmaxValue || 1; // Use initial max value or default to 1 to avoid division by zero
+                const eteBar = document.getElementById('ete-bar');
+                if (eteBar) {
+                    const ete = eteData[0]; // Assuming the first line corresponds to the ETE value
 
-                if (ete === -1) {
-                    eteBar.style.width = '100%';
-                    eteBar.style.opacity = 0;
-                } else if (ete > 0) {
-                    const etePercentage = Math.min((ete / maxETE) * 100, 100);
-                    eteBar.style.width = etePercentage + '%';
-                    eteBar.style.opacity = 1;
-                } else {
-                    eteBar.style.width = '0%';
-                    eteBar.style.opacity = 0;
+                    if (ete === -1) {
+                        eteBar.style.width = '100%';
+                        eteBar.style.opacity = 0;
+                    } else if (ete > 0) {
+                        const etePercentage = Math.min((ete / maxETE) * 100, 100);
+                        eteBar.style.width = etePercentage + '%';
+                        eteBar.style.opacity = 1;
+                    } else {
+                        eteBar.style.width = '0%';
+                        eteBar.style.opacity = 0;
+                    }
                 }
             }
         })
