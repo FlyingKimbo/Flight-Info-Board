@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", function() {
     var sortDirection = localStorage.getItem('sortDirection');
     if (sortColumnIndex !== null && sortDirection !== null) {
         sortTable(parseInt(sortColumnIndex), sortDirection);
+    } else {
+        // Default sort by Flight Status on first load
+        sortTable(3, 'asc');
     }
 
     // Fetch and update ETE bars
@@ -16,10 +19,12 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Automatically sort by Flight Status every 2000 milliseconds
     setInterval(function() {
-        sortTable(3); // Sort by Flight Status (column index 3)
+        sortTable(3, 'asc'); // Sort by Flight Status (column index 3)
         updateETEbars();
-    }, 40000);
+    }, 2000);
 });
+
+let initialETEmaxValue = null;
 
 function sortTable(columnIndex, dir = 'asc') {
     var table = document.getElementById("flightTable");
@@ -36,9 +41,9 @@ function sortTable(columnIndex, dir = 'asc') {
 
     while (switching) {
         switching = false;
-        var rowsArray = Array.prototype.slice.call(rows, 1); // Skip the header row
+        var rowsArray = Array.prototype.slice.call(rows, 2); // Skip the header row and the green bar row
 
-        for (i = 0; i < rowsArray.length - 1); i++) {
+        for (i = 0; i < rowsArray.length - 1; i++) {
             shouldSwitch = false;
             var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
             var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
@@ -81,18 +86,24 @@ function sortTable(columnIndex, dir = 'asc') {
 }
 
 function updateETEbars() {
-    fetch('https://raw.githubusercontent.com/YourUsername/YourRepo/main/ETE.txt')
+    fetch('https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/ETE_seconds.txt')
         .then(response => response.text())
         .then(data => {
-            const eteData = data.split('\n').map(line => line.trim()).filter(line => line !== '');
-            const table = document.getElementById("flightTable");
-            const rows = table.getElementsByTagName("tr");
-
+            const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
+            if (initialETEmaxValue === null && eteData.length > 0) {
+                initialETEmaxValue = Math.max(...eteData.filter(ete => ete > 0));
+            }
+            const maxETE = initialETEmaxValue || 1; // Use initial max value or default to 1 to avoid division by zero
             const eteBar = document.getElementById('ete-bar');
             if (eteBar) {
-                const ete = eteData[0] || 0; // Assuming the first line corresponds to the ETE value
-                if (ete > 0) {
-                    eteBar.style.width = ete + '%';
+                const ete = eteData[0]; // Assuming the first line corresponds to the ETE value
+
+                if (ete === -1) {
+                    eteBar.style.width = '100%';
+                    eteBar.style.opacity = 0;
+                } else if (ete > 0) {
+                    const etePercentage = Math.min((ete / maxETE) * 100, 100);
+                    eteBar.style.width = etePercentage + '%';
                     eteBar.style.opacity = 1;
                 } else {
                     eteBar.style.width = '0%';
@@ -142,10 +153,10 @@ th.sort-desc:after {
 <body>
 <table id="flightTable" border='1'>
 <tr><th onclick="sortTable(0)">Aircraft</th>
-    <th onclick="sortTable(1)">Flight Number</th>
-    <th onclick="sortTable(2)">Departure/Location</th>
+    <th>Flight Number</th>
+    <th>Departure/Location</th>
     <th onclick="sortTable(3)">Flight Status</th>
-    <th onclick="sortTable(4)">Destination</th>
+    <th>Destination</th>
 </tr>
 <tr><td colspan="5" class="ete-bar-container">
         <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
@@ -169,18 +180,8 @@ th.sort-desc:after {
     <td class='' style=''>-</td>
     <td class='' style=''>-</td>
 </tr>
-
-
 <tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Longitude.png' alt='Aircraft Image' style='width:100px;height:auto;'> Longitude</td>
 <td>KIMBO701</td>
-<td class='' style=''>LEIB Ibiza </td>
-<td class='blinking' style='background-color:lightblue;'>Deboarding</td>
-<td class='blinking' style='background-color:lightblue;'>KSAN San Diego Intl</td>
-</tr>
-
-
-<tr><td style='text-align: center;'><img src='https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Aircraft_Type/Longitude.png' alt='Aircraft Image' style='width:100px;height:auto;'> Longitude</td>
-<td>KIMBO706</td>
 <td class='' style=''>LEIB Ibiza </td>
 <td class='blinking' style='background-color:lightblue;'>Deboarding</td>
 <td class='blinking' style='background-color:lightblue;'>KSAN San Diego Intl</td>
