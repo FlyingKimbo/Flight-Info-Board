@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Automatically sort by Flight Status every 2000 milliseconds
     setInterval(function() {
-        sortTable(3, 'asc'); // Sort by Flight Status (column index 3)
+        sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         updateETEbars();
     }, 2000);
 });
@@ -192,14 +192,6 @@ th.sort-desc:after {
 <td class='blinking' style='background-color:lightblue;'>Deboarding</td>
 <td class='blinking' style='background-color:lightblue;'>KSAN San Diego Intl</td>
 </tr>
-
-
-
-
-
-
-
-
 </table>
 </body>
 </html>
