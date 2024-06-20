@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
                 const eteBar = document.getElementById('ete-bar');
+                const aircraftImage = document.getElementById('aircraft-image'); // Aircraft image element
                 if (eteBar && eteData.length > 0) {
                     const ete = eteData[0]; // Assuming the first line corresponds to the ETE value
                     console.log('Current ETE:', ete);
@@ -42,9 +43,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         console.log('ETE Percentage:', etePercentage);
                         eteBar.style.width = etePercentage + '%';
                         eteBar.style.opacity = 1;
+
+                        // Update the aircraft image position
+                        const barWidth = eteBar.clientWidth;
+                        aircraftImage.style.left = `${barWidth}px`; // Position the aircraft image at the leading edge
+                        aircraftImage.src = '/Image/Aircraft_Type/Concorde.png'; // Set the appropriate image based on the current flight
+                        aircraftImage.style.opacity = 1; // Ensure the image is visible
                     } else {
                         eteBar.style.width = '0%';
                         eteBar.style.opacity = 0;
+                        aircraftImage.style.opacity = 0; // Hide the image
                     }
                 }
             })
@@ -52,9 +60,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error fetching ETE data:', error);
                 // Set opacity to 0 if fetching data fails
                 const eteBar = document.getElementById('ete-bar');
+                const aircraftImage = document.getElementById('aircraft-image');
                 if (eteBar) {
                     eteBar.style.width = '0%';
                     eteBar.style.opacity = 0;
+                    aircraftImage.style.opacity = 0; // Hide the image
                 }
             });
     }

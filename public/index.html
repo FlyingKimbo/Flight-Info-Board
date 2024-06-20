@@ -60,6 +60,13 @@
             z-index: 3;
             color: white;
         }
+
+        .aircraft-image {
+            position: absolute;
+            top: -30px; /* Adjust as needed */
+            height: 30px; /* Adjust as needed */
+            z-index: 4;
+        }
     </style>
 </head>
 <body>
@@ -71,7 +78,8 @@
             <th>Destination</th>
         </tr>
         <tr><td colspan="5" class="ete-bar-container">
-                <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
+             <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
+            <img id="aircraft-image" class="aircraft-image" src="" alt="Aircraft Image">
             </td>
         </tr>
         <tr><td style='text-align: center;'>
@@ -122,6 +130,7 @@
 <td class='blinking' style='background-color:green;'>Enroute</td>
 <td class='blinking' style='background-color:green;'>LTBA Ataturk, Istanbul </td>
 </tr>
+
 
 
 
