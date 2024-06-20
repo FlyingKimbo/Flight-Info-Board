@@ -1,0 +1,2 @@
+E:\FS_VS_prj\source\KimboExpress\obj\Debug\KimboExpress.njsproj.CoreCompileInputs.cache
+E:\FS_VS_prj\source\KimboExpress\bin\Microsoft.NodejsTools.WebRole.dll
