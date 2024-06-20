@@ -120,7 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function initialize() {
         // Set image paths
-        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
+        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://Flight-Info-Board.vercel.app';
         document.querySelectorAll('img[data-src]').forEach(img => {
             img.src = baseUrl + img.getAttribute('data-src');
             console.log('Setting image src:', img.src); // Debugging line
