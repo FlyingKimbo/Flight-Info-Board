@@ -1,8 +1,8 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
 
     function fetchInitialETE() {
-        fetch('/data/ ETE_seconds_initial.txt')
+        fetch('/data/ETE_seconds_initial.txt')
             .then(response => response.text())
             .then(initialData => {
                 initialETE = parseInt(initialData.trim());
@@ -119,10 +119,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function initialize() {
-	// Set image paths
+        // Set image paths
         const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
         document.querySelectorAll('img[data-src]').forEach(img => {
             img.src = baseUrl + img.getAttribute('data-src');
+            console.log('Setting image src:', img.src); // Debugging line
         });
 
         // Restore sort state
@@ -139,17 +140,17 @@ document.addEventListener("DOMContentLoaded", function() {
         fetchInitialETE();
 
         // Automatically sort by Flight Status every 20000 milliseconds
-        setInterval(function() {
+        setInterval(function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
-	// Refresh the Greenbar function every 100 milliseconds
-	setInterval(function() {
-           updateETEbars();
-    	}, 100);
+        // Refresh the Greenbar function every 100 milliseconds
+        setInterval(function () {
+            updateETEbars();
+        }, 100);
 
         // Refresh the entire page every 20000 milliseconds
-        setInterval(function() {
+        setInterval(function () {
             location.reload();
         }, 20000);
     }
