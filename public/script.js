@@ -45,8 +45,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         eteBar.style.opacity = 1;
 
                         // Update the aircraft image position
-                        const barWidth = eteBar.clientWidth;
-                        aircraftImage.style.left = `${barWidth}px`; // Position the aircraft image at the leading edge
+                        const barWidth = eteBar.getBoundingClientRect().width;
+                        const containerOffset = eteBar.parentElement.getBoundingClientRect().left;
+                        const imagePosition = barWidth + containerOffset - aircraftImage.width /2 ;
+                        aircraftImage.style.left = `${imagePosition}px`; // Position the aircraft image at the leading edge
                         aircraftImage.src = '/Image/Aircraft_Type/Concorde.png'; // Set the appropriate image based on the current flight
                         aircraftImage.style.opacity = 1; // Ensure the image is visible
                     } else {
