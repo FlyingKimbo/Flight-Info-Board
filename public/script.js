@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let initialETE = -1;
 
     function fetchInitialETE() {
-        fetch('https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Flight_Data/ETE_seconds_initial.txt')
+        fetch('/data/ ETE_seconds_initial.txt')
             .then(response => response.text())
             .then(initialData => {
                 initialETE = parseInt(initialData.trim());
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (initialETE === -1) {
             return;
         }
-        fetch('https://raw.githubusercontent.com/FlyingKimbo/Flight-Info-Board/main/Flight_Data/ETE_seconds.txt')
+        fetch('/data/ETE_seconds.txt')
             .then(response => response.text())
             .then(data => {
                 const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
@@ -119,6 +119,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function initialize() {
+	// Set image paths
+        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            img.src = baseUrl + img.getAttribute('data-src');
+        });
+
         // Restore sort state
         var sortColumnIndex = localStorage.getItem('sortColumnIndex');
         var sortDirection = localStorage.getItem('sortDirection');
