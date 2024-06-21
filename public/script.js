@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
+    let aircraftStopped = false; // To track if the aircraft image should stop
+    let lastImagePosition = null; // To store the last position of the aircraft image
 
     function fetchInitialETE() {
         fetch('/data/ETE_seconds_initial.txt')
@@ -13,7 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     console.error('Invalid initial ETE value.');
                     initialETE = -1; // Ensure we don't use invalid initial values
                 } else {
-                    updateETEbars();
+                    fetchCurrentFlight().then(aircraftType => {
+                        updateETEbars(aircraftType);
+                    });
                 }
             })
             .catch(error => {
@@ -21,7 +25,21 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function updateETEbars() {
+    function fetchCurrentFlight() {
+        return fetch('/data/CurrentFlight.txt')
+            .then(response => response.text())
+            .then(data => {
+                // Assuming the file contains the aircraft type and flight number separated by a space
+                const [aircraftType, flightNumber] = data.trim().split(' ');
+                return aircraftType;
+            })
+            .catch(error => {
+                console.error('Error fetching current flight data:', error);
+                return null;
+            });
+    }
+
+    function updateETEbars(aircraftType) {
         if (initialETE === -1) {
             return;
         }
@@ -38,6 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     if (ete === -1) {
                         eteBar.style.width = '100%';
                         eteBar.style.opacity = 0;
+                        aircraftImage.style.opacity = 0; // Hide the image
                     } else if (ete > 0) {
                         const etePercentage = Math.min((ete / initialETE) * 100, 100);
                         console.log('ETE Percentage:', etePercentage);
@@ -45,11 +64,22 @@ document.addEventListener("DOMContentLoaded", function () {
                         eteBar.style.opacity = 1;
 
                         // Update the aircraft image position
-                        const barWidth = eteBar.getBoundingClientRect().width;
-                        const containerOffset = eteBar.parentElement.getBoundingClientRect().left;
-                        const imagePosition = barWidth + containerOffset - aircraftImage.width /2 ;
-                        aircraftImage.style.left = `${imagePosition}px`; // Position the aircraft image at the leading edge
-                        aircraftImage.src = '/Image/Aircraft_Type/Concorde.png'; // Set the appropriate image based on the current flight
+                        if (etePercentage > 5) {
+                            const barWidth = eteBar.getBoundingClientRect().width;
+                            const containerRight = eteBar.parentElement.getBoundingClientRect().right;
+                            const barRight = containerRight - barWidth;
+                            const imagePosition = barRight - aircraftImage.width / 4;
+                            aircraftImage.style.left = `${imagePosition}px`; // Position the aircraft image at the leading edge
+                            lastImagePosition = imagePosition; // Update the last position
+                            aircraftStopped = false; // Aircraft is moving
+                        } else {
+                            if (lastImagePosition !== null) {
+                                aircraftImage.style.left = `${lastImagePosition}px`; // Set to the last captured position
+                            }
+                            aircraftStopped = true; // Stop the aircraft from moving
+                        }
+
+                        aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate image based on the current flight
                         aircraftImage.style.opacity = 1; // Ensure the image is visible
                     } else {
                         eteBar.style.width = '0%';
@@ -158,7 +188,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Refresh the Greenbar function every 100 milliseconds
         setInterval(function () {
-            updateETEbars();
+            fetchCurrentFlight().then(aircraftType => {
+                updateETEbars(aircraftType);
+            });
         }, 100);
 
         // Refresh the entire page every 20000 milliseconds
