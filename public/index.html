@@ -55,10 +55,12 @@
         }
 
         .ete-bar-text {
-            position: relative;
-            width: 100%;
+            position: absolute;
+            left: 0; /* Initial position, will be updated via JS */
+            top: 0; /* Adjust as needed */
             z-index: 3;
             color: white;
+            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
 
         .aircraft-image {
@@ -79,9 +81,10 @@
             <th>Destination</th>
         </tr>
         <tr><td colspan="5" class="ete-bar-container">
-             <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-            <img id="aircraft-image" class="aircraft-image" src="" alt="Aircraft Image">
-            </td>
+    <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
+    <span class="ete-bar-text" id="ete-bar-text">ETE: 0s</span> <!-- Add this -->
+    <img id="aircraft-image" class="aircraft-image" src="" alt="Aircraft Image">
+</td>
         </tr>
         <tr><td style='text-align: center;'>
                 <img data-src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde
@@ -136,6 +139,7 @@
 <td class='' style=''>-</td>
 <td class='' style=''>-</td>
 </tr>
+
 
 
 </table>
