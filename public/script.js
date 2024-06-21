@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let aircraftStopped = false; // To track if the aircraft image should stop
     let lastImagePosition = null; // To store the last position of the aircraft image
-
+    
     function fetchInitialETE() {
         fetch('/data/ETE_seconds_initial.txt')
             .then(response => response.text())
@@ -39,7 +39,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+   
+
     function updateETEbars(aircraftType) {
+        
         if (initialETE === -1) {
             return;
         }
@@ -48,58 +51,97 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
                 const eteBar = document.getElementById('ete-bar');
-                const aircraftImage = document.getElementById('aircraft-image'); // Aircraft image element
+                const aircraftImage = document.getElementById('aircraft-image');
+                const eteText = document.getElementById('ete-bar-text'); // ETE text element
+                const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
+                const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
+
                 if (eteBar && eteData.length > 0) {
-                    const ete = eteData[0]; // Assuming the first line corresponds to the ETE value
-                    console.log('Current ETE:', ete);
+                    const ete = eteData[0];
+                    const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                    eteBar.style.width = etePercentage + '%';
+                    eteBar.style.opacity = 1; // Ensure the green bar is always visible
 
-                    if (ete === -1) {
-                        eteBar.style.width = '100%';
-                        eteBar.style.opacity = 0;
-                        aircraftImage.style.opacity = 0; // Hide the image
-                    } else if (ete > 0) {
-                        const etePercentage = Math.min((ete / initialETE) * 100, 100);
-                        console.log('ETE Percentage:', etePercentage);
-                        eteBar.style.width = etePercentage + '%';
-                        eteBar.style.opacity = 1;
+                    // Determine properties based on etePercentage using a switch statement
+                    switch (true) {
+                        
 
-                        // Update the aircraft image position
-                        if (etePercentage > 5) {
-                            const barWidth = eteBar.getBoundingClientRect().width;
-                            const containerRight = eteBar.parentElement.getBoundingClientRect().right;
-                            const barRight = containerRight - barWidth;
-                            const imagePosition = barRight - aircraftImage.width / 4;
-                            aircraftImage.style.left = `${imagePosition}px`; // Position the aircraft image at the leading edge
-                            lastImagePosition = imagePosition; // Update the last position
-                            aircraftStopped = false; // Aircraft is moving
-                        } else {
-                            if (lastImagePosition !== null) {
-                                aircraftImage.style.left = `${lastImagePosition}px`; // Set to the last captured position
-                            }
-                            aircraftStopped = true; // Stop the aircraft from moving
-                        }
+                        case (etePercentage >= 96 && etePercentage <= 100):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 1;
+                            updatePositions();
+                            eteTextDummy.style.opacity = 0;
+                            aircraftImageDummy.style.opacity = 0;
+                            break;
 
-                        aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate image based on the current flight
-                        aircraftImage.style.opacity = 1; // Ensure the image is visible
-                    } else {
-                        eteBar.style.width = '0%';
-                        eteBar.style.opacity = 0;
-                        aircraftImage.style.opacity = 0; // Hide the image
+                        case (etePercentage >= 5 && etePercentage < 96):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
+                            updatePositions();
+                            eteTextDummy.style.opacity = 0;
+                            aircraftImageDummy.style.opacity = 0;
+                            break;
+
+                        case (etePercentage > 0 && etePercentage <= 5):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 0;
+                            eteTextDummy.style.opacity = 1;
+                            aircraftImageDummy.style.opacity = 1;
+                            break;
+
+                        case (etePercentage <= 0):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 0;
+                            eteTextDummy.style.opacity = 0;
+                            aircraftImageDummy.style.opacity = 0;
+                            break;
                     }
+
+                    aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                    aircraftImageDummy.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                    // Fetch ETE.txt for the text to display on the bar
+                    fetch('/data/ETE.txt')
+                        .then(response => response.text())
+                        .then(text => {
+                            eteText.textContent = text.trim(); // Update text content from ETE.txt
+                            eteTextDummy.textContent = text.trim(); // Update text content from ETE.txt
+                        })
+                        .catch(error => console.error('Error fetching ETE text:', error));
                 }
             })
             .catch(error => {
                 console.error('Error fetching ETE data:', error);
-                // Set opacity to 0 if fetching data fails
-                const eteBar = document.getElementById('ete-bar');
-                const aircraftImage = document.getElementById('aircraft-image');
-                if (eteBar) {
-                    eteBar.style.width = '0%';
-                    eteBar.style.opacity = 0;
-                    aircraftImage.style.opacity = 0; // Hide the image
-                }
+                eteBar.style.width = '0%';
+                eteBar.style.opacity = 0;
+                aircraftImage.style.opacity = 0;
+                eteText.style.opacity = 0;
             });
     }
+
+    function updatePositions() {
+        const eteBar = document.getElementById('ete-bar');
+        const aircraftImage = document.getElementById('aircraft-image');
+        const eteText = document.getElementById('ete-bar-text'); // ETE text element
+        const barWidth = eteBar.getBoundingClientRect().width;
+        const containerRight = eteBar.parentElement.getBoundingClientRect().right;
+        const barRight = containerRight - barWidth;
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 4);
+        aircraftImage.style.left = `${imagePosition}px`;
+        aircraftImage.style.opacity = 1; // Make sure the image is visible
+
+        // Update ETE text positioning 
+        const textPosition = imagePosition + (aircraftImage.offsetWidth / -3) - (eteText.offsetWidth / 2);
+        eteText.style.left = `${textPosition}px`;
+    }
+
+
+
+
+
+
+
+
+
 
     function sortTable(columnIndex, dir = 'asc') {
         var table = document.getElementById("flightTable");

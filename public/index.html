@@ -63,12 +63,28 @@
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
 
+        .ete-bar-text-dummy {
+            position: absolute;
+            left: 1295px; /* Initial position, will be updated via JS */
+            top: 0; /* Adjust as needed */
+            z-index: 3;
+            color: white;
+            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
+        }
         .aircraft-image {
             position: absolute;
             top: -10px; /* Adjust as needed to align with the green bar */
             height: 30px; /* Adjust as needed */
             z-index: 4;
             transition: left 0.1s linear; /* Smooth movement */
+        }
+        .aircraft-image-dummy {
+            position: absolute;
+            left: 1353px;
+            top: -10px; /* Adjust as needed to align with the green bar */
+            height: 30px; /* Adjust as needed */
+            z-index: 4;
+            /*transition: left 0.1s linear; /* Smooth movement */
         }
     </style>
 </head>
@@ -82,8 +98,10 @@
         </tr>
         <tr><td colspan="5" class="ete-bar-container">
     <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-    <span class="ete-bar-text" id="ete-bar-text">ETE: 0s</span> <!-- Add this -->
-    <img id="aircraft-image" class="aircraft-image" src="" alt="Aircraft Image">
+    <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
+    <span class="ete-bar-text-dummy" id="ete-bar-text-dummy"></span> <!-- Add this -->
+    <img id="aircraft-image" class="aircraft-image" src="" alt="">
+    <img id="aircraft-image-dummy" class="aircraft-image-dummy" src="" alt="">
 </td>
         </tr>
         <tr><td style='text-align: center;'>
@@ -133,15 +151,16 @@
             <td class='' style=''>-</td>
             <td class='' style=''>-</td>
         </tr>
+
+
+
+
 <tr><td style='text-align: center;'><img src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
 <td>KIMBO704</td>
 <td class='' style=''>LTBA Ataturk, Istanbul </td>
 <td class='' style=''>-</td>
 <td class='' style=''>-</td>
 </tr>
-
-
-
 </table>
 </body>
 </html>
