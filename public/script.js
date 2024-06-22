@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     aircraftImageDummy.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     // Fetch ETE.txt for the text to display on the bar
-                    fetch('/data/ETE.txt')
+                    fetch('/data/DistToDestination.txt')
                         .then(response => response.text())
                         .then(text => {
                             eteText.textContent = text.trim(); // Update text content from ETE.txt
