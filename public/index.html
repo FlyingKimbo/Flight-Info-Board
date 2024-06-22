@@ -58,17 +58,17 @@
             position: absolute;
             left: 0; /* Initial position, will be updated via JS */
             top: 0; /* Adjust as needed */
-            z-index: 3;
-            color: white;
+            z-index: 4;
+            color: yellow;
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
 
         .ete-bar-text-dummy {
             position: absolute;
-            left: 1314px; /* Initial position, will be updated via JS */
+            left: 1220px; /* Initial position, will be updated via JS */
             top: 0; /* Adjust as needed */
-            z-index: 3;
-            color: white;
+            z-index: 4;
+            color: yellow;
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
         .aircraft-image {
@@ -80,11 +80,20 @@
         }
         .aircraft-image-dummy {
             position: absolute;
-            left: 1365px;
+            left: 1359px;
             top: -10px; /* Adjust as needed to align with the green bar */
             height: 30px; /* Adjust as needed */
             z-index: 4;
             /*transition: left 0.1s linear; /* Smooth movement */
+        }
+
+        .jetstream-image {
+            position: absolute;
+            top: 8px; /* Adjust as needed to align with the green bar */
+            height: 12px; /* Adjust as needed */
+            z-index: 3;
+            opacity: 0.8;
+            transition: left 0.1s linear; /* Smooth movement */
         }
     </style>
 </head>
@@ -102,6 +111,8 @@
     <span class="ete-bar-text-dummy" id="ete-bar-text-dummy"></span> <!-- Add this -->
     <img id="aircraft-image" class="aircraft-image" src="" alt="">
     <img id="aircraft-image-dummy" class="aircraft-image-dummy" src="" alt="">
+    <img id="jetstream-image" class="jetstream-image" src="" alt="">
+
 </td>
         </tr>
         <tr><td style='text-align: center;'>

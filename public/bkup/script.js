@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
+    let aircraftStopped = false; // To track if the aircraft image should stop
+    let lastImagePosition = null; // To store the last position of the aircraft image
     let previousFlightStatus = null;
     let pageReloaded = false;
 
@@ -53,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+
     function checkFlightStatus() {
         fetchFlightStatus().then(currentFlightStatus => {
             if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
@@ -64,20 +67,19 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every second
-
+    setInterval(checkFlightStatus, 1000); // This sets the interval to check the flight status every 20 seconds
+    /*
     function startJetStreamCycling() {
         let imageIndex = 1;
         setInterval(() => {
             const jetStreamImage = document.getElementById('jetstream-image');
-            if (jetStreamImage) {
-                jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
-                imageIndex = (imageIndex % 3) + 1; // Cycle through 1 to 3
-            }
-        }, 20); // Change image every 20ms
+            jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+            imageIndex = (imageIndex % 3) + 1; // Cycle through 1 to 3
+        }, 500); // Change image every 500ms
     }
-
+    */
     function updateETEbars(aircraftType) {
+        
         if (initialETE === -1) {
             return;
         }
@@ -90,7 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
                 const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
                 const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
-                const jetStreamImage = document.getElementById('jetstream-image');
+                const jetstreamimage = document.getElementById('jetstream-image');
 
                 if (eteBar && eteData.length > 0) {
                     const ete = eteData[0];
@@ -123,7 +125,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImage.style.opacity = 0;
                             eteTextDummy.style.opacity = 1;
                             aircraftImageDummy.style.opacity = 1;
-                            jetStreamImage.style.opacity = 0;
                             break;
 
                         case (etePercentage <= 0):
@@ -131,7 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImage.style.opacity = 0;
                             eteTextDummy.style.opacity = 1;
                             aircraftImageDummy.style.opacity = 1;
-                            jetStreamImage.style.opacity = 0;
                             break;
                     }
 
@@ -154,9 +154,6 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => {
                 console.error('Error fetching ETE data:', error);
-                const eteBar = document.getElementById('ete-bar');
-                const aircraftImage = document.getElementById('aircraft-image');
-                const eteText = document.getElementById('ete-bar-text'); // ETE text element
                 eteBar.style.width = '0%';
                 eteBar.style.opacity = 0;
                 aircraftImage.style.opacity = 0;
@@ -168,17 +165,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
         const eteText = document.getElementById('ete-bar-text'); // ETE text element
-        const jetstream = document.getElementById('jetstream-image');
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
         const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) + 130;
         const textPosition = barRight - (eteText.offsetWidth / 1000) - 10;
-        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) + 60;
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) + 130;
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
         aircraftImage.style.opacity = 1; // Make sure the image is visible
+
+        // Update ETE text positioning 
+        //const textPosition = imagePosition + (aircraftImage.offsetWidth / 1.5) - (eteText.offsetWidth / -122);
+        //eteText.style.left = `${textPosition}px`;
     }
 
     function sortTable(columnIndex, dir = 'asc') {
@@ -272,9 +272,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateETEbars(aircraftType);
             });
         }, 2000);
-
-        // Start jet stream cycling
-        startJetStreamCycling();
+        
     }
 
     initialize();
