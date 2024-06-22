@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const jetStreamImage = document.getElementById('jetstream-image');
             if (jetStreamImage) {
                 jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
-                imageIndex = (imageIndex % 3) + 1; // Cycle through 1 to 3
+                imageIndex = (imageIndex % 5) + 1; // Cycle through 1 to 5
             }
         }, 20); // Change image every 20ms
     }
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const barRight = containerRight - barWidth;
         const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) + 130;
         const textPosition = barRight - (eteText.offsetWidth / 1000) - 10;
-        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) + 60;
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 10;
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
