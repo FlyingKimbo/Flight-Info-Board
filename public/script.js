@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     fetch('/data/DistToDestination.txt')
                         .then(response => response.text())
                         .then(text => {
-                            const distanceText = text.trim() + " km" 
+                            const distanceText = text.trim() + "km  " 
                             eteText.textContent = distanceText; // Update text content from ETE.txt
                             eteTextDummy.textContent = distanceText; // Update text content from ETE.txt
                         })
