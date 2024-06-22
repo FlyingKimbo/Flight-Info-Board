@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
 
     function fetchInitialETE() {
-        fetch('/data/ETE_seconds_initial.txt')
+        fetch('/data/StartDistance.txt')
             .then(response => response.text())
             .then(initialData => {
                 initialETE = parseInt(initialData.trim());
@@ -55,20 +55,19 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    //setInterval(fetchFlightStatus, 20000); // This sets the interval to check the fetch flight status every 20 seconds
 
     function checkFlightStatus() {
         fetchFlightStatus().then(currentFlightStatus => {
             if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
                 pageReloaded = true; // Set the flag to true to prevent further reloads
-                location.reload();   // Reload the page
+                //location.reload();   // Reload the page
             } else {
                 previousFlightStatus = currentFlightStatus; // Update the previous flight status
             }
         });
     }
 
-    setInterval(checkFlightStatus, 10000); // This sets the interval to check the flight status every 20 seconds
+    setInterval(checkFlightStatus, 100); // This sets the interval to check the flight status every 20 seconds
 
 
     function updateETEbars(aircraftType) {
@@ -76,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (initialETE === -1) {
             return;
         }
-        fetch('/data/ETE_seconds.txt')
+        fetch('/data/DistToDestination.txt')
             .then(response => response.text())
             .then(data => {
                 const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
