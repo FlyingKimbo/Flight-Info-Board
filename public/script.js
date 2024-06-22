@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 20 seconds
+    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every 20 seconds
 
 
     function updateETEbars(aircraftType) {
