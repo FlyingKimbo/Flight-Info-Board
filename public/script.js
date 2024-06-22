@@ -2,7 +2,9 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let aircraftStopped = false; // To track if the aircraft image should stop
     let lastImagePosition = null; // To store the last position of the aircraft image
-    
+    let previousFlightStatus = null;
+    let pageReloaded = false;
+
     function fetchInitialETE() {
         fetch('/data/ETE_seconds_initial.txt')
             .then(response => response.text())
@@ -39,7 +41,35 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-   
+    function fetchFlightStatus() {
+        return fetch('/data/FlightStatus.txt')
+            .then(response => response.text())
+            .then(data => {
+                // Assuming the file contains a single word representing the flight status
+                const flightStatus = data.trim();
+                return flightStatus;
+            })
+            .catch(error => {
+                console.error('Error fetching Flight Status data:', error);
+                return null;
+            });
+    }
+
+    setInterval(fetchFlightStatus, 20000); // This sets the interval to check the fetch flight status every 20 seconds
+
+    function checkFlightStatus() {
+        fetchFlightStatus().then(currentFlightStatus => {
+            if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
+                pageReloaded = true; // Set the flag to true to prevent further reloads
+                location.reload();   // Reload the page
+            } else {
+                previousFlightStatus = currentFlightStatus; // Update the previous flight status
+            }
+        });
+    }
+
+    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every 20 seconds
+
 
     function updateETEbars(aircraftType) {
         
@@ -225,11 +255,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 updateETEbars(aircraftType);
             });
         }, 2000);
-
-        // Refresh the entire page every 20000 milliseconds
-        //setInterval(function () {
-            //location.reload();
-        //}, 20000);
+        
     }
 
     initialize();
