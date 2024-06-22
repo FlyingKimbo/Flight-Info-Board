@@ -60,14 +60,14 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchFlightStatus().then(currentFlightStatus => {
             if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
                 pageReloaded = true; // Set the flag to true to prevent further reloads
-                //location.reload();   // Reload the page
+                location.reload();   // Reload the page
             } else {
                 previousFlightStatus = currentFlightStatus; // Update the previous flight status
             }
         });
     }
 
-    setInterval(checkFlightStatus, 100); // This sets the interval to check the flight status every 20 seconds
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 20 seconds
 
 
     function updateETEbars(aircraftType) {
@@ -95,7 +95,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     switch (true) {
                         
 
-                        case (etePercentage >= 96 && etePercentage <= 100):
+                        case (etePercentage >= 97 && etePercentage <= 100):
                             eteText.style.opacity = 0;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
@@ -103,7 +103,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImageDummy.style.opacity = 0;
                             break;
 
-                        case (etePercentage >= 5 && etePercentage < 96):
+                        case (etePercentage >= 6 && etePercentage < 97):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImageDummy.style.opacity = 0;
                             break;
 
-                        case (etePercentage > 0 && etePercentage <= 5):
+                        case (etePercentage > 0 && etePercentage <= 6):
                             eteText.style.opacity = 0;
                             aircraftImage.style.opacity = 0;
                             eteTextDummy.style.opacity = 1;
@@ -154,13 +154,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
-        const imagePosition = barRight - (aircraftImage.offsetWidth / 4);
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 10;
+        const textPosition = barRight - (eteText.offsetWidth / 1000) - 60;
         aircraftImage.style.left = `${imagePosition}px`;
+        eteText.style.left = `${textPosition}px`;
         aircraftImage.style.opacity = 1; // Make sure the image is visible
 
         // Update ETE text positioning 
-        const textPosition = imagePosition + (aircraftImage.offsetWidth / -3) - (eteText.offsetWidth / 2);
-        eteText.style.left = `${textPosition}px`;
+        //const textPosition = imagePosition + (aircraftImage.offsetWidth / 1.5) - (eteText.offsetWidth / -122);
+        //eteText.style.left = `${textPosition}px`;
     }
 
     function sortTable(columnIndex, dir = 'asc') {
