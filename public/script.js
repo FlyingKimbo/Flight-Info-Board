@@ -134,15 +134,6 @@ document.addEventListener("DOMContentLoaded", function () {
         eteText.style.left = `${textPosition}px`;
     }
 
-
-
-
-
-
-
-
-
-
     function sortTable(columnIndex, dir = 'asc') {
         var table = document.getElementById("flightTable");
         var rows = table.rows;
@@ -228,17 +219,17 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
-        // Refresh the Greenbar function every 100 milliseconds
+        // Refresh the Greenbar function every 1000 milliseconds
         setInterval(function () {
             fetchCurrentFlight().then(aircraftType => {
                 updateETEbars(aircraftType);
             });
-        }, 100);
+        }, 2000);
 
         // Refresh the entire page every 20000 milliseconds
-        setInterval(function () {
-            location.reload();
-        }, 20000);
+        //setInterval(function () {
+            //location.reload();
+        //}, 20000);
     }
 
     initialize();
