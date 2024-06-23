@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every second
+    setInterval(checkFlightStatus, 1000); // This sets the interval to check the flight status every second
 
     function startJetStreamCycling() {
         let imageIndex = 1;
@@ -87,9 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
-                const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
-                const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
+                const eteText = document.getElementById('ete-bar-text'); // ETE text element     
                 const jetStreamImage = document.getElementById('jetstream-image');
 
                 if (eteBar && eteData.length > 0) {
@@ -106,31 +104,26 @@ document.addEventListener("DOMContentLoaded", function () {
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
-                            eteTextDummy.style.opacity = 0;
-                            aircraftImageDummy.style.opacity = 0;
+                            
                             break;
 
                         case (etePercentage >= 16 && etePercentage < 97):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
-                            eteTextDummy.style.opacity = 0;
-                            aircraftImageDummy.style.opacity = 0;
+                            jetStreamImage.style.opacity = 0;
                             break;
 
                         case (etePercentage > 0 && etePercentage <= 16):
                             eteText.style.opacity = 0;
                             aircraftImage.style.opacity = 0;
-                            eteTextDummy.style.opacity = 1;
-                            aircraftImageDummy.style.opacity = 1;
+                            updatePositions();
                             jetStreamImage.style.opacity = 0;
                             break;
 
-                        case (etePercentage <= 0):
+                        case (etePercentage < 0):
                             eteText.style.opacity = 0;
                             aircraftImage.style.opacity = 0;
-                            eteTextDummy.style.opacity = 1;
-                            aircraftImageDummy.style.opacity = 1;
                             jetStreamImage.style.opacity = 0;
                             break;
                     }
