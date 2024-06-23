@@ -88,7 +88,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                
+                const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
+                const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
                 const jetStreamImage = document.getElementById('jetstream-image');
 
                 if (eteBar && eteData.length > 0) {
@@ -99,19 +100,38 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // Determine properties based on etePercentage using a switch statement
                     switch (true) {
-                     
-                        case (etePercentage > 0 && etePercentage <= 100):
+                        
+
+                        case (etePercentage >= 97 && etePercentage <= 100):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
-                            jetStreamImage.style.opacity = 1;
                             updatePositions();
+                            eteTextDummy.style.opacity = 0;
+                            aircraftImageDummy.style.opacity = 0;
+                            break;
+
+                        case (etePercentage >= 16 && etePercentage < 97):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
+                            updatePositions();
+                            eteTextDummy.style.opacity = 0;
+                            aircraftImageDummy.style.opacity = 0;
+                            break;
+
+                        case (etePercentage > 0 && etePercentage <= 16):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 0;
+                            eteTextDummy.style.opacity = 1;
+                            aircraftImageDummy.style.opacity = 1;
+                            jetStreamImage.style.opacity = 0;
                             break;
 
                         case (etePercentage <= 0):
                             eteText.style.opacity = 0;
                             aircraftImage.style.opacity = 0;
+                            eteTextDummy.style.opacity = 1;
+                            aircraftImageDummy.style.opacity = 1;
                             jetStreamImage.style.opacity = 0;
-                            updatePositions();
                             break;
                     }
 
@@ -152,9 +172,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
-        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 100;
-        const textPosition = barRight - (eteText.offsetWidth / 1000) - 250;
-        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 240;
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) + 130;
+        const textPosition = barRight - (eteText.offsetWidth / 1000) - 10;
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 10;
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;

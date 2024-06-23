@@ -50,7 +50,7 @@
         .ete-bar {
             height: 100%;
             background-color: seagreen;
-            opacity: 0;
+            opacity: 1;
             float: right;
             z-index: 2;
             
@@ -61,16 +61,18 @@
             left: 0; /* Initial position, will be updated via JS */
             top: 0; /* Adjust as needed */
             z-index: 4;
+            opacity: 1;
             color: white;
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
 
-        
+
         .aircraft-image {
             position: absolute;
             top: -10px; /* Adjust as needed to align with the green bar */
             height: 30px; /* Adjust as needed */
             z-index: 4;
+            opacity: 1;
             transition: left 0.1s linear; /* Smooth movement */
         }
         
