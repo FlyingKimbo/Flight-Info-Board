@@ -158,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function () {
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
-        //aircraftImage.style.opacity = 1; // Make sure the image is visible
+        aircraftImage.style.opacity = 1; // Make sure the image is visible
     }
 
     function sortTable(columnIndex, dir = 'asc') {
