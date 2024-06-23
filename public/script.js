@@ -88,8 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
-                const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
+                
                 const jetStreamImage = document.getElementById('jetstream-image');
 
                 if (eteBar && eteData.length > 0) {
