@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
-                            jetStreamImage.style.opacity = 0;
+                            jetStreamImage.style.opacity = 1;
                             break;
 
                         case (etePercentage > 0 && etePercentage <= 16):
@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
 
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
-                    aircraftImageDummy.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                   
                     // Fetch ETE.txt for the text to display on the bar
                     Promise.all([
                         fetch('/data/DistToDestination.txt').then(response => response.text()),
