@@ -98,32 +98,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // Determine properties based on etePercentage using a switch statement
                     switch (true) {
-                        
-
-                        case (etePercentage >= 97 && etePercentage <= 100):
-                            eteText.style.opacity = 1;
-                            aircraftImage.style.opacity = 1;
-                            updatePositions();
-                            
-                            break;
-
-                        case (etePercentage >= 16 && etePercentage < 97):
+                                                        
+                        case (etePercentage > 0 && etePercentage <= 100):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
                             jetStreamImage.style.opacity = 1;
                             break;
 
-                        case (etePercentage > 0 && etePercentage <= 16):
-                            eteText.style.opacity = 0;
-                            aircraftImage.style.opacity = 0;
+                        case (etePercentage = 0):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
                             updatePositions();
-                            jetStreamImage.style.opacity = 0;
-                            break;
-
-                        case (etePercentage < 0):
-                            eteText.style.opacity = 0;
-                            aircraftImage.style.opacity = 0;
                             jetStreamImage.style.opacity = 0;
                             break;
                     }
@@ -165,13 +151,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
-        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) + 130;
-        const textPosition = barRight - (eteText.offsetWidth / 1000) - 10;
-        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 10;
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105;
+        const textPosition = barRight - (eteText.offsetWidth / 1000) - 245;
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245;
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
-        aircraftImage.style.opacity = 1; // Make sure the image is visible
+        //aircraftImage.style.opacity = 1; // Make sure the image is visible
     }
 
     function sortTable(columnIndex, dir = 'asc') {
