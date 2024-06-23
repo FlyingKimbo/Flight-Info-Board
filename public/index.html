@@ -44,6 +44,7 @@
             z-index: 1;
             text-align: left;
             line-height: 20px;
+            overflow: hidden;
         }
 
         .ete-bar {
@@ -63,6 +64,15 @@
             color: white;
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
         }
+
+        .ete-bar-text-dummy {
+            position: absolute;
+            left: 1220px; /* Initial position, will be updated via JS */
+            top: 0; /* Adjust as needed */
+            z-index: 4;
+            color: white;
+            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
+        }
         .aircraft-image {
             position: absolute;
             top: -10px; /* Adjust as needed to align with the green bar */
@@ -70,13 +80,23 @@
             z-index: 4;
             transition: left 0.1s linear; /* Smooth movement */
         }
+        .aircraft-image-dummy {
+            position: absolute;
+            left: 1359px;
+            top: -10px; /* Adjust as needed to align with the green bar */
+            height: 30px; /* Adjust as needed */
+            z-index: 4;
+            /*transition: left 0.1s linear; /* Smooth movement */
+        }
+
         .jetstream-image {
             position: absolute;
             top: 8px; /* Adjust as needed to align with the green bar */
             height: 11px; /* Adjust as needed */
             z-index: 3;
             opacity: 1;
-            mix-blend-mode : screen;
+            object-fit: cover;
+            mix-blend-mode: screen;
             transition: left 0.1s linear; /* Smooth movement */
         }
     </style>
@@ -92,7 +112,9 @@
         <tr><td colspan="5" class="ete-bar-container">
     <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
     <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
+    <span class="ete-bar-text-dummy" id="ete-bar-text-dummy"></span> <!-- Add this -->
     <img id="aircraft-image" class="aircraft-image" src="" alt="">
+    <img id="aircraft-image-dummy" class="aircraft-image-dummy" src="" alt="">
     <img id="jetstream-image" class="jetstream-image" src="" alt="">
 
 </td>

@@ -1,28 +1,27 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let initialDistance = -1;
+    let initialETE = -1;
     let previousFlightStatus = null;
     let pageReloaded = false;
-    let jetStreamInterval;
 
-    function fetchInitialDistance() {
+    function fetchInitialETE() {
         fetch('/data/StartDistance.txt')
             .then(response => response.text())
             .then(initialData => {
-                initialDistance = parseInt(initialData.trim());
-                console.log('Initial Distance:', initialDistance);
-                if (initialDistance === -1) {
-                    console.log('Distance evaluation disabled.');
-                } else if (isNaN(initialDistance) || initialDistance <= 0) {
-                    console.error('Invalid initial distance value.');
-                    initialDistance = -1; // Ensure we don't use invalid initial values
+                initialETE = parseInt(initialData.trim());
+                console.log('Initial ETE:', initialETE);
+                if (initialETE === -1) {
+                    console.log('ETE evaluation disabled.');
+                } else if (isNaN(initialETE) || initialETE <= 0) {
+                    console.error('Invalid initial ETE value.');
+                    initialETE = -1; // Ensure we don't use invalid initial values
                 } else {
                     fetchCurrentFlight().then(aircraftType => {
-                        updateProgressBars(aircraftType);
+                        updateETEbars(aircraftType);
                     });
                 }
             })
             .catch(error => {
-                console.error('Error fetching initial distance data:', error);
+                console.error('Error fetching initial ETE data:', error);
             });
     }
 
@@ -65,11 +64,11 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every 20 seconds
+    setInterval(checkFlightStatus, 20000); // This sets the interval to check the flight status every second
 
     function startJetStreamCycling() {
         let imageIndex = 1;
-        jetStreamInterval = setInterval(() => {
+        setInterval(() => {
             const jetStreamImage = document.getElementById('jetstream-image');
             if (jetStreamImage) {
                 jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
@@ -78,129 +77,89 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 20); // Change image every 20ms
     }
 
-    function stopJetStreamCycling() {
-        clearInterval(jetStreamInterval);
-        const jetStreamImage = document.getElementById('jetstream-image');
-        if (jetStreamImage) {
-            jetStreamImage.style.opacity = 0; // Hide jetstream image
-        }
-    }
-
-    function updateProgressBars(aircraftType) {
-        if (initialDistance === -1) {
+    function updateETEbars(aircraftType) {
+        if (initialETE === -1) {
             return;
         }
         fetch('/data/DistToDestination.txt')
             .then(response => response.text())
-            .then(currentData => {
-                const currentDistance = parseInt(currentData.trim());
-                const progressBar = document.getElementById('ete-bar');
+            .then(data => {
+                const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
+                const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
+                const aircraftImageDummy = document.getElementById('aircraft-image-dummy');
+                const eteTextDummy = document.getElementById('ete-bar-text-dummy'); // ETE text element
                 const jetStreamImage = document.getElementById('jetstream-image');
 
-                if (progressBar && !isNaN(currentDistance)) {
-                    const progressPercentage = Math.min((currentDistance / initialDistance) * 100, 100);
-                    updateProgressBarWidth(progressBar, progressPercentage);
-                    animateAircraftImage(aircraftImage, progressPercentage);
-                    updateETEText(eteText, aircraftType, progressPercentage);
-                    handleOpacity(progressBar, jetStreamImage, aircraftImage, eteText, progressPercentage);
-                    saveProgressState(currentDistance, progressPercentage);
+                if (eteBar && eteData.length > 0) {
+                    const ete = eteData[0];
+                    const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                    eteBar.style.width = etePercentage + '%';
+                    eteBar.style.opacity = 1; // Ensure the green bar is always visible
+
+                    // Determine properties based on etePercentage using a switch statement
+                    switch (true) {
+                     
+                        case (etePercentage > 0 && etePercentage <= 100):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
+                            jetStreamImage.style.opacity = 1;
+                            updatePositions();
+                            break;
+
+                        case (etePercentage <= 0):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 0;
+                            jetStreamImage.style.opacity = 0;
+                            updatePositions();
+                            break;
+                    }
+
+                    aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                    aircraftImageDummy.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                    // Fetch ETE.txt for the text to display on the bar
+                    Promise.all([
+                        fetch('/data/DistToDestination.txt').then(response => response.text()),
+                        fetch('/data/ETE_SRGS.txt').then(response => response.text())
+                    ])
+                        .then(([distText, eteTextA]) => {
+                            const distanceText = distText.trim() + " KM";
+                            const combinedText = `${eteTextA.trim()} | ${distanceText}`;
+                            eteText.textContent = combinedText; // Update text content with combined ETE and Distance
+                            eteTextDummy.textContent = combinedText; // Update text content with combined ETE and Distance
+                        })
+                        .catch(error => console.error('Error fetching data:', error));
+
                 }
             })
             .catch(error => {
-                console.error('Error fetching distance to destination data:', error);
-                const progressBar = document.getElementById('ete-bar');
+                console.error('Error fetching ETE data:', error);
+                const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                progressBar.style.width = '0%';
-                progressBar.style.opacity = 0;
+                eteBar.style.width = '0%';
+                eteBar.style.opacity = 0;
                 aircraftImage.style.opacity = 0;
                 eteText.style.opacity = 0;
             });
     }
 
-    function updateProgressBarWidth(progressBar, percentage) {
-        progressBar.style.width = percentage + '%';
-        progressBar.style.opacity = 1; // Ensure the green bar is always visible
-    }
-
-    function animateAircraftImage(aircraftImage, percentage) {
-        const containerWidth = document.querySelector('.ete-bar-container').offsetWidth;
-        const imagePosition = (containerWidth * percentage / 100) - (aircraftImage.offsetWidth / 2);
-        aircraftImage.style.left = imagePosition + 'px';
-    }
-
-    function updateETEText(eteText, aircraftType, percentage) {
-        // Fetch ETE_SRGS.txt for the text to display on the bar
-        Promise.all([
-            fetch('/data/DistToDestination.txt').then(response => response.text()),
-            fetch('/data/ETE_SRGS.txt').then(response => response.text())
-        ])
-            .then(([distText, eteTextA]) => {
-                const distanceText = distText.trim() + " KM";
-                const combinedText = `${eteTextA.trim()} | ${distanceText}`;
-                eteText.textContent = combinedText; // Update text content with combined ETE and Distance
-            })
-            .catch(error => console.error('Error fetching ETE data:', error));
-    }
-
-    function handleOpacity(progressBar, jetStreamImage, aircraftImage, eteText, percentage) {
-        if (percentage === 100) {
-            progressBar.style.opacity = 1;
-            jetStreamImage.style.opacity = 0;
-            aircraftImage.style.opacity = 1;
-            eteText.style.opacity = 1;
-            stopJetStreamCycling();
-        } else if (percentage < 100 && percentage > 0) {
-            progressBar.style.opacity = 1;
-            jetStreamImage.style.opacity = 1;
-            aircraftImage.style.opacity = 1;
-            eteText.style.opacity = 1;
-            startJetStreamCycling();
-        } else if (percentage === 0) {
-            progressBar.style.opacity = 0;
-            jetStreamImage.style.opacity = 0;
-            aircraftImage.style.opacity = 1;
-            eteText.style.opacity = 1;
-            stopJetStreamCycling();
-        } else if (percentage <= 16) {
-            progressBar.style.opacity = 1;
-            jetStreamImage.style.opacity = 1;
-            aircraftImage.style.opacity = 1;
-            eteText.style.opacity = 1;
-            stopJetStreamCycling();
-            const containerWidth = document.querySelector('.ete-bar-container').offsetWidth;
-            const imagePosition = (containerWidth * 16 / 100) - (aircraftImage.offsetWidth / 2);
-            aircraftImage.style.left = `${imagePosition}px`;
-            eteText.style.left = `${imagePosition}px`;
-        }
-    }
-
-    function saveProgressState(currentDistance, progressPercentage) {
-        localStorage.setItem('currentDistance', currentDistance);
-        localStorage.setItem('progressPercentage', progressPercentage);
-    }
-
-    function loadProgressState() {
-        const currentDistance = localStorage.getItem('currentDistance');
-        const progressPercentage = localStorage.getItem('progressPercentage');
-        return {
-            currentDistance: currentDistance ? parseInt(currentDistance) : null,
-            progressPercentage: progressPercentage ? parseFloat(progressPercentage) : null
-        };
-    }
-
-    function initializeProgress() {
-        const { currentDistance, progressPercentage } = loadProgressState();
-        if (currentDistance !== null && progressPercentage !== null) {
-            const progressBar = document.getElementById('ete-bar');
-            const aircraftImage = document.getElementById('aircraft-image');
-            const eteText = document.getElementById('ete-bar-text');
-            updateProgressBarWidth(progressBar, progressPercentage);
-            animateAircraftImage(aircraftImage, progressPercentage);
-            updateETEText(eteText, progressPercentage);
-        }
+    function updatePositions() {
+        const eteBar = document.getElementById('ete-bar');
+        const aircraftImage = document.getElementById('aircraft-image');
+        const eteText = document.getElementById('ete-bar-text'); // ETE text element
+        const jetstream = document.getElementById('jetstream-image');
+        const barWidth = eteBar.getBoundingClientRect().width;
+        const containerRight = eteBar.parentElement.getBoundingClientRect().right;
+        const barRight = containerRight - barWidth;
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 100;
+        const textPosition = barRight - (eteText.offsetWidth / 1000) - 250;
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 240;
+        aircraftImage.style.left = `${imagePosition}px`;
+        eteText.style.left = `${textPosition}px`;
+        jetstream.style.left = `${jetstream_imagePosition}px`;
+        //aircraftImage.style.opacity = 1; // Make sure the image is visible
     }
 
     function sortTable(columnIndex, dir = 'asc') {
@@ -280,23 +239,23 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        // Fetch initial distance value
-        fetchInitialDistance();
+        // Fetch initial ETE value
+        fetchInitialETE();
 
         // Automatically sort by Flight Status every 20000 milliseconds
         setInterval(function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
-        // Refresh the Greenbar function every 2000 milliseconds
+        // Refresh the Greenbar function every 1000 milliseconds
         setInterval(function () {
             fetchCurrentFlight().then(aircraftType => {
-                updateProgressBars(aircraftType);
+                updateETEbars(aircraftType);
             });
         }, 2000);
 
-        // Initialize progress from stored state
-        initializeProgress();
+        // Start jet stream cycling
+        startJetStreamCycling();
     }
 
     initialize();
