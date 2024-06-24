@@ -67,19 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function fetchAmbientPrecipState() {
-        return fetch('/data/AmbientPRECIPSTATE.txt')
-            .then(response => response.text())
-            .then(data => {
-                const precipState = parseInt(data.trim());
-                return precipState;
-            })
-            .catch(error => {
-                console.error('Error fetching Ambient Precipitation State data:', error);
-                return null;
-            });
-    }
-
     function checkFlightStatus() {
         fetchFlightStatus().then(currentFlightStatus => {
             if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
@@ -117,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element     
                 const jetStreamImage = document.getElementById('jetstream-image');
                 const cloudImage = document.getElementById('cloud-image');
-                const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
                 if (eteBar && eteData.length > 0) {
                     const ete = eteData[0];
@@ -140,12 +126,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // Determine properties based on etePercentage using a switch statement
                     switch (true) {
+                
+                        
+                    
                         case (etePercentage > 0 && etePercentage <= 100):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
                             jetStreamImage.style.opacity = 1;
+                            
+                            
                             break;
+
                         case (etePercentage == 0):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
@@ -163,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     cloudImage.src = `/Image/Cloud/Cloud1.png`;
-
                     // Fetch ETE.txt for the text to display on the bar
                     Promise.all([
                         fetch('/data/DistToDestination.txt').then(response => response.text()),
@@ -173,21 +164,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             const distanceText = distText.trim() + " KM";
                             const combinedText = `${eteTextA.trim()} | ${distanceText}`;
                             eteText.textContent = combinedText; // Update text content with combined ETE and Distance
+                            
                         })
                         .catch(error => console.error('Error fetching data:', error));
 
-                    // Fetch precipitation state and update the precipitation image
-                    fetchAmbientPrecipState().then(precipState => {
-                        if (precipState === 4) {
-                            precipImage.src = '/Image/Precip/rain1.gif';
-                            precipImage.style.opacity = 1;
-                        } else if (precipState === 8) {
-                            precipImage.src = '/Image/Precip/snow1.gif';
-                            precipImage.style.opacity = 1;
-                        } else {
-                            precipImage.style.opacity = 0;
-                        }
-                    });
                 }
             })
             .catch(error => {
@@ -203,23 +183,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function startCloudOpacityCycling(cloudImage) {
-        let opacity = 0.3;
+        let opacity = 0.5;
         let direction = 1; // 1 for increasing, -1 for decreasing
         const increment = 0.01; // Smaller increment for smoother transition
         const intervalTime = 30; // Smaller interval for more frequent updates
 
         cloudOpacityInterval = setInterval(() => {
             opacity += direction * increment;
-            if (opacity >= 1.0) {
-                opacity = 1.0;
+            if (opacity >= 0.9) {
+                opacity = 0.9;
                 direction = -1;
-            } else if (opacity <= 0.3) {
-                opacity = 0.3;
+            } else if (opacity <= 0.5) {
+                opacity = 0.5;
                 direction = 1;
             }
             cloudImage.style.opacity = opacity;
         }, intervalTime); // Adjust the interval as needed
     }
+
 
     function updatePositions() {
         const eteBar = document.getElementById('ete-bar');
@@ -227,8 +208,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const eteText = document.getElementById('ete-bar-text'); // ETE text element
         const jetstream = document.getElementById('jetstream-image');
         const cloud = document.getElementById('cloud-image');
-        const precipImage = document.getElementById('precip-image'); // New precipitation image element
-
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
@@ -236,14 +215,10 @@ document.addEventListener("DOMContentLoaded", function () {
         const textPosition = barRight - (eteText.offsetWidth / 1000) - 245;
         const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245;
         const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150;
-        const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110; // Position the precipitation image the same as cloud
-
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
         cloud.style.left = `${cloud_imagePosition}px`;
-        precipImage.style.left = `${precip_imagePosition}px`;
-
         //aircraftImage.style.opacity = 1; // Make sure the image is visible
     }
 
