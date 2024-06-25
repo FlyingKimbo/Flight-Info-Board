@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flight Status</title>
+<script src="script.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(100, 100, 100);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        th, td {
+            text-align: center;
+            position: relative;
+        }
+
+        .blinking {
+            animation: blinker 2s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                background-color: transparent;
+            }
+        }
+
+        @keyframes opacityCycle {
+            0% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.6;
+            }
+        }
+
+        .flipped {
+            transform: scaleX(-1);
+        }
+
+        th.sort-asc:after {
+            content: " ▲";
+        }
+
+        th.sort-desc:after {
+            content: " ▼";
+        }
+
+        .ete-bar-container {
+            position: relative;
+            height: 20px;
+            background-color: rgb(43 47 49);
+            z-index: 1;
+            text-align: left;
+            line-height: 20px;
+            overflow: hidden;
+            
+        }
+        
+
+        .ete-bar {
+            height: 100%;
+            background-color: seagreen;
+            opacity: 0;
+            float: right;
+            z-index: 2;
+        }
+
+        .ete-bar-text {
+            position: absolute;
+            left: 0; /* Initial position, will be updated via JS */
+            top: 0; /* Adjust as needed */
+            z-index: 4;
+            color: white;
+            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
+        }
+
+        .aircraft-image {
+            position: absolute;
+            top: -10px; /* Adjust as needed to align with the green bar */
+            height: 30px; /* Adjust as needed */
+            z-index: 4;
+            transition: left 0.1s linear; /* Smooth movement */
+        }
+
+        .jetstream-image {
+            position: absolute;
+            top: 8px; /* Adjust as needed to align with the green bar */
+            height: 11px; /* Adjust as needed */
+            opacity: 0;
+            z-index: 3;
+        }
+
+        .cloud-image {
+            position: absolute;
+            top: -20px; /* Adjust as needed to align with the green bar */
+            height: 50px; /* Adjust as needed */
+            opacity: 0;
+            z-index: 5;
+            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely */
+        }
+        .precip-image {
+            position: absolute;
+            top: -20px; /* Adjust as needed to align with the green bar */
+            height: 120px; /* Adjust as needed */
+            transform: rotate(100deg); /* Rotate the GIF to a fixed value */
+            opacity: 0;
+            z-index: 5;
+            float: left;
+            mix-blend-mode: screen; /* Apply the blend mode */
+            filter: brightness(5); /* Increase brightness */
+            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely */
+        }
+
+    </style>
+</head>
+<body>
+    <table id="flightTable" border='1'>
+        <tr><th onclick="sortTable(0)">Aircraft</th>
+            <th>Flight Number</th>
+            <th>Departure/Location</th>
+            <th onclick="sortTable(3)">Flight Status</th>
+            <th>Destination</th>
+        </tr>
+        <tr><td colspan="5" class="ete-bar-container">
+                <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
+                <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
+                <img id="aircraft-image" class="aircraft-image" src="" alt="">
+                <img id="jetstream-image" class="jetstream-image" src="" alt="">
+                <img id="cloud-image" class="cloud-image" src="" alt="">
+                <img id="precip-image" class="precip-image flipped" src="" alt="Precipitation">
+
+            </td>
+        </tr>
+        <tr><td style='text-align: center;'>
+                <img data-src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde
+            </td>
+            <td>KIMBO707</td>
+            <td class='' style=''>VIDP Indira Gandhi International, Delhi </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'><img src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
+            <td>KIMBO706</td>
+            <td class='' style=''>LPPT Lisbon </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'>
+                <img data-src='/Image/Aircraft_Type/Boeing748.png' alt='Aircraft Image' style='width:100px;height:auto;'> Boeing748
+            </td>
+            <td>KIMBO702</td>
+            <td class='' style=''>KJFK Kennedy, New York </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'>
+                <img data-src='/Image/Aircraft_Type/Longitude.png' alt='Aircraft Image' style='width:100px;height:auto;'> Longitude
+            </td>
+            <td>KIMBO701</td>
+            <td class='' style=''>KSAN San Diego Intl</td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'>
+                <img data-src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde
+            </td>
+            <td>KIMBO703</td>
+            <td class='' style=''>KMIA Miami International </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'><img src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
+            <td>KIMBO704</td>
+            <td class='' style=''>LFPO Orly, Paris </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+        <tr><td style='text-align: center;'><img src='/Image/Aircraft_Type/Boeing748.png' alt='Aircraft Image' style='width:100px;height:auto;'> Boeing748</td>
+            <td>KIMBO706</td>
+            <td class='' style=''>EDDB Schonefeld, Berlin </td>
+            <td class='' style=''>-</td>
+            <td class='' style=''>-</td>
+        </tr>
+<tr><td style='text-align: center;'><img src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
+<td>KIMBO708</td>
+<td class='' style=''>KLAX Los Angeles International </td>
+<td class='' style=''>-</td>
+<td class='' style=''>-</td>
+</tr>
