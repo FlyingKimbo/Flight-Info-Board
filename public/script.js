@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
         }
     }
-
+    /*
     function updateFlightTable(data) {
         const table = document.getElementById('flightTable');
         // Clear existing rows except header and ETE bar row
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
         }
     }
-
+    */
     // Fetch data every 5 seconds
     setInterval(fetchFlightData, 5000);
 
