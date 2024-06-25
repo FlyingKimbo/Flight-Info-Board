@@ -1,12 +1,18 @@
+let flightData = {};  // In-memory storage for flight data
+
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const flightData = req.body;
+        const { playerId, lat, lon } = req.body;
 
-        // Process the flight data (e.g., store it in a database, update a file, etc.)
-        // Here you might add your logic to handle the incoming data
+        // Update the flight data
+        flightData[playerId] = { lat, lon, timestamp: new Date().toISOString() };
 
         res.status(200).json({ message: 'Flight data updated successfully' });
+    } else if (req.method === 'GET') {
+        // Retrieve the flight data
+        res.status(200).json(flightData);
     } else {
         res.status(405).json({ message: 'Method not allowed' });
     }
 }
+

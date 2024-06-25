@@ -4,6 +4,18 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
 
+    async function fetchFlightData() {
+        const response = await fetch('/api/update-flight');
+        const data = await response.json();
+        document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+    }
+
+    // Fetch data every 5 seconds
+    setInterval(fetchFlightData, 5000);
+
+    // Initial fetch
+    fetchFlightData();
+
     function fetchInitialETE() {
         fetch('/data/StartDistance.txt')
             .then(response => response.text())
