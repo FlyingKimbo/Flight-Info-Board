@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
-                updateFlightTable(data); // Update flight table with the new data
+                //updateFlightTable(data); // Update flight table with the new data
             } else {
                 document.getElementById('flight-data').textContent = 'Error fetching data';
             }
