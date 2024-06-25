@@ -1,34 +1,30 @@
-import { json } from 'micro';
-import { send } from 'micro';
+const express = require('express');
+const bodyParser = require('body-parser');
 
+const app = express();
 let flightData = {};  // In-memory storage for flight data
 
-export default async function handler(req, res) {
-    if (req.method === 'POST') {
-        try {
-            const body = await json(req); // Parse JSON body
-            console.log('Received data:', body);
+app.use(bodyParser.json());
 
-            const { value } = body;
+app.post('/api/update-flight', (req, res) => {
+    const { value } = req.body;
 
-            // Check if data is received
-            if (value !== undefined) {
-                flightData['test'] = { value, timestamp: new Date().toISOString() };
-                console.log('Updated flight data:', flightData);
-                send(res, 200, { message: 'Flight data updated successfully' });
-            } else {
-                console.log('Invalid data received:', body);
-                send(res, 400, { message: 'Invalid data' });
-            }
-        } catch (err) {
-            console.error('Error parsing JSON:', err);
-            send(res, 400, { message: 'Invalid JSON' });
-        }
-    } else if (req.method === 'GET') {
-        console.log('Sending flight data:', flightData);
-        send(res, 200, flightData);
+    // Check if data is received
+    console.log('Received data:', req.body);
+
+    if (value !== undefined) {
+        flightData['test'] = { value, timestamp: new Date().toISOString() };
+        console.log('Updated flight data:', flightData);
+        res.status(200).json({ message: 'Flight data updated successfully' });
     } else {
-        console.log('Invalid method:', req.method);
-        send(res, 405, { message: 'Method not allowed' });
+        console.log('Invalid data received:', req.body);
+        res.status(400).json({ message: 'Invalid data' });
     }
-}
+});
+
+app.get('/api/update-flight', (req, res) => {
+    console.log('Sending flight data:', flightData);
+    res.status(200).json(flightData);
+});
+
+module.exports = app;
