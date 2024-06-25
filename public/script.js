@@ -43,9 +43,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function fetchFlightData() {
-        const response = await fetch('/api/update-flight');
-        const data = await response.json();
-        document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+        try {
+            const response = await fetch('/api/update-flight');
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+            } else {
+                document.getElementById('flight-data').textContent = 'Error fetching data';
+            }
+        } catch (error) {
+            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
+        }
     }
 
     // Fetch data every 5 seconds
