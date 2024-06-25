@@ -48,11 +48,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
                 const data = await response.json();
                 document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+                updateFlightTable(data); // Update flight table with the new data
             } else {
                 document.getElementById('flight-data').textContent = 'Error fetching data';
             }
         } catch (error) {
             document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
+        }
+    }
+
+    function updateFlightTable(data) {
+        const table = document.getElementById('flightTable');
+        // Clear existing rows except header and ETE bar row
+        while (table.rows.length > 2) {
+            table.deleteRow(2);
+        }
+        // Add new rows based on the data
+        for (const playerId in data) {
+            const playerData = data[playerId];
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td style='text-align: center;'><img src='/Image/Aircraft_Type/Concorde.png' alt='Aircraft Image' style='width:100px;height:auto;'> Concorde</td>
+                <td>${playerId}</td>
+                <td class='' style=''>${playerData.lat}, ${playerData.lon}</td>
+                <td class='' style=''>In Flight</td>
+                <td class='' style=''>-</td>
+            `;
         }
     }
 
