@@ -2,14 +2,14 @@ let flightData = {};  // In-memory storage for flight data
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { playerId, lat, lon } = req.body;
+        const { status } = req.body;
 
         // Check if data is received
         console.log('Received data:', req.body);
 
         // Update the flight data
-        if (playerId && lat && lon) {
-            flightData[playerId] = { lat, lon, timestamp: new Date().toISOString() };
+        if (status) {
+            flightData['test'] = { status, timestamp: new Date().toISOString() };
             console.log('Updated flight data:', flightData);
             res.status(200).json({ message: 'Flight data updated successfully' });
         } else {
