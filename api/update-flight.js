@@ -1,27 +1,34 @@
+import { json } from 'micro';
+import { send } from 'micro';
+
 let flightData = {};  // In-memory storage for flight data
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
-        const { value } = req.body;
+        try {
+            const body = await json(req); // Parse JSON body
+            console.log('Received data:', body);
 
-        // Check if data is received
-        console.log('Received data:', req.body);
+            const { value } = body;
 
-        // Update the flight data
-        if (value !== undefined) {
-            flightData['test'] = { value, timestamp: new Date().toISOString() };
-            console.log('Updated flight data:', flightData);
-            res.status(200).json({ message: 'Flight data updated successfully' });
-        } else {
-            console.log('Invalid data received:', req.body);
-            res.status(400).json({ message: 'Invalid data' });
+            // Check if data is received
+            if (value !== undefined) {
+                flightData['test'] = { value, timestamp: new Date().toISOString() };
+                console.log('Updated flight data:', flightData);
+                send(res, 200, { message: 'Flight data updated successfully' });
+            } else {
+                console.log('Invalid data received:', body);
+                send(res, 400, { message: 'Invalid data' });
+            }
+        } catch (err) {
+            console.error('Error parsing JSON:', err);
+            send(res, 400, { message: 'Invalid JSON' });
         }
     } else if (req.method === 'GET') {
         console.log('Sending flight data:', flightData);
-        // Retrieve the flight data
-        res.status(200).json(flightData);
+        send(res, 200, flightData);
     } else {
         console.log('Invalid method:', req.method);
-        res.status(405).json({ message: 'Method not allowed' });
+        send(res, 405, { message: 'Method not allowed' });
     }
 }
