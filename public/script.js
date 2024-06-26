@@ -4,8 +4,33 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
 
-    
+    function fetchInitialETE() {
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the structure of the data received is known and we're interested in "StartDistance" from a specific flight
+                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
+                const initialETE = data[currentFlightKey]?.StartDistance;
 
+                console.log('Initial ETE:', initialETE);
+
+                if (initialETE === -1) {
+                    console.log('ETE evaluation disabled.');
+                } else if (isNaN(initialETE) || initialETE <= 0) {
+                    console.error('Invalid initial ETE value.');
+                    initialETE = -1; // Ensure we don't use invalid initial values
+                } else {
+                    fetchCurrentFlight().then(aircraftType => {
+                        updateETEbars(aircraftType);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching initial ETE data:', error);
+            });
+    }
+
+    /*
     function fetchInitialETE() {
         fetch('/data/StartDistance.txt')
             .then(response => response.text())
@@ -27,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error fetching initial ETE data:', error);
             });
     }
-
+    */
     function fetchCurrentFlight() {
         return fetch('/data/CurrentFlight.txt')
             .then(response => response.text())
