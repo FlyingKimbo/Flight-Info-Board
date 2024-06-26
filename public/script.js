@@ -13,9 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 console.log('Initial ETE:', startDistance);
 
-                if (startDistance === -1) {
-                    console.log('ETE evaluation disabled.');
-                } else if (isNaN(startDistance) || startDistance <= 0) {
+                if (isNaN(startDistance) || startDistance <= 0) {
                     console.error('Invalid initial ETE value.');
                     initialETE = -1; // Ensure we don't use invalid initial values
                 } else {
@@ -29,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error fetching initial ETE data:', error);
             });
     }
+
 
 
    
