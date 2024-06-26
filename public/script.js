@@ -65,8 +65,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-    
+   
 
+    async function fetchFlightData() {
+        try {
+            const response = await fetch('/api/update-flight');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Received data:', data);
+                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+            } else {
+                document.getElementById('flight-data').textContent = 'Error fetching data';
+            }
+        } catch (error) {
+            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
+        }
+    }
+
+
+    // Fetch data every 5 seconds
+    setInterval(fetchFlightData, 5000);
 
 
   
@@ -383,7 +401,8 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        
+        // Initial fetch
+        fetchFlightData();
 
         // Fetch initial ETE value
         fetchInitialETE();
