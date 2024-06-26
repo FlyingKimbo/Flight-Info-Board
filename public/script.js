@@ -168,7 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 const cloudImage = document.getElementById('cloud-image');
                 const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
-                if (eteBar && eteData !== undefined) {
+                if (eteBar && eteData.length > 0) {
                     const ete = eteData;
                     const etePercentage = Math.min((ete / initialETE) * 100, 100);
                     eteBar.style.width = etePercentage + '%';
