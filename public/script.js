@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     function fetchCurrentFlight() {
-        return fetch('/api/current-flight')
+        return fetch('/api/update-flight')
             .then(response => response.json()) // Assuming the response is JSON
             .then(data => {
                 console.log('Fetched Current Flight:', data.CurrentFlight);
