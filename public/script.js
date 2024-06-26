@@ -88,20 +88,24 @@ document.addEventListener("DOMContentLoaded", function () {
     setInterval(fetchFlightData, 5000);
 
 
-  
-
     function fetchAirplaneInCloud() {
-        return fetch('/data/AirplaneInCloud.txt')
-            .then(response => response.text())
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                const airplaneInCloud = data.trim();
-                return airplaneInCloud
+                // Extract the first key which is the flight key
+                const currentFlightKey = Object.keys(data)[0];
+                const airplaneInCloud = data[currentFlightKey].AirplaneInCloud;
+                console.log('Airplane In Cloud:', airplaneInCloud);
+                return airplaneInCloud;
             })
             .catch(error => {
-                console.error('Error fetch AirplaneInCloud Status data:', error);
+                console.error('Error fetching AirplaneInCloud status data:', error);
                 return null;
             });
     }
+
+
+    
 
     function fetchFlightStatus() {
         return fetch('/data/FlightStatus.txt')
