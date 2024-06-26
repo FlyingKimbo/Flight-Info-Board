@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    setInterval(fetchAirplaneInCloud, 5000);
+   
     
 
     function fetchFlightStatus() {
@@ -122,17 +122,22 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function fetchAmbientPrecipState() {
-        return fetch('/data/AmbientPRECIPSTATE.txt')
-            .then(response => response.text())
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                const precipState = parseInt(data.trim());
+                // Extract the first key which is the flight key
+                const currentFlightKey = Object.keys(data)[0];
+                const precipState = data[currentFlightKey].AmbientPRECIPSTATE;
+                console.log('AmbientPRECIPSTATE:', precipState);
                 return precipState;
             })
             .catch(error => {
-                console.error('Error fetching Ambient Precipitation State data:', error);
+                console.error('Error fetching AirplaneInCloud status data:', error);
                 return null;
             });
     }
+
+    
 
     function fetchFlight_State() {
         return fetch('/data/Flight_State.txt')
