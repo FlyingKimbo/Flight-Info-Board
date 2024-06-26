@@ -10,15 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 console.log('Received data:', data); // Log the entire response to check its structure
 
-                // Find the current flight key dynamically
-                const currentFlightKey = Object.keys(data).find(key => data[key].CurrentFlight === key);
-                console.log('Identified current flight key:', currentFlightKey);
-
-                if (!currentFlightKey) {
-                    console.error('No current flight data.');
-                    return;
-                }
-
+                // Extract the current flight key directly from the data structure
+                const currentFlightKey = Object.keys(data)[0]; // Assuming there's only one key
                 const flightData = data[currentFlightKey];
                 console.log('Flight data:', flightData);
 
@@ -42,6 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error fetching initial ETE data:', error);
             });
     }
+
 
 
 
@@ -282,6 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
