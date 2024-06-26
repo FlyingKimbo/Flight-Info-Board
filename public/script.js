@@ -140,17 +140,22 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
     function fetchFlight_State() {
-        return fetch('/data/Flight_State.txt')
-            .then(response => response.text())
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                const Flight_State = data.trim();
-                return Flight_State;
+                // Extract the first key which is the flight key
+                const currentFlightKey = Object.keys(data)[0];
+                const flightState = data[currentFlightKey].Flight_State;
+                console.log('Flight State:', flightState);
+                return flightState;
             })
             .catch(error => {
                 console.error('Error fetching Flight_State data:', error);
                 return null;
             });
     }
+
+
 
 
     function checkFlightStatus() {
@@ -212,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
                             if (!cloudOpacityInterval) {
                                 startCloudOpacityCycling(cloudImage);
-                                
                             }
                         } else {
                             clearInterval(cloudOpacityInterval);
@@ -221,18 +225,17 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
 
-
                     switch (true) {
                         case (etePercentage > 0 && etePercentage <= 100):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
 
-                            fetchFlight_State().then(Flight_State => {
-                                if (Flight_State) {
-                                    if (Flight_State.includes('Landed')) {
+                            fetchFlight_State().then(flightState => {
+                                if (flightState) {
+                                    if (flightState.includes('Landed')) {
                                         jetStreamImage.style.opacity = 0;
-                                    } else if (Flight_State.includes('Airborne')) {
+                                    } else if (flightState.includes('Airborne')) {
                                         updatePositions();
                                         jetStreamImage.style.opacity = 1;
                                     }
@@ -287,6 +290,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
