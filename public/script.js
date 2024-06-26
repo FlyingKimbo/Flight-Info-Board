@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 // Assuming the structure of the data received and extracting "CurrentFlight"
-                const currentFlightKey = 'Concorde KIMBO705'; // Replace with dynamic selection if necessary
+                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
                 const currentFlight = data[currentFlightKey]?.CurrentFlight;
 
                 if (currentFlight) {
