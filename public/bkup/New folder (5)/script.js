@@ -92,7 +92,24 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     */
 
-    
+    async function fetchFlightData() {
+        try {
+            const response = await fetch('/api/update-flight');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Received data:', data);
+                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+            } else {
+                document.getElementById('flight-data').textContent = 'Error fetching data';
+            }
+        } catch (error) {
+            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
+        }
+    }
+
+
+    // Fetch data every 5 seconds
+    setInterval(fetchFlightData, 5000);
 
   
 
@@ -178,20 +195,11 @@ document.addEventListener("DOMContentLoaded", function () {
         if (initialETE === -1) {
             return;
         }
-
-        fetch('/api/update-flight')
-            .then(response => response.json())
+        fetch('/data/DistToDestination.txt')
+            .then(response => response.text())
             .then(data => {
-                // Assuming the structure of the data received and extracting necessary values
-                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
-                const flightData = data[currentFlightKey];
 
-                if (!flightData) {
-                    console.error('Current flight data is missing.');
-                    return;
-                }
-
-                const eteData = flightData.DistToDestination;
+                const eteData = data.split('\n').map(line => parseInt(line.trim())).filter(line => !isNaN(line));
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element     
@@ -199,12 +207,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const cloudImage = document.getElementById('cloud-image');
                 const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
-                if (eteBar && eteData !== undefined) {
-                    const ete = eteData;
+                if (eteBar && eteData.length > 0) {
+                    const ete = eteData[0];
                     const etePercentage = Math.min((ete / initialETE) * 100, 100);
                     eteBar.style.width = etePercentage + '%';
                     eteBar.style.opacity = 1; // Ensure the green bar is always visible
 
+                    //fetchAirplaneInCloud()
                     fetchAirplaneInCloud().then(airplaneInCloud => {
                         if (airplaneInCloud && airplaneInCloud.includes('1')) {
                             if (!cloudOpacityInterval) {
@@ -216,13 +225,18 @@ document.addEventListener("DOMContentLoaded", function () {
                             cloudImage.style.opacity = 0;
                         }
                     });
+                    
 
+                 
+
+                    // Determine properties based on etePercentage using a switch statement
                     switch (true) {
                         case (etePercentage > 0 && etePercentage <= 100):
                             eteText.style.opacity = 1;
                             aircraftImage.style.opacity = 1;
                             updatePositions();
-
+                            //jetStreamImage.style.opacity = 1;
+                            
                             fetchFlight_State().then(Flight_State => {
                                 if (Flight_State) {
                                     if (Flight_State.includes('Landed')) {
@@ -233,6 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                     }
                                 }
                             });
+                   
                             break;
                         case (etePercentage == 0):
                             eteText.style.opacity = 1;
@@ -251,24 +266,35 @@ document.addEventListener("DOMContentLoaded", function () {
                             // Handle default case if needed
                             break;
                     }
+                    
 
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     cloudImage.src = `/Image/Cloud/Cloud1.png`;
 
-                    const distanceText = flightData.DistToDestination + " KM";
-                    const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
-                    eteText.textContent = combinedText; // Update text content with combined ETE and Distance
+                    // Fetch ETE.txt for the text to display on the bar
+                    Promise.all([
+                        fetch('/data/DistToDestination.txt').then(response => response.text()),
+                        fetch('/data/ETE_SRGS.txt').then(response => response.text())
+                    ])
+                        .then(([distText, eteTextA]) => {
+                            const distanceText = distText.trim() + " KM";
+                            const combinedText = `${eteTextA.trim()} | ${distanceText}`;
+                            eteText.textContent = combinedText; // Update text content with combined ETE and Distance
+                        })
+                        .catch(error => console.error('Error fetching data:', error));
 
-                    const precipState = flightData.AmbientPRECIPSTATE;
-                    if (precipState === 4) {
-                        precipImage.src = '/Image/Precip/rain1.gif';
-                        precipImage.style.opacity = 1;
-                    } else if (precipState === 8) {
-                        precipImage.src = '/Image/Precip/snow1.gif';
-                        precipImage.style.opacity = 1;
-                    } else {
-                        precipImage.style.opacity = 0;
-                    }
+                    // Fetch precipitation state and update the precipitation image
+                    fetchAmbientPrecipState().then(precipState => {
+                        if (precipState === 4) {
+                            precipImage.src = '/Image/Precip/rain1.gif';
+                            precipImage.style.opacity = 1;
+                        } else if (precipState === 8) {
+                            precipImage.src = '/Image/Precip/snow1.gif';
+                            precipImage.style.opacity = 1;
+                        } else {
+                            precipImage.style.opacity = 0;
+                        }
+                    });
                 }
             })
             .catch(error => {
@@ -282,7 +308,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
-
 
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
