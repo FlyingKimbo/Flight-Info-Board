@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
+    setInterval(fetchAirplaneInCloud, 5000);
     
 
     function fetchFlightStatus() {
