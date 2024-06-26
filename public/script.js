@@ -207,6 +207,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
                             if (!cloudOpacityInterval) {
                                 startCloudOpacityCycling(cloudImage);
+                                
                             }
                         } else {
                             clearInterval(cloudOpacityInterval);
