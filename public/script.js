@@ -10,37 +10,38 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 console.log('Received data:', data); // Log the entire response to check its structure
 
-                // Fetch the current flight dynamically
-                fetchCurrentFlight().then(currentFlight => {
-                    if (!currentFlight) {
-                        console.error('No current flight data.');
-                        return;
-                    }
+                // Determine the flight key dynamically from the CurrentFlight field
+                const currentFlightKey = Object.keys(data).find(key => data[key].CurrentFlight === key);
 
-                    const flightData = data[currentFlight];
+                if (!currentFlightKey) {
+                    console.error('No current flight data.');
+                    return;
+                }
 
-                    if (!flightData) {
-                        console.error('Current flight data is missing.');
-                        return;
-                    }
+                const flightData = data[currentFlightKey];
 
-                    const startDistance = flightData.StartDistance;
+                if (!flightData) {
+                    console.error('Current flight data is missing.');
+                    return;
+                }
 
-                    console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
+                const startDistance = flightData.StartDistance;
 
-                    if (isNaN(startDistance) || startDistance <= 0) {
-                        console.error('Invalid initial ETE value.');
-                        initialETE = -1; // Ensure we don't use invalid initial values
-                    } else {
-                        initialETE = startDistance;
-                        updateETEbars(currentFlight, flightData.CurrentFlight.split(' ')[0]);
-                    }
-                });
+                console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
+
+                if (isNaN(startDistance) || startDistance <= 0) {
+                    console.error('Invalid initial ETE value.');
+                    initialETE = -1; // Ensure we don't use invalid initial values
+                } else {
+                    initialETE = startDistance;
+                    updateETEbars(currentFlightKey, flightData.CurrentFlight.split(' ')[0]);
+                }
             })
             .catch(error => {
                 console.error('Error fetching initial ETE data:', error);
             });
     }
+
 
 
 
@@ -275,6 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
