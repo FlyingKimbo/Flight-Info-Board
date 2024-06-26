@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 console.log('Received data:', data); // Log the entire response to check its structure
 
-                // Determine the flight key dynamically from the CurrentFlight field
+                // Fetch the current flight dynamically
                 fetchCurrentFlight().then(currentFlight => {
                     if (!currentFlight) {
                         console.error('No current flight data.');
@@ -47,28 +47,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
     function fetchCurrentFlight() {
         return fetch('/api/current-flight')
-            .then(response => response.text()) // Read the response as text
+            .then(response => response.json()) // Assuming the response is JSON
             .then(data => {
-                console.log('Raw response:', data); // Log the raw response to check its format
-
-                // Try to parse the JSON data if it's in JSON format
-                try {
-                    const parsedData = JSON.parse(data);
-                    const currentFlight = parsedData.CurrentFlight;
-                    console.log('Fetched Current Flight:', currentFlight);
-                    return currentFlight;
-                } catch (error) {
-                    console.error('Error parsing JSON data:', error);
-                    return null;
-                }
+                console.log('Fetched Current Flight:', data.CurrentFlight);
+                return data.CurrentFlight;
             })
             .catch(error => {
                 console.error('Error fetching current flight data:', error);
                 return null;
             });
     }
+
 
 
 
@@ -283,6 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
