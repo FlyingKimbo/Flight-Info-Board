@@ -8,20 +8,34 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Directly accessing StartDistance from the JSON data
-                const startDistance = data.StartDistance;
+                console.log('Received data:', data); // Log the entire response to check its structure
 
-                console.log('Initial ETE:', startDistance);
+                // Determine the flight key dynamically from the CurrentFlight field
+                fetchCurrentFlight().then(currentFlight => {
+                    if (!currentFlight) {
+                        console.error('No current flight data.');
+                        return;
+                    }
 
-                if (isNaN(startDistance) || startDistance <= 0) {
-                    console.error('Invalid initial ETE value.');
-                    initialETE = -1; // Ensure we don't use invalid initial values
-                } else {
-                    initialETE = startDistance;
-                    fetchCurrentFlight().then(aircraftType => {
-                        updateETEbars(aircraftType);
-                    });
-                }
+                    const flightData = data[currentFlight];
+
+                    if (!flightData) {
+                        console.error('Current flight data is missing.');
+                        return;
+                    }
+
+                    const startDistance = flightData.StartDistance;
+
+                    console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
+
+                    if (isNaN(startDistance) || startDistance <= 0) {
+                        console.error('Invalid initial ETE value.');
+                        initialETE = -1; // Ensure we don't use invalid initial values
+                    } else {
+                        initialETE = startDistance;
+                        updateETEbars(currentFlight, flightData.CurrentFlight.split(' ')[0]);
+                    }
+                });
             })
             .catch(error => {
                 console.error('Error fetching initial ETE data:', error);
@@ -31,22 +45,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
-   
+
 
     function fetchCurrentFlight() {
-        return fetch('/data/CurrentFlight.txt')
-            .then(response => response.text())
+        return fetch('/api/current-flight')
+            .then(response => response.json())
             .then(data => {
-                // Assuming the file contains the aircraft type and flight number separated by a space
-                const [aircraftType, flightNumber] = data.trim().split(' ');
-                console.log('Fetched Current Flight:', aircraftType);
-                return aircraftType;
+                // Assuming the API response contains the aircraft type and flight number in the field `CurrentFlight`
+                const currentFlight = data.CurrentFlight;
+                console.log('Fetched Current Flight:', currentFlight);
+                return currentFlight;
             })
             .catch(error => {
                 console.error('Error fetching current flight data:', error);
                 return null;
             });
     }
+
 
 
 
@@ -152,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 20); // Change image every 20ms
     }
 
-    function updateETEbars(aircraftType) {
+    function updateETEbars(currentFlightKey, aircraftType) {
         if (initialETE === -1) {
             return;
         }
@@ -160,8 +175,14 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Directly accessing DistToDestination from the JSON data
-                const eteData = data.DistToDestination;
+                const flightData = data[currentFlightKey];
+
+                if (!flightData) {
+                    console.error('Current flight data is missing.');
+                    return;
+                }
+
+                const eteData = flightData.DistToDestination;
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
@@ -226,11 +247,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     cloudImage.src = `/Image/Cloud/Cloud1.png`;
 
-                    const distanceText = data.DistToDestination + " KM";
-                    const combinedText = `${data.ETE_SRGS.trim()} | ${distanceText}`;
+                    const distanceText = flightData.DistToDestination + " KM";
+                    const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
                     eteText.textContent = combinedText; // Update text content with combined ETE and Distance
 
-                    const precipState = data.AmbientPRECIPSTATE;
+                    const precipState = flightData.AmbientPRECIPSTATE;
                     if (precipState === 4) {
                         precipImage.src = '/Image/Precip/rain1.gif';
                         precipImage.style.opacity = 1;
@@ -253,6 +274,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
