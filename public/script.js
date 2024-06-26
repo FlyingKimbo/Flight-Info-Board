@@ -53,6 +53,30 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
     */
+
+    function fetchCurrentFlight() {
+        return fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the structure of the data received and extracting "CurrentFlight"
+                const currentFlightKey = 'Concorde KIMBO705'; // Replace with dynamic selection if necessary
+                const currentFlight = data[currentFlightKey]?.CurrentFlight;
+
+                if (currentFlight) {
+                    const [aircraftType, flightNumber] = currentFlight.trim().split(' ');
+                    return aircraftType;
+                } else {
+                    console.error('Current flight data is missing.');
+                    return null;
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching current flight data:', error);
+                return null;
+            });
+    }
+
+    /*
     function fetchCurrentFlight() {
         return fetch('/data/CurrentFlight.txt')
             .then(response => response.text())
@@ -66,6 +90,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
+    */
 
     async function fetchFlightData() {
         try {
