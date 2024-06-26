@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Assuming data directly contains the needed information
+                // Directly accessing StartDistance from the JSON data
                 const startDistance = data.StartDistance;
 
                 console.log('Initial ETE:', startDistance);
@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
    
 
     function fetchCurrentFlight() {
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 // Assuming the file contains the aircraft type and flight number separated by a space
                 const [aircraftType, flightNumber] = data.trim().split(' ');
+                console.log('Fetched Current Flight:', aircraftType);
                 return aircraftType;
             })
             .catch(error => {
@@ -45,6 +47,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
+
 
 
    
@@ -157,9 +160,8 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Assuming data directly contains the needed information
+                // Directly accessing DistToDestination from the JSON data
                 const eteData = data.DistToDestination;
-
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
                 const eteText = document.getElementById('ete-bar-text'); // ETE text element
@@ -167,9 +169,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 const cloudImage = document.getElementById('cloud-image');
                 const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
-                if (eteBar && eteData.length > 0) {
+                if (eteBar && eteData !== undefined) {
                     const ete = eteData;
                     const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                    console.log('ETE Percentage:', etePercentage);
                     eteBar.style.width = etePercentage + '%';
                     eteBar.style.opacity = 1; // Ensure the green bar is always visible
 
@@ -250,6 +253,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
 
