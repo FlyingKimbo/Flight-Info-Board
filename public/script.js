@@ -49,18 +49,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function fetchCurrentFlight() {
         return fetch('/api/current-flight')
-            .then(response => response.json())
+            .then(response => response.text()) // Read the response as text
             .then(data => {
-                // Assuming the API response contains the aircraft type and flight number in the field `CurrentFlight`
-                const currentFlight = data.CurrentFlight;
-                console.log('Fetched Current Flight:', currentFlight);
-                return currentFlight;
+                console.log('Raw response:', data); // Log the raw response to check its format
+
+                // Try to parse the JSON data if it's in JSON format
+                try {
+                    const parsedData = JSON.parse(data);
+                    const currentFlight = parsedData.CurrentFlight;
+                    console.log('Fetched Current Flight:', currentFlight);
+                    return currentFlight;
+                } catch (error) {
+                    console.error('Error parsing JSON data:', error);
+                    return null;
+                }
             })
             .catch(error => {
                 console.error('Error fetching current flight data:', error);
                 return null;
             });
     }
+
 
 
 
