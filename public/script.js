@@ -8,18 +8,18 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Assuming the structure of the data received is known and we're interested in "StartDistance" from a specific flight
-                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
-                const initialETE = data[currentFlightKey]?.StartDistance;
+                // Assuming data directly contains the needed information
+                const startDistance = data.StartDistance;
 
-                console.log('Initial ETE:', initialETE);
+                console.log('Initial ETE:', startDistance);
 
-                if (initialETE === -1) {
+                if (startDistance === -1) {
                     console.log('ETE evaluation disabled.');
-                } else if (isNaN(initialETE) || initialETE <= 0) {
+                } else if (isNaN(startDistance) || startDistance <= 0) {
                     console.error('Invalid initial ETE value.');
                     initialETE = -1; // Ensure we don't use invalid initial values
                 } else {
+                    initialETE = startDistance;
                     fetchCurrentFlight().then(aircraftType => {
                         updateETEbars(aircraftType);
                     });
@@ -30,53 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    /*
-    function fetchInitialETE() {
-        fetch('/data/StartDistance.txt')
-            .then(response => response.text())
-            .then(initialData => {
-                initialETE = parseInt(initialData.trim());
-                console.log('Initial ETE:', initialETE);
-                if (initialETE === -1) {
-                    console.log('ETE evaluation disabled.');
-                } else if (isNaN(initialETE) || initialETE <= 0) {
-                    console.error('Invalid initial ETE value.');
-                    initialETE = -1; // Ensure we don't use invalid initial values
-                } else {
-                    fetchCurrentFlight().then(aircraftType => {
-                        updateETEbars(aircraftType);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching initial ETE data:', error);
-            });
-    }
-    */
 
-    function fetchCurrentFlight() {
-        return fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                // Assuming the structure of the data received and extracting "CurrentFlight"
-                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
-                const currentFlight = data[currentFlightKey]?.currentFlight;
+   
 
-                if (currentFlight) {
-                    const [aircraftType, flightNumber] = currentFlight.trim().split(' ');
-                    return aircraftType;
-                } else {
-                    console.error('Current flight data is missing.');
-                    return null;
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching current flight data:', error);
-                return null;
-            });
-    }
-
-    /*
     function fetchCurrentFlight() {
         return fetch('/data/CurrentFlight.txt')
             .then(response => response.text())
@@ -90,7 +46,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
-    */
+
+
+   
 
     async function fetchFlightData() {
         try {
@@ -200,19 +158,12 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Assuming the structure of the data received and extracting necessary values
-                const currentFlightKey = 'CurrentFlight'; // Replace with dynamic selection if necessary
-                const flightData = data[currentFlightKey];
+                // Assuming data directly contains the needed information
+                const eteData = data.DistToDestination;
 
-                if (!flightData) {
-                    console.error('Current flight data is missing.');
-                    return;
-                }
-
-                const eteData = flightData.DistToDestination;
                 const eteBar = document.getElementById('ete-bar');
                 const aircraftImage = document.getElementById('aircraft-image');
-                const eteText = document.getElementById('ete-bar-text'); // ETE text element     
+                const eteText = document.getElementById('ete-bar-text'); // ETE text element
                 const jetStreamImage = document.getElementById('jetstream-image');
                 const cloudImage = document.getElementById('cloud-image');
                 const precipImage = document.getElementById('precip-image'); // New precipitation image element
@@ -273,11 +224,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
                     cloudImage.src = `/Image/Cloud/Cloud1.png`;
 
-                    const distanceText = flightData.DistToDestination + " KM";
-                    const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
+                    const distanceText = data.DistToDestination + " KM";
+                    const combinedText = `${data.ETE_SRGS.trim()} | ${distanceText}`;
                     eteText.textContent = combinedText; // Update text content with combined ETE and Distance
 
-                    const precipState = flightData.AmbientPRECIPSTATE;
+                    const precipState = data.AmbientPRECIPSTATE;
                     if (precipState === 4) {
                         precipImage.src = '/Image/Precip/rain1.gif';
                         precipImage.style.opacity = 1;
@@ -300,6 +251,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
 
 
     function startCloudOpacityCycling(cloudImage) {
