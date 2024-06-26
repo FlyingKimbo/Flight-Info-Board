@@ -11,6 +11,9 @@ app.use('/Image', express.static(path.join(__dirname, 'Image')));
 // Serve static files from the 'data' directory
 app.use('/data', express.static(path.join(__dirname, 'data')));
 
+// Serve static files from the 'api' directory
+app.use('/data', express.static(path.join(__dirname, 'data')));
+
 // Define a route to serve your HTML file
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
