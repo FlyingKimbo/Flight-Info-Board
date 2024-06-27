@@ -64,8 +64,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+
     // Fetch data every 5 seconds
     setInterval(fetchFlightData, 5000);
+
 
     function fetchAirplaneInCloud() {
         return fetch('/api/update-flight')
@@ -79,6 +81,21 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .catch(error => {
                 console.error('Error fetching AirplaneInCloud status data:', error);
+                return null;
+            });
+    }
+
+
+    function fetchFlightStatus() {
+        return fetch('/data/FlightStatus.txt')
+            .then(response => response.text())
+            .then(data => {
+                // Assuming the file contains a single word representing the flight status
+                const flightStatus = data.trim();
+                return flightStatus;
+            })
+            .catch(error => {
+                console.error('Error fetching Flight Status data:', error);
                 return null;
             });
     }
@@ -99,46 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function fetchFlightStatus() {
-        return fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                // Extract the first key which is the flight key
-                const currentFlightKey = Object.keys(data)[0];
-                const flightStatus = data[currentFlightKey].FlightStatus;
-                console.log('Flight Status:', flightStatus);
-                return flightStatus;
-            })
-            .catch(error => {
-                console.error('Error fetching Flight Status data:', error);
-                return null;
-            });
-    }
-
-    function checkFlightStatus() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightData = data[currentFlightKey];
-                const currentFlightStatus = flightData.FlightStatus;
-                const currentFlight = flightData.CurrentFlight;
-
-                if (currentFlightStatus === "Boarding Completed") {
-                    removeBlinking(currentFlight);
-                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
-                } else {
-                    setBlinking(currentFlight);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                }
-            })
-            .catch(error => {
-                console.error('Error checking flight status:', error);
-            });
-    }
-
-    setInterval(checkFlightStatus, 30000); // This sets the interval to check the flight status every 30 seconds
-
+    
     function fetchFlight_State() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
@@ -154,6 +132,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
+
+
+    function checkFlightStatus() {
+        fetchFlightStatus().then(currentFlightStatus => {
+            if (currentFlightStatus !== null && currentFlightStatus !== previousFlightStatus && !pageReloaded) {
+                pageReloaded = true; // Set the flag to true to prevent further reloads
+                location.reload();   // Reload the page
+            } else {
+                previousFlightStatus = currentFlightStatus; // Update the previous flight status
+            }
+        });
+    }
+
+    setInterval(checkFlightStatus, 30000); // This sets the interval to check the flight status every second
 
     function startJetStreamCycling() {
         let imageIndex = 1;
@@ -274,6 +266,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
+
+
+
+
+
+
+
+
+
+
+
 
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
@@ -417,51 +420,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Start jet stream cycling
         startJetStreamCycling();
-    }
-
-    function setBlinking(currentFlight) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const aircraft = cells[0].textContent.trim();
-            const flightNumber = cells[1].textContent.trim();
-            if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[0].classList.add("blinking");
-                cells[1].classList.add("blinking");
-            } else {
-                cells[0].classList.remove("blinking");
-                cells[1].classList.remove("blinking");
-            }
-        }
-    }
-
-    function removeBlinking(currentFlight) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const aircraft = cells[0].textContent.trim();
-            const flightNumber = cells[1].textContent.trim();
-            if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[0].classList.remove("blinking");
-                cells[1].classList.remove("blinking");
-            }
-        }
-    }
-
-    function updateFlightCells(currentFlight, flightStatus, obsArrDisplay, departureDisplay = null) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const aircraft = cells[0].textContent.trim();
-            const flightNumber = cells[1].textContent.trim();
-            if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[3].textContent = flightStatus;
-                cells[4].textContent = obsArrDisplay;
-                if (departureDisplay !== null) {
-                    cells[2].textContent = departureDisplay;
-                }
-            }
-        }
     }
 
     initialize();
