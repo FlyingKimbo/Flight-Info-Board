@@ -499,7 +499,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }
         }
-        location.reload();   // Reload the page
     }
 
     initialize();
