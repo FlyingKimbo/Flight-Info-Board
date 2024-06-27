@@ -234,7 +234,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImage.style.opacity = 1;
                             updatePositions();
                             jetStreamImage.style.opacity = 0;
-                            cloudImage.style.opacity = 1;
+                            cloudImage.style.opacity = 0;
                             break;
                         case (etePercentage < 0):
                             eteText.style.opacity = 0;
