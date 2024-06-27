@@ -126,13 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentFlightStatus = flightData.FlightStatus;
                 const currentFlight = flightData.CurrentFlight;
 
-                if (currentFlightStatus === "Boarding Completed") {
+                if (currentFlightStatus === "Deboarding Completed") {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
 
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSDepDisplay);
+                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 }
             })
             .catch(error => {
