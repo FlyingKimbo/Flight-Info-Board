@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     eteBar.style.opacity = 1; // Ensure the green bar is always visible
 
                     fetchAirplaneInCloud().then(airplaneInCloud => {
-                        if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
+                        if (airplaneInCloud === 1 && flightState.includes('Airborne')) { // Check if airplaneInCloud is exactly 1
                             if (!cloudOpacityInterval) {
                                 startCloudOpacityCycling(cloudImage);
                             }
