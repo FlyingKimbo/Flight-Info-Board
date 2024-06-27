@@ -139,8 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 30 seconds
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
     function fetchFlight_State() {
         return fetch('/api/update-flight')
@@ -482,6 +481,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 return 'blinking-deboarding';
             default:
                 return '';
+        }
+    }
+
+    function updateFlightCells(currentFlight, flightStatus, destination, departure = '') {
+        const rows = document.getElementById("flightTable").rows;
+        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
+            const cells = rows[i].cells;
+            const aircraft = cells[0].textContent.trim();
+            const flightNumber = cells[1].textContent.trim();
+            if (`${aircraft} ${flightNumber}` === currentFlight) {
+                cells[3].textContent = flightStatus;
+                cells[4].textContent = destination;
+                if (departure) {
+                    cells[2].textContent = departure;
+                }
+            }
         }
     }
 
