@@ -128,11 +128,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (currentFlightStatus === "Boarding Completed") {
                     removeBlinking(currentFlight);
-                    updateFlightCells(currentFlight, "-", "-", flightData.OBSDepDisplay);
+                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
 
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSDepDisplay);
                 }
             })
             .catch(error => {
