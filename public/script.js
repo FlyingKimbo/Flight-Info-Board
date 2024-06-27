@@ -36,18 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
     function fetchCurrentFlight() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Assuming the response is JSON
@@ -60,13 +48,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
-
-
-
-
-
-
-   
 
     async function fetchFlightData() {
         try {
@@ -104,8 +85,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-   
-    
 
     function fetchFlightStatus() {
         return fetch('/data/FlightStatus.txt')
@@ -138,7 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     
-
     function fetchFlight_State() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
@@ -154,8 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
-
-
 
 
     function checkFlightStatus() {
