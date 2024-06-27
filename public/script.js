@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
-                    setBlinking(currentFlight);
+                    setBlinking(currentFlight, currentFlightStatus);
                     updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 }
             })
