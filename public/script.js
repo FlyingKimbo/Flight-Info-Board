@@ -139,7 +139,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    setInterval(checkFlightStatus, 30000); // This sets the interval to check the flight status every 30 seconds
+
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 30 seconds
 
     function fetchFlight_State() {
         return fetch('/api/update-flight')
@@ -458,6 +459,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+
 
     function updateFlightCells(currentFlight, flightStatus, obsArrDisplay, departureDisplay = null) {
         const rows = document.getElementById("flightTable").rows;
