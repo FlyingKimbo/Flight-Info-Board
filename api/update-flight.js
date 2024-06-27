@@ -21,7 +21,7 @@ app.post('/api/update-flight', (req, res) => {
             timestamp: new Date().toISOString()  // Update the timestamp with each change
         };
         console.log('Updated flight data:', flightData);
-        res.status(200).json({ message: 'Flight data updated successfully' });
+        res.status(200).json({message: 'Json Flight data updated successfully' });
     } else {
         console.log('Invalid data received:', data);
         res.status(400).json({ message: 'Invalid data' });

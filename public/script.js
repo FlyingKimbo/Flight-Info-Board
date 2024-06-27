@@ -204,6 +204,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (airplaneInCloud === 1 && flightState.includes('Airborne')) { // Check if airplaneInCloud is exactly 1
                             if (!cloudOpacityInterval) {
                                 startCloudOpacityCycling(cloudImage);
+                                cloudImage.style.opacity = 1;
                             }
                         } else {
                             clearInterval(cloudOpacityInterval);
