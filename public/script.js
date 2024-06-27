@@ -40,8 +40,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Assuming the response is JSON
             .then(data => {
-                console.log('Fetched Current Flight:', data.CurrentFlight);
-                return data.CurrentFlight;
+                const currentFlightKey = Object.keys(data)[0];
+                const currentFlight = data[currentFlightKey].CurrentFlight;
+                console.log('Fetched Current Flight:', currentFlight);
+                return currentFlight;
             })
             .catch(error => {
                 console.error('Error fetching current flight data:', error);
@@ -410,8 +412,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Refresh the Greenbar function every 1000 milliseconds
         setInterval(function () {
-            fetchCurrentFlight().then(aircraftType => {
-                updateETEbars(aircraftType);
+            fetchCurrentFlight().then(currentFlightKey => {
+                updateETEbars(currentFlightKey, currentFlightKey.split(' ')[0]);
             });
         }, 2000);
 
@@ -428,9 +430,15 @@ document.addEventListener("DOMContentLoaded", function () {
             if (`${aircraft} ${flightNumber}` === currentFlight) {
                 cells[0].classList.add("blinking");
                 cells[1].classList.add("blinking");
+                cells[2].classList.add("blinking");
+                cells[3].classList.add("blinking");
+                cells[4].classList.add("blinking");
             } else {
                 cells[0].classList.remove("blinking");
                 cells[1].classList.remove("blinking");
+                cells[2].classList.remove("blinking");
+                cells[3].classList.remove("blinking");
+                cells[4].classList.remove("blinking");
             }
         }
     }
@@ -444,6 +452,9 @@ document.addEventListener("DOMContentLoaded", function () {
             if (`${aircraft} ${flightNumber}` === currentFlight) {
                 cells[0].classList.remove("blinking");
                 cells[1].classList.remove("blinking");
+                cells[2].classList.remove("blinking");
+                cells[3].classList.remove("blinking");
+                cells[4].classList.remove("blinking");
             }
         }
     }
