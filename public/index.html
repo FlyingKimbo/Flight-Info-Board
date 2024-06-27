@@ -20,15 +20,66 @@
             position: relative;
         }
 
-        .blinking {
-            animation: blinker 4s linear infinite;
+        .blinking-boarding {
+            animation: blinker-boarding 4s linear infinite;
         }
 
-        @keyframes blinker {
+        @keyframes blinker-boarding {
             50% {
-                background-color: cornflowerblue; /* Adjust the blinking color here */
+                background-color: lightblue; /* Boarding color */
             }
         }
+
+        .blinking-departed {
+            animation: blinker-departed 4s linear infinite;
+        }
+
+        @keyframes blinker-departed {
+            50% {
+                background-color: blue; /* Departed color */
+            }
+        }
+
+        .blinking-enroute {
+            animation: blinker-enroute 4s linear infinite;
+        }
+
+        @keyframes blinker-enroute {
+            50% {
+                background-color: green; /* Enroute color */
+            }
+        }
+
+        .blinking-delayed {
+            animation: blinker-delayed 4s linear infinite;
+        }
+
+        @keyframes blinker-delayed {
+            50% {
+                background-color: red; /* Delayed color */
+            }
+        }
+
+        .blinking-landed {
+            animation: blinker-landed 4s linear infinite;
+        }
+
+        @keyframes blinker-landed {
+            50% {
+                background-color: lightgreen; /* Landed color */
+            }
+        }
+
+        .blinking-deboarding {
+            animation: blinker-deboarding 4s linear infinite;
+        }
+
+        @keyframes blinker-deboarding {
+            50% {
+                background-color: lightyellow; /* Deboarding color */
+            }
+        }
+
 
         @keyframes opacityCycle {
             0% {

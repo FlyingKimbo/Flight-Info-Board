@@ -422,24 +422,22 @@ document.addEventListener("DOMContentLoaded", function () {
         startJetStreamCycling();
     }
 
-    function setBlinking(currentFlight) {
+    function setBlinking(currentFlight, flightStatus) {
         const rows = document.getElementById("flightTable").rows;
         for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
             const cells = rows[i].cells;
             const aircraft = cells[0].textContent.trim();
             const flightNumber = cells[1].textContent.trim();
             if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[0].classList.add("blinking");
-                cells[1].classList.add("blinking");
-                cells[2].classList.add("blinking");
-                cells[3].classList.add("blinking");
-                cells[4].classList.add("blinking");
+                removeBlinkingClasses(cells); // Remove any existing blinking classes
+                const blinkingClass = getBlinkingClass(flightStatus);
+                cells[0].classList.add(blinkingClass);
+                cells[1].classList.add(blinkingClass);
+                cells[2].classList.add(blinkingClass);
+                cells[3].classList.add(blinkingClass);
+                cells[4].classList.add(blinkingClass);
             } else {
-                cells[0].classList.remove("blinking");
-                cells[1].classList.remove("blinking");
-                cells[2].classList.remove("blinking");
-                cells[3].classList.remove("blinking");
-                cells[4].classList.remove("blinking");
+                removeBlinkingClasses(cells);
             }
         }
     }
@@ -451,29 +449,39 @@ document.addEventListener("DOMContentLoaded", function () {
             const aircraft = cells[0].textContent.trim();
             const flightNumber = cells[1].textContent.trim();
             if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[0].classList.remove("blinking");
-                cells[1].classList.remove("blinking");
-                cells[2].classList.remove("blinking");
-                cells[3].classList.remove("blinking");
-                cells[4].classList.remove("blinking");
+                removeBlinkingClasses(cells);
             }
         }
     }
 
+    function removeBlinkingClasses(cells) {
+        const classes = [
+            'blinking-boarding', 'blinking-departed', 'blinking-enroute',
+            'blinking-delayed', 'blinking-landed', 'blinking-deboarding'
+        ];
+        cells[0].classList.remove(...classes);
+        cells[1].classList.remove(...classes);
+        cells[2].classList.remove(...classes);
+        cells[3].classList.remove(...classes);
+        cells[4].classList.remove(...classes);
+    }
 
-    function updateFlightCells(currentFlight, flightStatus, obsArrDisplay, departureDisplay = null) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const aircraft = cells[0].textContent.trim();
-            const flightNumber = cells[1].textContent.trim();
-            if (`${aircraft} ${flightNumber}` === currentFlight) {
-                cells[3].textContent = flightStatus;
-                cells[4].textContent = obsArrDisplay;
-                if (departureDisplay !== null) {
-                    cells[2].textContent = departureDisplay;
-                }
-            }
+    function getBlinkingClass(flightStatus) {
+        switch (flightStatus) {
+            case 'Boarding':
+                return 'blinking-boarding';
+            case 'Departed':
+                return 'blinking-departed';
+            case 'Enroute':
+                return 'blinking-enroute';
+            case 'Delayed':
+                return 'blinking-delayed';
+            case 'Landed':
+                return 'blinking-landed';
+            case 'Deboarding':
+                return 'blinking-deboarding';
+            default:
+                return '';
         }
     }
 
