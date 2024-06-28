@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let previousFlightStatus = null;
     let pageReloaded = false;
     let cloudOpacityInterval;
-
+    let GreenbarPercentage = 0;
     fetchSavedFlightState();
 
     function CreateNewRow(flightData) {
@@ -295,6 +295,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (eteBar && eteData !== undefined) {
                     const ete = eteData;
                     const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                    GreenbarPercentage = etePercentage;
                     console.log('ETE Percentage:', etePercentage);
                     eteBar.style.width = etePercentage + '%';
                     eteBar.style.opacity = 1; // Ensure the green bar is always visible
@@ -400,7 +401,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function updatePositions() {
         let Xoffset = 0;
         let XoffsetFix = 100;
-        if (etePercentage >= 50) {
+        if (GreenbarPercentage >= 50) {
             Xoffset =1;
         }
         const eteBar = document.getElementById('ete-bar');
