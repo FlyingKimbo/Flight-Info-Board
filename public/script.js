@@ -400,7 +400,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updatePositions() {
         let Xoffset = 0;
-        let XoffsetFix = 100;
+        let XoffsetFix = 250;
         if (GreenbarPercentage >= 50) {
             Xoffset =1;
         }
