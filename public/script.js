@@ -552,6 +552,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    setInterval(fetchSavedFlightState, 5000);
+
     function updateTableFromSavedState(data) {
         const rows = document.getElementById("flightTable").rows;
         for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
