@@ -4,6 +4,66 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
 
+    async function fetchSavedFlightState() {
+        try {
+            const response = await fetch('/api/saved-flight-state');
+            if (response.ok) {
+                const data = await response.json();
+                updateTableFromSavedState(data);
+            } else {
+                console.error('Failed to fetch saved flight state');
+            }
+        } catch (error) {
+            console.error('Error fetching saved flight state:', error);
+        }
+    }
+
+    function updateTableFromSavedState(data) {
+        const rows = document.getElementById("flightTable").rows;
+        data.forEach((flight, index) => {
+            const cells = rows[index + 2].cells; // Skip header and green bar rows
+            cells[0].textContent = flight.aircraft;
+            cells[1].textContent = flight.flightNumber;
+            cells[2].textContent = flight.departure;
+            cells[3].textContent = flight.flightStatus;
+            cells[4].textContent = flight.destination;
+        });
+    }
+
+    async function saveFlightState() {
+        const table = document.getElementById("flightTable");
+        const rows = Array.from(table.rows).slice(2); // Skip header and green bar rows
+        const flightData = rows.map(row => {
+            const cells = row.cells;
+            return {
+                aircraft: cells[0].textContent.trim(),
+                flightNumber: cells[1].textContent.trim(),
+                departure: cells[2].textContent.trim(),
+                flightStatus: cells[3].textContent.trim(),
+                destination: cells[4].textContent.trim()
+            };
+        });
+
+        try {
+            const response = await fetch('/api/save-flight-state', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ flightData })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to save flight state');
+            }
+
+            console.log('Flight state saved successfully');
+        } catch (error) {
+            console.error('Error saving flight state:', error);
+        }
+    }
+
+
     function fetchInitialETE() {
         fetch('/api/update-flight')
             .then(response => response.json())
@@ -405,9 +465,6 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        // Fetch the saved state and update the table
-        fetchSavedFlightState();
-
         // Initial fetch
         fetchFlightData();
 
@@ -509,67 +566,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    async function saveFlightState() {
-        const table = document.getElementById("flightTable");
-        const rows = Array.from(table.rows).slice(2); // Skip header and green bar rows
-        const flightData = rows.map(row => {
-            const cells = row.cells;
-            return {
-                aircraft: cells[0].textContent.trim(),
-                flightNumber: cells[1].textContent.trim(),
-                departure: cells[2].textContent.trim(),
-                flightStatus: cells[3].textContent.trim(),
-                destination: cells[4].textContent.trim()
-            };
-        });
-
-        try {
-            const response = await fetch('/api/save-flight-state', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ flightData })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save flight state');
-            }
-
-            console.log('Flight state saved successfully');
-        } catch (error) {
-            console.error('Error saving flight state:', error);
-        }
-    }
-
-    async function fetchSavedFlightState() {
-        try {
-            const response = await fetch('/api/saved-flight-state');
-            if (response.ok) {
-                const data = await response.json();
-                updateTableFromSavedState(data);
-            } else {
-                console.error('Failed to fetch saved flight state');
-            }
-        } catch (error) {
-            console.error('Error fetching saved flight state:', error);
-        }
-    }
-
-    setInterval(fetchSavedFlightState, 5000);
-
-    function updateTableFromSavedState(data) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const flightData = data.find(f => `${f.aircraft} ${f.flightNumber}` === `${cells[0].textContent.trim()} ${cells[1].textContent.trim()}`);
-            if (flightData) {
-                cells[2].textContent = flightData.departure;
-                cells[3].textContent = flightData.flightStatus;
-                cells[4].textContent = flightData.destination;
-            }
-        }
-    }
+    
 
     initialize();
 });

@@ -1,6 +1,8 @@
-const express = require('express');
+// /api/save-flight-state.js
+
 const fs = require('fs');
 const path = require('path');
+const express = require('express');
 const app = express();
 
 app.use(express.json());
@@ -19,17 +21,4 @@ app.post('/api/save-flight-state', (req, res) => {
     });
 });
 
-app.get('/api/saved-flight-state', (req, res) => {
-    fs.readFile(flightStateFilePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error fetching saved flight state:', err);
-            return res.status(500).send('Failed to fetch saved flight state');
-        }
-        res.json(JSON.parse(data));
-    });
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app;
