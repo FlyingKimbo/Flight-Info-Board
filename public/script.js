@@ -6,6 +6,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
     fetchSavedFlightState();
 
+    function CreateNewRow(flightData) {
+        const table = document.getElementById("flightTable");
+        const newRow = table.insertRow(-1); // Insert at the end of the table
+
+        const aircraftCell = newRow.insertCell(0);
+        const flightNumberCell = newRow.insertCell(1);
+        const departureCell = newRow.insertCell(2);
+        const flightStatusCell = newRow.insertCell(3);
+        const destinationCell = newRow.insertCell(4);
+
+        // Add content to the new cells
+        aircraftCell.style.textAlign = 'center';
+        const img = document.createElement('img');
+        img.src = `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`;
+        img.alt = 'Aircraft Image';
+        img.style.width = '100px';
+        img.style.height = 'auto';
+        aircraftCell.appendChild(img);
+        aircraftCell.appendChild(document.createTextNode(` ${flightData.CurrentFlight.split(' ')[0]}`));
+
+        flightNumberCell.textContent = flightData.CurrentFlight.split(' ')[1];
+        departureCell.textContent = flightData.OBSArrDisplay;
+        flightStatusCell.textContent = flightData.FlightStatus;
+        destinationCell.textContent = flightData.OBSArrDisplay;
+
+        // Apply blinking class based on the flight status
+        const blinkingClass = getBlinkingClass(flightData.FlightStatus);
+        if (blinkingClass) {
+            newRow.classList.add(blinkingClass);
+        }
+    }
+
+
     function fetchFlightStatus() {
         return fetch('/api/update-flight')
             .then(response => response.json())
@@ -31,6 +64,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentFlightStatus = flightData.FlightStatus;
                 const currentFlight = flightData.CurrentFlight;
 
+                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                if (!matchFound) {
+                    CreateNewRow(flightData);
+                }
+
                 if (currentFlightStatus === "Deboarding Completed") {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
@@ -44,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error('Error checking flight status:', error);
             });
     }
+
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
@@ -552,6 +591,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateFlightCells(currentFlight, flightStatus, destination, departure = '') {
         const rows = document.getElementById("flightTable").rows;
+        let matchFound = false;
         for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
             const cells = rows[i].cells;
             const aircraft = cells[0].textContent.trim();
@@ -562,9 +602,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (departure) {
                     cells[2].textContent = departure;
                 }
+                matchFound = true;
+                break;
             }
         }
+        return matchFound;
     }
+
 
     initialize();
 });
