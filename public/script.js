@@ -384,6 +384,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function initialize() {
+
+        // Fetch the saved state and update the table
+        fetchSavedFlightState();
+
         // Set image paths
         const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
         document.querySelectorAll('img[data-src]').forEach(img => {
