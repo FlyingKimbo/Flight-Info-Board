@@ -129,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (currentFlightStatus === "Deboarding Completed") {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
-                    saveFlightState();
+
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
                     updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     eteBar.style.opacity = 1; // Ensure the green bar is always visible
 
                     fetchAirplaneInCloud().then(airplaneInCloud => {
-                        if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
+                        if (airplaneInCloud === 1 ) { // Check if airplaneInCloud is exactly 1
                             if (!cloudOpacityInterval) {
                                 startCloudOpacityCycling(cloudImage);
                                 cloudImage.style.opacity = 1;
@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             aircraftImage.style.opacity = 1;
                             updatePositions();
                             jetStreamImage.style.opacity = 0;
-
+                            
                             break;
                         case (etePercentage < 0):
                             eteText.style.opacity = 0;
@@ -401,9 +401,6 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        // Fetch the saved state and update the table
-        fetchSavedFlightState();
-
         // Initial fetch
         fetchFlightData();
 
@@ -501,66 +498,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (departure) {
                     cells[2].textContent = departure;
                 }
-            }
-        }
-    }
-
-    async function saveFlightState() {
-        const table = document.getElementById("flightTable");
-        const rows = Array.from(table.rows).slice(2); // Skip header and green bar rows
-        const flightData = rows.map(row => {
-            const cells = row.cells;
-            return {
-                aircraft: cells[0].textContent.trim(),
-                flightNumber: cells[1].textContent.trim(),
-                departure: cells[2].textContent.trim(),
-                flightStatus: cells[3].textContent.trim(),
-                destination: cells[4].textContent.trim()
-            };
-        });
-
-        try {
-            const response = await fetch('/api/save-flight-state', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ flightData })
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save flight state');
-            }
-
-            console.log('Flight state saved successfully');
-        } catch (error) {
-            console.error('Error saving flight state:', error);
-        }
-    }
-
-    async function fetchSavedFlightState() {
-        try {
-            const response = await fetch('/api/saved-flight-state');
-            if (response.ok) {
-                const data = await response.json();
-                updateTableFromSavedState(data);
-            } else {
-                console.error('Failed to fetch saved flight state');
-            }
-        } catch (error) {
-            console.error('Error fetching saved flight state:', error);
-        }
-    }
-
-    function updateTableFromSavedState(data) {
-        const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
-            const cells = rows[i].cells;
-            const flightData = data.find(f => `${f.aircraft} ${f.flightNumber}` === `${cells[0].textContent.trim()} ${cells[1].textContent.trim()}`);
-            if (flightData) {
-                cells[2].textContent = flightData.departure;
-                cells[3].textContent = flightData.flightStatus;
-                cells[4].textContent = flightData.destination;
             }
         }
     }
