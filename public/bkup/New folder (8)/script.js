@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
 
+    fetchSavedFlightState();
+
     function fetchFlightStatus() {
         return fetch('/api/update-flight')
             .then(response => response.json())
@@ -19,7 +21,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 return null;
             });
     }
-
     function checkFlightStatus() {
         fetch('/api/update-flight')
             .then(response => response.json())
@@ -41,16 +42,26 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => {
                 console.error('Error checking flight status:', error);
             });
+
+        fetch('/api/saved-flight-state')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('saved-flight-state').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('Error fetching saved flight state:', error);
+                document.getElementById('saved-flight-state').textContent = 'Failed to fetch saved flight state';
+            });
     }
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
+
 
     function fetchSavedFlightState() {
         fetch('/api/saved-flight-state')
             .then(response => response.json())
             .then(data => {
                 document.getElementById('saved-flight-state').textContent = JSON.stringify(data, null, 2);
-                updateTableFromSavedState(data); // Update the table from saved state
             })
             .catch(error => {
                 console.error('Error fetching saved flight state:', error);
@@ -102,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Error saving flight state:', error);
         }
     }
+
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
@@ -200,6 +212,11 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    
+
+
+
+   
     function fetchFlight_State() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
@@ -563,6 +580,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+
+    
 
     initialize();
 });
