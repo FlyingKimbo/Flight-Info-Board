@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
 
+    fetchSavedFlightState();
+
     function fetchFlightStatus() {
         return fetch('/api/update-flight')
             .then(response => response.json())
@@ -50,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 document.getElementById('saved-flight-state').textContent = JSON.stringify(data, null, 2);
-                updateTableFromSavedState(data); // Update the table from saved state
+                updateTableFromSavedState(data);
             })
             .catch(error => {
                 console.error('Error fetching saved flight state:', error);
