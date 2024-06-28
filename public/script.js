@@ -398,6 +398,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updatePositions() {
+        let Xoffset = 0;
+        let XoffsetFix = 100;
+        if (etePercentage >= 50) {
+            Xoffset =1;
+        }
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
         const eteText = document.getElementById('ete-bar-text'); // ETE text element
@@ -408,11 +413,11 @@ document.addEventListener("DOMContentLoaded", function () {
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
         const barRight = containerRight - barWidth;
-        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105;
-        const textPosition = barRight - (eteText.offsetWidth / 1000) - 245;
-        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245;
-        const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150;
-        const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110; // Position the precipitation image the same as cloud
+        const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105 + (Xoffset * XoffsetFix);
+        const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+        const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+        const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
+        const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
 
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
