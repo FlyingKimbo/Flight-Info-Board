@@ -1,19 +1,37 @@
 {
+
   "name": "kimbo-express",
+
   "version": "0.0.0",
+
   "description": "KimboExpress",
+
   "main": "server.js",
+
   "author": "",
+
   "scripts": {
+
     "test": "echo \"Error: no test specified\" && exit 1",
+
     "start": "node server.js"
+
   },
+
   "keywords": [],
+
   "license": "ISC",
+
   "dependencies": {
+
     "debug": "^4.3.5",
+
     "express": "^4.19.2",
+
     "rimraf": "^5.0.7",
+
     "uuid": "^10.0.0"
+
   }
+
 }
