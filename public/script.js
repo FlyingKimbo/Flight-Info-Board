@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
     let NewRowCreated = false;
-    
+
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
         const newRow = table.insertRow(-1); // Insert at the end of the table
@@ -19,25 +19,44 @@ document.addEventListener("DOMContentLoaded", function () {
         // Add content to the new cells
         aircraftCell.style.textAlign = 'center';
         const img = document.createElement('img');
-        img.src = `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`;
+        img.src = flightData.image;
         img.alt = 'Aircraft Image';
         img.style.width = '100px';
         img.style.height = 'auto';
         aircraftCell.appendChild(img);
-        aircraftCell.appendChild(document.createTextNode(` ${flightData.CurrentFlight.split(' ')[0]}`));
+        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
 
-        flightNumberCell.textContent = flightData.CurrentFlight.split(' ')[1];
-        departureCell.textContent = flightData.OBSArrDisplay;
-        flightStatusCell.textContent = flightData.FlightStatus;
-        destinationCell.textContent = flightData.OBSArrDisplay;
+        flightNumberCell.textContent = flightData.flightNumber;
+        departureCell.textContent = flightData.departure;
+        flightStatusCell.textContent = flightData.flightStatus;
+        destinationCell.textContent = flightData.destination;
 
         // Apply blinking class based on the flight status
-        const blinkingClass = getBlinkingClass(flightData.FlightStatus);
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             newRow.classList.add(blinkingClass);
         }
     }
-    
+
+    function fetchFlightStateJSON() {
+        fetch('/path/to/flight-state.json')
+            .then(response => response.json())
+            .then(data => {
+                updateTableFromJSON(data);
+            })
+            .catch(error => {
+                console.error('Error fetching flight state JSON:', error);
+            });
+    }
+
+    function updateTableFromJSON(data) {
+        const tableBody = document.getElementById('flight-rows');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(flightData => {
+            CreateNewRow(flightData);
+        });
+    }
 
     function fetchFlightStatus() {
         return fetch('/api/update-flight')
@@ -84,9 +103,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
-
+    /*
     function fetchSavedFlightState() {
         fetch('/api/saved-flight-state')
             .then(response => response.json())
@@ -99,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 document.getElementById('saved-flight-state').textContent = 'Failed to fetch saved flight state';
             });
     }
-
+    */
     function updateTableFromSavedState(data) {
         const rows = document.getElementById("flightTable").rows;
         data.forEach((flight, index) => {
@@ -118,11 +136,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const flightData = rows.map(row => {
             const cells = row.cells;
             return {
-                aircraft: cells[0].textContent.trim(),
+                aircraft: cells[0].textContent.trim().split(' ')[0],
                 flightNumber: cells[1].textContent.trim(),
                 departure: cells[2].textContent.trim(),
                 flightStatus: cells[3].textContent.trim(),
-                destination: cells[4].textContent.trim()
+                destination: cells[4].textContent.trim(),
+                image: cells[0].querySelector('img').src // Get the image URL from the <img> tag
             };
         });
 
@@ -132,7 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ flightData })
+                body: JSON.stringify(flightData)
             });
 
             if (!response.ok) {
@@ -144,6 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Error saving flight state:', error);
         }
     }
+
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
@@ -403,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
         let Xoffset = 0;
         let XoffsetFix = 250;
         if (GreenbarPercentage >= 50) {
-            Xoffset =1;
+            Xoffset = 1;
         }
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
@@ -492,7 +512,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function initialize() {
 
         // Fetch the saved state and update the table
-        fetchSavedFlightState();
+        //fetchSavedFlightState();
+
+        // Fetch and update the table from flight-state.json
+        fetchFlightStateJSON();
 
         // Set image paths
         const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
@@ -615,7 +638,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         return matchFound;
     }
-
 
     initialize();
 });
