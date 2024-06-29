@@ -22,7 +22,7 @@ app.use('/data', express.static(path.join(__dirname, 'data')));
 
 // Serve static files from the 'api' directory
 
-app.use('/data', express.static(path.join(__dirname, 'data')));
+app.use('/api', express.static(path.join(__dirname, 'api')));
 
 
 // Define a route to serve your HTML file
