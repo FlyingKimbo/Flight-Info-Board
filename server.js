@@ -16,7 +16,7 @@ app.use('/data', express.static(path.join(__dirname, 'public/data')));
 const updateFlight = require('./api/update-flight');
 const flightProgress = require('./api/flight-progress'); // Updated to the new file name
 app.use('/api/update-flight', updateFlight);
-app.use('/api/flight-progress', flightProgress); // Updated to the new file name
+app.use('/api', flightProgress); // Ensure the correct path
 
 // Define a route to serve your HTML file
 app.get('/', (req, res) => {
