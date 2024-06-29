@@ -47,14 +47,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function fetchFlightStateJSON() {
         fetch('/flight-state.json')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Fetched data:', data); // Log the fetched data
                 updateTableFromJSON(data);
             })
             .catch(error => {
                 console.error('Error fetching flight state JSON:', error);
             });
     }
+
 
     function updateTableFromJSON(data) {
         const tableBody = document.getElementById('flight-rows');
@@ -144,6 +151,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Error saving flight state:', error);
         }
     }
+
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
