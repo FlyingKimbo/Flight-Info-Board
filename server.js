@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const updateFlight = require('./api/update-flight');
+const flightProgress = require('./api/flight-progress'); // Ensure this path is correct
 
 const app = express();
 
@@ -7,16 +9,15 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve static files from the 'Image' directory
-app.use('/Image', express.static(path.join(__dirname, 'public/Image')));
+app.use('/Image', express.static(path.join(__dirname, 'public', 'Image')));
 
 // Serve static files from the 'data' directory
-app.use('/data', express.static(path.join(__dirname, 'public/data')));
+app.use('/data', express.static(path.join(__dirname, 'public', 'data')));
 
 // API Routes
-const updateFlight = require('./api/update-flight');
-const flightProgress = require('./api/flight-progress'); // Updated to the new file name
 app.use('/api/update-flight', updateFlight);
-app.use('/api', flightProgress); // Ensure the correct path
+app.use('/api/saved-flight-state', flightProgress); // Adjust the path as needed
+app.use('/api/save-flight-state', flightProgress);  // Adjust the path as needed
 
 // Define a route to serve your HTML file
 app.get('/', (req, res) => {

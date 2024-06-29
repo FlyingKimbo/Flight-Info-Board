@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const app = express();
+const app = express.Router();
 
 app.use(express.json());
 
@@ -27,19 +27,7 @@ app.get('/api/saved-flight-state', (req, res) => {
             console.error('Error fetching saved flight state:', err);
             return res.status(500).send('Failed to fetch saved flight state');
         }
-
-        // If the file is empty, respond with an empty array
-        if (data.trim() === '') {
-            return res.json([]);
-        }
-
-        try {
-            const jsonData = JSON.parse(data);
-            res.json(jsonData);
-        } catch (parseError) {
-            console.error('Error parsing saved flight state:', parseError);
-            res.status(500).send('Failed to parse saved flight state');
-        }
+        res.json(JSON.parse(data));
     });
 });
 
