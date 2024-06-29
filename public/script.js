@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
-        const newRow = table.insertRow(-1); // Insert at the end of the table
+        const newRow = document.createElement('tr');
 
-        const aircraftCell = newRow.insertCell(0);
-        const flightNumberCell = newRow.insertCell(1);
-        const departureCell = newRow.insertCell(2);
-        const flightStatusCell = newRow.insertCell(3);
-        const destinationCell = newRow.insertCell(4);
+        const aircraftCell = document.createElement('td');
+        const flightNumberCell = document.createElement('td');
+        const departureCell = document.createElement('td');
+        const flightStatusCell = document.createElement('td');
+        const destinationCell = document.createElement('td');
 
         // Add content to the new cells
         aircraftCell.style.textAlign = 'center';
@@ -31,11 +31,18 @@ document.addEventListener("DOMContentLoaded", function () {
         flightStatusCell.textContent = flightData.flightStatus;
         destinationCell.textContent = flightData.destination;
 
-        // Apply blinking class based on the flight status
+        newRow.appendChild(aircraftCell);
+        newRow.appendChild(flightNumberCell);
+        newRow.appendChild(departureCell);
+        newRow.appendChild(flightStatusCell);
+        newRow.appendChild(destinationCell);
+
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             newRow.classList.add(blinkingClass);
         }
+
+        table.querySelector('tbody').appendChild(newRow);
     }
 
     function fetchFlightStateJSON() {
@@ -62,7 +69,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch('/api/update-flight')
             .then(response => response.json())
             .then(data => {
-                // Extract the first key which is the flight key
                 const currentFlightKey = Object.keys(data)[0];
                 const flightStatus = data[currentFlightKey].FlightStatus;
                 console.log('Flight Status:', flightStatus);
@@ -104,31 +110,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
-    /*
-    function fetchSavedFlightState() {
-        fetch('/api/saved-flight-state')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('saved-flight-state').textContent = JSON.stringify(data, null, 2);
-                updateTableFromSavedState(data);
-            })
-            .catch(error => {
-                console.error('Error fetching saved flight state:', error);
-                document.getElementById('saved-flight-state').textContent = 'Failed to fetch saved flight state';
-            });
-    }
-    */
-    function updateTableFromSavedState(data) {
-        const rows = document.getElementById("flightTable").rows;
-        data.forEach((flight, index) => {
-            const cells = rows[index + 2].cells; // Skip header and green bar rows
-            cells[0].textContent = flight.aircraft;
-            cells[1].textContent = flight.flightNumber;
-            cells[2].textContent = flight.departure;
-            cells[3].textContent = flight.flightStatus;
-            cells[4].textContent = flight.destination;
-        });
-    }
 
     async function saveFlightState() {
         const table = document.getElementById("flightTable");
@@ -163,7 +144,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Error saving flight state:', error);
         }
     }
-
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
@@ -234,7 +214,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                // Extract the first key which is the flight key
                 const currentFlightKey = Object.keys(data)[0];
                 const airplaneInCloud = data[currentFlightKey].AirplaneInCloud;
                 console.log('Airplane In Cloud:', airplaneInCloud);
@@ -250,7 +229,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                // Extract the first key which is the flight key
                 const currentFlightKey = Object.keys(data)[0];
                 const precipState = data[currentFlightKey].AmbientPRECIPSTATE;
                 console.log('AmbientPRECIPSTATE:', precipState);
@@ -266,7 +244,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
             .then(data => {
-                // Extract the first key which is the flight key
                 const currentFlightKey = Object.keys(data)[0];
                 const flightState = data[currentFlightKey].Flight_State;
                 console.log('Flight State:', flightState);
@@ -510,10 +487,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function initialize() {
-
-        // Fetch the saved state and update the table
-        //fetchSavedFlightState();
-
         // Fetch and update the table from flight-state.json
         fetchFlightStateJSON();
 
