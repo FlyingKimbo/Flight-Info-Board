@@ -6,7 +6,8 @@
   "author": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "vercel-start": "vercel dev"
   },
   "keywords": [],
   "license": "ISC",
@@ -14,6 +15,7 @@
     "debug": "^4.3.5",
     "express": "^4.19.2",
     "rimraf": "^5.0.7",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "body-parser": "^1.19.0"
   }
 }
