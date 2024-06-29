@@ -1,47 +1,29 @@
 const express = require('express');
+const path = require('path');
 
 const app = express();
 
-const path = require('path');
-
-
 // Serve static files from the 'public' directory
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 // Serve static files from the 'Image' directory
-
-app.use('/Image', express.static(path.join(__dirname, '/Public/Image')));
-
+app.use('/Image', express.static(path.join(__dirname, 'public/Image')));
 
 // Serve static files from the 'data' directory
-
-app.use('/data', express.static(path.join(__dirname, '/Public/data')));
-
-
-// Serve static files from the 'api' directory
-
+app.use('/data', express.static(path.join(__dirname, 'public/data')));
 
 // API Routes
 const updateFlight = require('./api/update-flight');
-const flightState = require('./api/flight-state');
+const flightProgress = require('./api/flight-progress'); // Updated to the new file name
 app.use('/api/update-flight', updateFlight);
-app.use('/api/flight-state', flightState);
+app.use('/api/flight-progress', flightProgress); // Updated to the new file name
 
 // Define a route to serve your HTML file
-
 app.get('/', (req, res) => {
-
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-
 });
 
-
 const port = process.env.PORT || 8080;
-
 app.listen(port, () => {
-
     console.log(`Server is running on port ${port}`);
-
 });
