@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
     
-
+    /*
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
         const newRow = table.insertRow(-1); // Insert at the end of the table
@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
             newRow.classList.add(blinkingClass);
         }
     }
-
+    */
 
     function fetchFlightStatus() {
         return fetch('/api/update-flight')
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 if (!matchFound) {
-                    CreateNewRow(flightData);
+                   // CreateNewRow(flightData);
                 }
 
                 if (currentFlightStatus === "Deboarding Completed") {
