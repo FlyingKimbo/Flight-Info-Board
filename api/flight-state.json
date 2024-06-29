@@ -79,12 +79,4 @@
     "destination": "-",
     "image": "/Image/Aircraft_Type/Concorde.png"
   },
-  {
-    "aircraft": "Longitude",
-    "flightNumber": "KIMBO704",
-    "departure": "KMIA Miami Intl Florida",
-    "flightStatus": "-",
-    "destination": "-",
-    "image": "/Image/Aircraft_Type/Longitude.png"
-  }
 ]
