@@ -8,7 +8,7 @@ app.use(express.json());
 const flightStateFilePath = path.join(__dirname, 'flight-state.json');
 
 // Endpoint to save flight state
-app.post('/api/save-flight-state', (req, res) => {
+app.post('/save-flight-state', (req, res) => {
     const flightData = req.body.flightData;
 
     fs.writeFile(flightStateFilePath, JSON.stringify(flightData, null, 2), err => {
@@ -21,7 +21,7 @@ app.post('/api/save-flight-state', (req, res) => {
 });
 
 // Endpoint to get saved flight state
-app.get('/api/saved-flight-state', (req, res) => {
+app.get('/saved-flight-state', (req, res) => {
     fs.readFile(flightStateFilePath, 'utf8', (err, data) => {
         if (err) {
             console.error('Error fetching saved flight state:', err);
