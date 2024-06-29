@@ -22,8 +22,12 @@ app.use('/data', express.static(path.join(__dirname, 'data')));
 
 // Serve static files from the 'api' directory
 
-app.use('/api', express.static(path.join(__dirname, 'api')));
 
+// API Routes
+const updateFlight = require('./api/update-flight');
+const flightState = require('./api/flight-state');
+app.use('/api/update-flight', updateFlight);
+app.use('/api/flight-state', flightState);
 
 // Define a route to serve your HTML file
 
