@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let pageReloaded = false;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-    fetchSavedFlightState();
+    
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
