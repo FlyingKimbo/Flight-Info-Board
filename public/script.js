@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function fetchFlightStateJSON() {
-        fetch('/api/flight-state.json')
+        fetch('/public/flight-state.json')
             .then(response => response.json())
             .then(data => {
                 updateTableFromJSON(data);
