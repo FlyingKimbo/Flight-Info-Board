@@ -12,12 +12,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve static files from the 'Image' directory
 
-app.use('/Image', express.static(path.join(__dirname, 'Image')));
+app.use('/public/data', express.static(path.join(__dirname, 'Image')));
 
 
 // Serve static files from the 'data' directory
 
-app.use('/data', express.static(path.join(__dirname, 'data')));
+app.use('/public/data', express.static(path.join(__dirname, 'data')));
 
 
 // Serve static files from the 'api' directory
