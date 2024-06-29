@@ -5,19 +5,16 @@ const app = express();
 const path = require('path');
 
 
-// Serve static files from the 'public' directory
-
-app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Serve static files from the 'Image' directory
 
-app.use('/Image', express.static(path.join(__dirname, '/Public/Image')));
+app.use('/Image', express.static(path.join(__dirname, '/Image')));
 
 
 // Serve static files from the 'data' directory
 
-app.use('/data', express.static(path.join(__dirname, '/Public/data')));
+app.use('/data', express.static(path.join(__dirname, '/data')));
 
 
 // Serve static files from the 'api' directory
@@ -33,7 +30,7 @@ app.use('/api/flight-state', flightState);
 
 app.get('/', (req, res) => {
 
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 
 });
 
