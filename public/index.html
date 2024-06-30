@@ -7,6 +7,11 @@
             font-family: Arial, sans-serif;
             background-color: rgb(100, 100, 100);
             color: antiquewhite;
+            background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
+            background-size: cover; /* Ensures the image covers the entire background */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents the image from repeating */
+            background-attachment: fixed; /* Makes the background image fixed in place */
         }
         #flightTable {
             width: 100%;
@@ -16,10 +21,6 @@
         }
 
             #flightTable::before {
-                content: "";
-                background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
-                
-                background-position: center; /* Center the image */
                 opacity: 1; /* Set the opacity of the background image */
                 position: absolute;
                 top: 0;
