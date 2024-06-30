@@ -1,10 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
-    let previousFlightStatus = null;
-    let pageReloaded = false;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-    let NewRowCreated = false;
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
@@ -46,7 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function fetchFlightStateJSON() {
-        fetch('/flight-state.json')
+        fetch('/data/flight-state.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -62,7 +59,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
     function updateTableFromJSON(data) {
         const tableBody = document.getElementById('flight-rows');
         tableBody.innerHTML = ''; // Clear existing rows
@@ -70,21 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
         data.forEach(flightData => {
             CreateNewRow(flightData);
         });
-    }
-
-    function fetchFlightStatus() {
-        return fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightStatus = data[currentFlightKey].FlightStatus;
-                console.log('Flight Status:', flightStatus);
-                return flightStatus;
-            })
-            .catch(error => {
-                console.error('Error fetching Flight Status data:', error);
-                return null;
-            });
     }
 
     function checkFlightStatus() {
@@ -97,15 +78,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentFlight = flightData.CurrentFlight;
 
                 let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                if (!matchFound && !NewRowCreated) {
+                if (!matchFound) {
                     CreateNewRow(flightData);
-                    NewRowCreated = true;
                 }
 
                 if (currentFlightStatus === "Deboarding Completed") {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
-                    saveFlightState();
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
                     updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
@@ -117,41 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
-
-    async function saveFlightState() {
-        const table = document.getElementById("flightTable");
-        const rows = Array.from(table.rows).slice(2); // Skip header and green bar rows
-        const flightData = rows.map(row => {
-            const cells = row.cells;
-            return {
-                aircraft: cells[0].textContent.trim().split(' ')[0],
-                flightNumber: cells[1].textContent.trim(),
-                departure: cells[2].textContent.trim(),
-                flightStatus: cells[3].textContent.trim(),
-                destination: cells[4].textContent.trim(),
-                image: cells[0].querySelector('img').src // Get the image URL from the <img> tag
-            };
-        });
-
-        try {
-            const response = await fetch('/api/save-flight-state', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(flightData)
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to save flight state');
-            }
-
-            console.log('Flight state saved successfully');
-        } catch (error) {
-            console.error('Error saving flight state:', error);
-        }
-    }
-
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
