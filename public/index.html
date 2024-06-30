@@ -8,19 +8,19 @@
             background-color: rgb(100, 100, 100);
             color: antiquewhite;
         }
-
         table {
             width: 100%;
             border-collapse: collapse; /* To collapse borders between cells */
         }
-
         th, td {
             text-align: center;
             position: relative;
             border: 2px solid black; /* Applying border to table cells */
-            opacity: 1;
         }
-
+        #flightTable {
+            border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
+            border-collapse: collapse;
+        }
         .blinking-boarding {
             animation: blinker-boarding 4s linear infinite;
         }
@@ -172,10 +172,7 @@
             filter: brightness(5); /* Increase brightness */
             animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely           <pre id="flight-data">Loading...</pre> <pre id="saved-flight-state">Loading...</pre>*/
         }
-        #flightTable {
-            border: 1px solid black;
-            opacity: 0.5;
-        }
+        
     </style>
 </head>
 <body>
