@@ -10,14 +10,31 @@
         }
         #flightTable {
             width: 100%;
-            border: 2px solid rgb(139, 137, 137, 0.1); /* 50% opacity for table border */
+            border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
             border-collapse: collapse; /* To collapse borders between cells */
+            position: relative;
         }
+
+            #flightTable::before {
+                content: "";
+                background-image: url('https://flight-info-board.vercel.app/bkgrd.png');
+                background-size: cover; /* Ensure the image covers the entire table area */
+                background-position: center; /* Center the image */
+                opacity: 0.5; /* Set the opacity of the background image */
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: -1; /* Place the pseudo-element behind the table content */
+            }
 
         th, td {
             text-align: center;
             position: relative;
-            border: 2px solid rgb(139, 137, 137,  0.5); /* Applying border to table cells */
+            border: 2px solid black; /* Applying border to table cells */
+            padding: 10px; /* Optional: adds padding for better readability */
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent background to ensure text readability */
         }
         .blinking-boarding {
             animation: blinker-boarding 4s linear infinite;
