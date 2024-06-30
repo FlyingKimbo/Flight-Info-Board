@@ -83,14 +83,6 @@
         "aircraft": "Concorde",
         "departure": "VHHH Hong Kong International ",
         "destination": "-",
-        "flightNumber": "KIMBO709",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "VHHH Hong Kong International ",
-        "destination": "-",
         "flightNumber": "KIMBO707",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
