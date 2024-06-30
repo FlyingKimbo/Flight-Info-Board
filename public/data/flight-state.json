@@ -1,14 +1,6 @@
 [
     {
         "aircraft": "Concorde",
-        "departure": "VHHH Hong Kong International ",
-        "destination": "-",
-        "flightNumber": "KIMBO707",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
         "departure": "LSZH Zurich",
         "destination": "-",
         "flightNumber": "KIMBO706",
@@ -86,5 +78,13 @@
         "flightNumber": "KIMBO704",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Longitude.png"
+    },
+    {
+        "aircraft": "Concorde",
+        "departure": "VHHH Hong Kong International ",
+        "destination": "-",
+        "flightNumber": "KIMBO707",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde.png"
     }
 ]
