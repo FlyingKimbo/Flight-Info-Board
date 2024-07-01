@@ -9,7 +9,7 @@
     },
     {
         "aircraft": "Boeing748",
-        "departure": "CYHZ Halifax International ",
+        "departure": "CYHZ Halifax International",
         "destination": "-",
         "flightNumber": "KIMBO702",
         "flightStatus": "-",
@@ -81,10 +81,10 @@
     },
     {
         "aircraft": "Concorde",
-        "departure": "ZBAA Beijing Capital ",
+        "departure": "ZBAA Beijing Capital",
         "destination": "-",
         "flightNumber": "KIMBO707",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
-    },
+    }
 ]
