@@ -110,5 +110,13 @@
         "flightNumber": "KIMBO702",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/KIMBO702.png"
+    },
+    {
+        "aircraft": "KIMBO702",
+        "departure": "VHHH Hong Kong International ",
+        "destination": "-",
+        "flightNumber": "KIMBO702",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO702.png"
     }
 ]
