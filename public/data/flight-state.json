@@ -134,5 +134,13 @@
         "flightNumber": "KIMBO702",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/KIMBO702.png"
+    },
+    {
+        "aircraft": "KIMBO702",
+        "departure": "KJFK Kennedy International, New York ",
+        "destination": "-",
+        "flightNumber": "KIMBO702",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO702.png"
     }
 ]
