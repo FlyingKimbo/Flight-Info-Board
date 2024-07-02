@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     CreateNewRow(flightData);
                 }
 
-                if (currentFlightStatus === "Deboarding Completed") {
+                if (currentFlightStatus === "Deboarding Completed" || currentFlightStatus === "-") {
                     removeBlinking(currentFlight);
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
