@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-    let PageRefresh = false;
+   
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
@@ -79,10 +79,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 const currentFlight = flightData.CurrentFlight;
 
                 let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                if (!matchFound && !PageRefresh) {
+                if (!matchFound) {
                     //CreateNewRow(flightData);
                     window.location.reload();
-                    PageRefresh = true;
+                   
 
                 }
 
