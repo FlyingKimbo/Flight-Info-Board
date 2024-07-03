@@ -31,14 +31,14 @@
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
     },
-    {
-        "aircraft": "Concorde",
-        "departure": "LFPO Orly, Paris ",
-        "destination": "-",
-        "flightNumber": "KIMBO704",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
+  {
+    "aircraft": "Concorde",
+    "departure": "LTBA Ataturk, Istanbul",
+    "destination": "-",
+    "flightNumber": "KIMBO704",
+    "flightStatus": "-",
+    "image": "/Image/Aircraft_Type/Concorde.png"
+  },
     {
         "aircraft": "Boeing748",
         "departure": "EDDB Schonefeld, Berlin",
