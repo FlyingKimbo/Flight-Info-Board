@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 if (!matchFound) {
-                    CreateNewRow(flightData);
+                    //CreateNewRow(flightData);
                 }
 
                 if (currentFlightStatus === "Deboarding Completed") {
