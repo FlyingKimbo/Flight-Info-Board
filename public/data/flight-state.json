@@ -86,5 +86,13 @@
         "flightNumber": "KIMBO707",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
+    },
+    {
+        "aircraft": "KIMBO704",
+        "departure": "LTBA Ataturk, Istanbul ",
+        "destination": "LFPO Orly, Paris ",
+        "flightNumber": "KIMBO704",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO704.png"
     }
 ]
