@@ -86,13 +86,5 @@
         "flightNumber": "KIMBO707",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "KIMBO704",
-        "departure": "KMIA Miami International ",
-        "destination": "MMMX Lic Benito Juarez International, Mexico City ",
-        "flightNumber": "KIMBO704",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/KIMBO704.png"
     }
 ]
