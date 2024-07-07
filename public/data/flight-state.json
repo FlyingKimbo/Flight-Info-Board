@@ -97,8 +97,8 @@
     },
     {
         "aircraft": "Concorde",
-        "departure": "DNEN Enugu ",
-        "destination": "FACT Cape Town International ",
+        "departure": "FACT Cape Town International ",
+        "destination": "-",
         "flightNumber": "KIMBO711",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
