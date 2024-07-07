@@ -88,9 +88,9 @@
         "image": "/Image/Aircraft_Type/Concorde.png"
     },
     {
-        "aircraft": "KIMBO710",
-        "departure": "EDDB Schonefeld, Berlin ",
-        "destination": "EGLL Heathrow, London ",
+        "aircraft": "Concorde",
+        "departure": "DNEN Enugu",
+        "destination": "-",
         "flightNumber": "KIMBO710",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/KIMBO710.png"
