@@ -94,5 +94,13 @@
         "flightNumber": "KIMBO710",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "LFPO Orly, Paris ",
+        "destination": "LFPG Charles-de-Gaulle, Paris ",
+        "flightNumber": "KIMBO701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
