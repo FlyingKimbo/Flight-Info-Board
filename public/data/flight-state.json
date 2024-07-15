@@ -97,8 +97,8 @@
     },
     {
         "aircraft": "Boeing773ER",
-        "departure": "LFPO Orly, Paris ",
-        "destination": "LFPG Charles-de-Gaulle, Paris ",
+        "departure": "LFPG Charles-de-Gaulle, Paris ",
+        "destination": "-",
         "flightNumber": "KIMBO701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
