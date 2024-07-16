@@ -102,5 +102,13 @@
         "flightNumber": "KIMBO701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "YMML Melbourne International ",
+        "destination": "YSSY Kingsford Smith International, Sydney ",
+        "flightNumber": "KIMBO702",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
