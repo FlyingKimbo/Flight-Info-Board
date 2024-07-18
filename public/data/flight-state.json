@@ -110,5 +110,13 @@
         "flightNumber": "KIMBO702",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "KPHL Philadelphia International ",
+        "destination": "KJFK Kennedy International, New York ",
+        "flightNumber": "KIMBO703",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
