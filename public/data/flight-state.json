@@ -118,5 +118,13 @@
         "flightNumber": "KIMBO703",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "WSSS Changi, Singapore ",
+        "destination": "VTBD Bangkok International ",
+        "flightNumber": "KIMBO704",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
