@@ -126,21 +126,5 @@
         "flightNumber": "KIMBO704",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "KIMBO703",
-        "departure": "KSTL Lambert-St Louis International ",
-        "destination": "KMCO Orlando International ",
-        "flightNumber": "KIMBO703",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/KIMBO703.png"
-    },
-    {
-        "aircraft": "KIMBO703",
-        "departure": "KSTL Lambert-St Louis International ",
-        "destination": "KMCO Orlando International ",
-        "flightNumber": "KIMBO703",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/KIMBO703.png"
     }
 ]
