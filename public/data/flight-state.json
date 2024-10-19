@@ -118,13 +118,5 @@
         "flightNumber": "KIMBO704",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "KIMBO701",
-        "departure": "EDDK Cologne-Bonn ",
-        "destination": "EKCH Kastrup, Copenhagen ",
-        "flightNumber": "KIMBO701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/KIMBO701.png"
     }
 ]
