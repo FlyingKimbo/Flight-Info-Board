@@ -97,14 +97,6 @@
     },
     {
         "aircraft": "Boeing773ER",
-        "departure": "EDDK Cologne-Bonn ",
-        "destination": "-",
-        "flightNumber": "KIMBO701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
         "departure": "YSSY Kingsford Smith International, Sydney ",
         "destination": "-",
         "flightNumber": "KIMBO702",
