@@ -126,5 +126,13 @@
         "flightNumber": "KIMBO701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
+    },
+    {
+        "aircraft": "KIMBO702",
+        "departure": "YSSY Kingsford Smith International, Sydney ",
+        "destination": "YBBN Brisbane International ",
+        "flightNumber": "KIMBO702",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO702.png"
     }
 ]
