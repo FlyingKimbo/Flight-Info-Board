@@ -17,9 +17,9 @@ app.use('/data', express.static(path.join(__dirname, 'public/data')));
 
 // API Routes
 const updateFlight = require('./api/update-flight');
-const flightProgress = require('./api/flight-progress');
+//const flightProgress = require('./api/flight-progress');
 app.use('/api/update-flight', updateFlight);
-app.use('/api', flightProgress); // Combine both save-flight-state and saved-flight-state in one router
+//app.use('/api', flightProgress); // Combine both save-flight-state and saved-flight-state in one router
 
 // Define a route to serve your HTML file
 app.get('/', (req, res) => {
