@@ -15,12 +15,11 @@
     </script>
 
     <style>
+        /* Original styling */
         body {
             font-family: Arial, sans-serif;
-            color: antiquewhite;
-            margin: 0;
-            display: flex;
             background-color: rgb(100, 100, 100);
+            color: antiquewhite;
             background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
             background-size: cover;
             background-position: right center;
@@ -28,7 +27,7 @@
             background-attachment: fixed;
         }
 
-        /* Sidebar styling */
+        /* Sidebar styling (added as a non-intrusive component) */
         .sidebar {
             width: 200px;
             background-color: #333;
@@ -37,6 +36,8 @@
             flex-direction: column;
             padding-top: 20px;
             position: fixed;
+            top: 0;
+            left: 0;
         }
 
         .sidebar a {
@@ -53,22 +54,18 @@
             background-color: #555;
         }
 
-        /* Main content styling */
+        /* Ensure main content area aligns next to sidebar */
         .main-content {
-            margin-left: 200px;
+            margin-left: 220px; /* Aligns with sidebar width */
             padding: 20px;
-            flex: 1;
         }
 
-        h1 {
-            color: antiquewhite;
-            margin-top: 0;
-        }
-
+        /* Existing styles for the table, ETE bar, animations, etc., remain unchanged */
         #flightTable {
             width: 100%;
             border: 2px solid rgba(0, 0, 0, 0.5);
             border-collapse: collapse;
+            position: relative;
         }
 
         th, td {
@@ -78,12 +75,9 @@
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
-
-        /* Additional styles for elements like blinking, ete-bar, etc., can remain as in your original code */
     </style>
 </head>
 <body>
-
     <!-- Sidebar with vertical menu -->
     <div class="sidebar">
         <a href="index.html">Home</a>
@@ -92,7 +86,7 @@
         <a href="login-signup.html">Login / Sign Up</a>
     </div>
 
-    <!-- Main content area -->
+    <!-- Main content area (original content) -->
     <div class="main-content">
         <h1>My Flight</h1>
 
