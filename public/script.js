@@ -16,17 +16,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         aircraftCell.style.textAlign = 'center';
         const img = document.createElement('img');
-        img.src = flightData.image;
+        img.src = flightData.image || '';  // Ensure there's a fallback if image URL is missing
         img.alt = 'Aircraft Image';
         img.style.width = '100px';
         img.style.height = 'auto';
         aircraftCell.appendChild(img);
-        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
+        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft || 'N/A'}`));
 
-        flightNumberCell.textContent = flightData.flightNumber;
-        departureCell.textContent = flightData.departure;
-        flightStatusCell.textContent = flightData.flightStatus;
-        destinationCell.textContent = flightData.destination;
+        flightNumberCell.textContent = flightData.flightNumber || 'N/A';
+        departureCell.textContent = flightData.departure || 'N/A';
+        flightStatusCell.textContent = flightData.flightStatus || 'N/A';
+        destinationCell.textContent = flightData.destination || 'N/A';
 
         newRow.appendChild(aircraftCell);
         newRow.appendChild(flightNumberCell);
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchFlightData() {
         try {
-            const response = await fetch('/api/update-flight');
+            const response = await fetch('/data/flight-state.json');  // Ensure correct path to JSON file
             if (response.ok) {
                 latestFlightData = await response.json();
                 console.log('Fetched data:', latestFlightData);
