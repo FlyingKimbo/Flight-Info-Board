@@ -26,7 +26,8 @@
             background-attachment: fixed;
         }
 
-        h1 {
+        /* Heading styling, isolated from table */
+        .page-heading {
             text-align: center;
             color: antiquewhite;
             font-size: 2em;
@@ -49,6 +50,7 @@
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
+        /* Cell content styling remains the same */
         .cell-content {
             display: flex;
             align-items: center;
@@ -77,7 +79,7 @@
         .ete-bar-container {
             position: relative;
             height: 20px;
-            background-color: rgb(43, 47, 49);
+            background-color: rgb(43 47 49);
             z-index: 1;
             text-align: left;
             line-height: 20px;
@@ -104,8 +106,10 @@
 </head>
 <body>
 
-    <!-- Heading for the page -->
-    <h1>My Flight</h1>
+    <!-- Isolated heading -->
+    <div class="page-heading">
+        <h1>My Flight</h1>
+    </div>
 
     <!-- Table remains unchanged -->
     <table id="flightTable" border="1">
