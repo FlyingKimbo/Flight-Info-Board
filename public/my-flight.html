@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Status</title>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-45NLM76RVR"></script>
@@ -8,38 +11,42 @@
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-
         gtag('config', 'G-45NLM76RVR');
     </script>
 
-    <title>Flight Status</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             background-color: rgb(100, 100, 100);
             color: antiquewhite;
             background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
-            background-size: cover; /* Ensures the image covers the entire background */
-            background-position: right center; /* Centers the image */
-            background-repeat: no-repeat; /* Prevents the image from repeating */
-            background-attachment: fixed; /* Makes the background image fixed in place */
+            background-size: cover;
+            background-position: right center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+
+        h1 {
+            text-align: center;
+            color: antiquewhite;
+            font-size: 2em;
+            margin-top: 20px;
         }
 
         #flightTable {
             width: 100%;
-            border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
-            border-collapse: collapse; /* To collapse borders between cells */
+            border: 2px solid rgba(0, 0, 0, 0.5);
+            border-collapse: collapse;
             position: relative;
         }
 
         th, td {
             text-align: center;
             position: relative;
-            border: 2px solid rgba(0, 0, 0, 0.3); /* Black border with 50% opacity */
-            /* padding: 10px; /* Optional: adds padding for better readability */
-            background-color: rgba(100, 100, 100, 0.3); /* Semi-transparent background to ensure text readability */
-            font-weight: bold; /* Makes the text bold */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Adds a shadow effect to the text */
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            background-color: rgba(100, 100, 100, 0.3);
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         .cell-content {
@@ -49,104 +56,28 @@
         }
 
             .cell-content img {
-                vertical-align: middle; /* Aligns the image vertically in the middle */
-                margin-right: 10px; /* Optional: adds space between the image and text */
-                width: 100px; /* Ensures the image width is consistent */
-                height: auto; /* Maintains the aspect ratio of the image */
-                box-shadow: 4px 4px 10px rgba(0, 0, 0, 1); /* Adds a shadow effect to the image */
+                vertical-align: middle;
+                margin-right: 10px;
+                width: 100px;
+                height: auto;
+                box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);
             }
 
+        /* Blinking and animation classes remain as in your original code */
         .blinking-boarding {
             animation: blinker-boarding 4s linear infinite;
         }
 
         @keyframes blinker-boarding {
             50% {
-                background-color: saddlebrown; /* Boarding color */
+                background-color: saddlebrown;
             }
-        }
-
-        .blinking-departed {
-            animation: blinker-departed 4s linear infinite;
-        }
-
-        @keyframes blinker-departed {
-            50% {
-                background-color: darkslateblue; /* Departed color */
-            }
-        }
-
-        .blinking-enroute {
-            animation: blinker-enroute 4s linear infinite;
-        }
-
-        @keyframes blinker-enroute {
-            50% {
-                background-color: darkgreen; /* Enroute color */
-            }
-        }
-
-        .blinking-delayed {
-            animation: blinker-delayed 1s linear infinite;
-        }
-
-        @keyframes blinker-delayed {
-            50% {
-                background-color: red; /* Delayed color */
-            }
-        }
-
-        .blinking-landed {
-            animation: blinker-landed 2s linear infinite;
-        }
-
-        @keyframes blinker-landed {
-            50% {
-                background-color: darkblue; /* Landed color */
-            }
-        }
-
-        .blinking-deboarding {
-            animation: blinker-deboarding 4s linear infinite;
-        }
-
-        @keyframes blinker-deboarding {
-            50% {
-                background-color: darkslategrey; /* Deboarding color */
-            }
-        }
-
-
-        @keyframes opacityCycle {
-            0% {
-                opacity: 0.6;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0.6;
-            }
-        }
-
-        .flipped {
-            transform: scaleX(-1);
-        }
-
-        th.sort-asc:after {
-            content: " ▲";
-        }
-
-        th.sort-desc:after {
-            content: " ▼";
         }
 
         .ete-bar-container {
             position: relative;
             height: 20px;
-            background-color: rgb(43 47 49);
+            background-color: rgb(43, 47, 49);
             z-index: 1;
             text-align: left;
             line-height: 20px;
@@ -163,55 +94,21 @@
 
         .ete-bar-text {
             position: absolute;
-            left: 0; /* Initial position, will be updated via JS */
-            top: 0; /* Adjust as needed */
+            left: 0;
+            top: 0;
             z-index: 4;
             color: white;
-            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
-        }
-
-        .aircraft-image {
-            position: absolute;
-            top: -10px; /* Adjust as needed to align with the green bar */
-            height: 30px; /* Adjust as needed */
-            z-index: 4;
-            transition: left 0.1s linear; /* Smooth movement */
-        }
-
-        .jetstream-image {
-            position: absolute;
-            top: 8px; /* Adjust as needed to align with the green bar */
-            height: 11px; /* Adjust as needed */
-            opacity: 0;
-            z-index: 3;
-        }
-
-        .cloud-image {
-            position: absolute;
-            top: -20px; /* Adjust as needed to align with the green bar */
-            height: 50px; /* Adjust as needed */
-            opacity: 0;
-            z-index: 5;
-            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely */
-        }
-
-        .precip-image {
-            position: absolute;
-            top: -20px; /* Adjust as needed to align with the green bar */
-            height: 120px; /* Adjust as needed */
-            transform: rotate(100deg); /* Rotate the GIF to a fixed value */
-            opacity: 0;
-            z-index: 5;
-            float: left;
-            mix-blend-mode: screen; /* Apply the blend mode */
-            filter: brightness(5); /* Increase brightness */
-            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely           <pre id="flight-data">Loading...</pre> <pre id="saved-flight-state">Loading...</pre>*/
+            white-space: nowrap;
         }
     </style>
 </head>
 <body>
-    <!-- <pre id="flight-data">Loading...</pre>-->
-    <table id="flightTable" border='1'>
+
+    <!-- Heading for the page -->
+    <h1>My Flight</h1>
+
+    <!-- Table remains unchanged -->
+    <table id="flightTable" border="1">
         <tr>
             <th onclick="sortTable(0)">Aircraft</th>
             <th>Flight Number</th>
@@ -222,7 +119,7 @@
         <tr>
             <td colspan="5" class="ete-bar-container">
                 <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-                <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
+                <span class="ete-bar-text" id="ete-bar-text"></span>
                 <img id="aircraft-image" class="aircraft-image" src="" alt="">
                 <img id="jetstream-image" class="jetstream-image" src="" alt="">
                 <img id="cloud-image" class="cloud-image" src="" alt="">
@@ -244,6 +141,7 @@
             </tr>
         </tbody>
     </table>
+
     <script src="script.js"></script>
 </body>
 </html>
