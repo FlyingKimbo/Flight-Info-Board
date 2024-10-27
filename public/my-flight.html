@@ -4,29 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flight Status</title>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-45NLM76RVR"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-45NLM76RVR');
-    </script>
-
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: rgb(100, 100, 100);
-            color: antiquewhite;
-            background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
-            background-size: cover;
-            background-position: right center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-        }
-
-        /* Heading styling, isolated from table */
+        /* Styles for page heading */
         .page-heading {
             text-align: center;
             color: antiquewhite;
@@ -34,118 +13,74 @@
             margin-top: 20px;
         }
 
+        /* Other existing styles */
         #flightTable {
             width: 100%;
-            border: 2px solid rgba(0, 0, 0, 0.5);
             border-collapse: collapse;
-            position: relative;
         }
-
         th, td {
             text-align: center;
-            position: relative;
-            border: 2px solid rgba(0, 0, 0, 0.3);
-            background-color: rgba(100, 100, 100, 0.3);
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            padding: 8px;
+            border: 1px solid #333;
         }
-
-        /* Cell content styling remains the same */
-        .cell-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .cell-content img {
-                vertical-align: middle;
-                margin-right: 10px;
-                width: 100px;
-                height: auto;
-                box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);
-            }
-
-        /* Blinking and animation classes remain as in your original code */
-        .blinking-boarding {
-            animation: blinker-boarding 4s linear infinite;
-        }
-
-        @keyframes blinker-boarding {
-            50% {
-                background-color: saddlebrown;
-            }
-        }
-
+        /* Progress bar styling */
         .ete-bar-container {
-            position: relative;
             height: 20px;
-            background-color: rgb(43 47 49);
-            z-index: 1;
+            background-color: rgb(43, 47, 49);
+            position: relative;
             text-align: left;
             line-height: 20px;
             overflow: hidden;
         }
-
         .ete-bar {
             height: 100%;
             background-color: seagreen;
             opacity: 0;
-            float: right;
-            z-index: 2;
+            transition: width 0.5s;
         }
-
-        .ete-bar-text {
+        /* Additional elements for progress bar */
+        .ete-bar-text, .aircraft-image, .jetstream-image, .cloud-image, .precip-image {
             position: absolute;
-            left: 0;
             top: 0;
-            z-index: 4;
-            color: white;
-            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
     </style>
 </head>
 <body>
 
-    <!-- Isolated heading -->
-    <div class="page-heading">
-        <h1>My Flight</h1>
-    </div>
+    <!-- Page title added without interfering with the table -->
+    <div class="page-heading">My Flight</div>
 
-    <!-- Table remains unchanged -->
-    <table id="flightTable" border="1">
-        <tr>
-            <th onclick="sortTable(0)">Aircraft</th>
-            <th>Flight Number</th>
-            <th>Departure/Location</th>
-            <th onclick="sortTable(3)">Flight Status</th>
-            <th>Destination</th>
-        </tr>
-        <tr>
-            <td colspan="5" class="ete-bar-container">
-                <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-                <span class="ete-bar-text" id="ete-bar-text"></span>
-                <img id="aircraft-image" class="aircraft-image" src="" alt="">
-                <img id="jetstream-image" class="jetstream-image" src="" alt="">
-                <img id="cloud-image" class="cloud-image" src="" alt="">
-                <img id="precip-image" class="precip-image flipped" src="" alt="Precipitation">
-            </td>
-        </tr>
-        <tbody id="flight-rows">
+    <table id="flightTable">
+        <thead>
             <tr>
-                <td class="flight-aircraft">
-                    <div class="cell-content">
-                        <img class="flight-image" src="" alt="Aircraft Image" style="width:100px;height:auto;box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);">
-                        <span>Aircraft Name</span>
-                    </div>
-                </td>
-                <td class="flight-number">Flight Number</td>
-                <td class="flight-departure">Departure</td>
-                <td class="flight-status">-</td>
-                <td class="flight-destination">-</td>
+                <th>Aircraft</th>
+                <th>Flight Number</th>
+                <th>Departure/Location</th>
+                <th>Flight Status</th>
+                <th>Destination</th>
             </tr>
+        </thead>
+        <tbody id="flight-rows">
+            <!-- Rows will be dynamically added here -->
         </tbody>
+        <tfoot>
+            <!-- Progress bar row -->
+            <tr>
+                <td colspan="5" class="ete-bar-container">
+                    <div class="ete-bar" id="ete-bar"></div>
+                    <span class="ete-bar-text" id="ete-bar-text"></span>
+                    <img id="aircraft-image" class="aircraft-image" src="" alt="Aircraft">
+                    <img id="jetstream-image" class="jetstream-image" src="" alt="Jet Stream">
+                    <img id="cloud-image" class="cloud-image" src="" alt="Cloud">
+                    <img id="precip-image" class="precip-image" src="" alt="Precipitation">
+                </td>
+            </tr>
+        </tfoot>
     </table>
 
+    <!-- Your original script here -->
     <script src="script.js"></script>
 </body>
 </html>
