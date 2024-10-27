@@ -27,40 +27,6 @@
             background-attachment: fixed;
         }
 
-        /* Sidebar styling (added as a non-intrusive component) */
-        .sidebar {
-            width: 200px;
-            background-color: #333;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding-top: 20px;
-            position: fixed;
-            top: 0;
-            left: 0;
-        }
-
-        .sidebar a {
-            padding: 15px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 18px;
-            color: #fff;
-            display: block;
-            transition: background-color 0.3s;
-        }
-
-        .sidebar a:hover {
-            background-color: #555;
-        }
-
-        /* Ensure main content area aligns next to sidebar */
-        .main-content {
-            margin-left: 220px; /* Aligns with sidebar width */
-            padding: 20px;
-        }
-
-        /* Existing styles for the table, ETE bar, animations, etc., remain unchanged */
         #flightTable {
             width: 100%;
             border: 2px solid rgba(0, 0, 0, 0.5);
@@ -75,16 +41,11 @@
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
+
+        /* Additional styles for animations, ete-bar, etc., remain unchanged */
     </style>
 </head>
 <body>
-    <!-- Sidebar with vertical menu -->
-    <div class="sidebar">
-        <a href="index.html">Home</a>
-        <a href="create-mission.html">Create Mission</a>
-        <a href="about.html">About</a>
-        <a href="login-signup.html">Login / Sign Up</a>
-    </div>
 
     <!-- Main content area (original content) -->
     <div class="main-content">
