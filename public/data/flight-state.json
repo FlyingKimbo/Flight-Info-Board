@@ -129,8 +129,8 @@
     },
     {
         "aircraft": "Airbus388",
-        "departure": "EDDF Frankfurt/Main ",
-        "destination": "LFPO Orly ",
+        "departure": "LFPO Orly ",
+        "destination": "-",
         "flightNumber": "SIA701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus388.png"
