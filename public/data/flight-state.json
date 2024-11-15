@@ -126,5 +126,13 @@
         "flightNumber": "KIMBO701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
+    },
+    {
+        "aircraft": "Airbus388",
+        "departure": "EDDF Frankfurt/Main ",
+        "destination": "LFPO Orly ",
+        "flightNumber": "SIA701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Airbus388.png"
     }
 ]
