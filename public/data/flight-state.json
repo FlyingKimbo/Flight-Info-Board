@@ -134,5 +134,13 @@
         "flightNumber": "SIA701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus388.png"
+    },
+    {
+        "aircraft": "KIMBO701",
+        "departure": "LFPO Orly ",
+        "destination": "EGLL Heathrow ",
+        "flightNumber": "KIMBO701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO701.png"
     }
 ]
