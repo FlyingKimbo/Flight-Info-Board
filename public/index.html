@@ -14,15 +14,19 @@
             margin: 0;
             background-color: #f4f4f9;
         }
+
         .container {
             text-align: center;
         }
+
         h1 {
             color: #333;
         }
+
         .button-container {
             margin-top: 20px;
         }
+
         .button {
             display: inline-block;
             padding: 10px 20px;
@@ -35,19 +39,71 @@
             cursor: pointer;
             text-decoration: none;
         }
-        .button:hover {
-            background-color: #0056b3;
-        }
+
+            .button:hover {
+                background-color: #0056b3;
+            }
     </style>
+    <script>let db;
+
+        // Open the IndexedDB
+        const request = indexedDB.open("UserDatabase", 1);
+
+        request.onupgradeneeded = (event) => {
+            db = event.target.result;
+            db.createObjectStore("users", { keyPath: "username" });
+        };
+
+        request.onsuccess = (event) => {
+            db = event.target.result;
+            console.log("Database opened successfully!");
+        };
+
+        request.onerror = (event) => {
+            console.error("Database error:", event.target.error);
+        };
+
+        // Function to check if a user is registered
+        const isUserRegistered = (callback) => {
+            const transaction = db.transaction(["users"], "readonly");
+            const objectStore = transaction.objectStore("users");
+
+            const request = objectStore.getAll(); // Get all registered users
+            request.onsuccess = (event) => {
+                const users = event.target.result;
+                callback(users.length > 0); // Check if any user exists
+            };
+
+            request.onerror = () => {
+                console.error("Error checking user registration.");
+                callback(false);
+            };
+        };
+
+        // Event listener for button clicks
+        const handleButtonClick = (event, targetPage) => {
+            event.preventDefault(); // Prevent default link behavior
+
+            isUserRegistered((isRegistered) => {
+                if (isRegistered) {
+                    // Redirect to the target page
+                    window.location.href = targetPage;
+                } else {
+                    // Redirect to signup page
+                    alert("You are not signed up yet! Redirecting to the signup page...");
+                    window.location.href = "login-signup.html";
+                }
+            });
+        };</script>
 </head>
 <body>
     <main class="container">
         <h1>Welcome to My Platform</h1>
         <div class="button-container">
-            <a href="my-flight.html" class="button">My Flight</a>
-            <a href="create-mission.html" class="button">Create Mission</a>
-            <a href="about.html" class="button">About</a>
-            <a href="login-signup.html" class="button">Login / Sign Up</a>
+            <a href="my-flight.html" class="button" onclick="handleButtonClick(event, 'my-flight.html')">My Flight</a>
+            <a href="create-mission.html" class="button" onclick="handleButtonClick(event, 'create-mission.html')">Create Mission</a>
+            <a href="about.html" class="button" onclick="handleButtonClick(event, 'about.html')">About</a>
+            <a href="login-signup.html" class="button" onclick="handleButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
         </div>
     </main>
 </body>
