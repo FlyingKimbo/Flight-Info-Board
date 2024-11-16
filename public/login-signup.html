@@ -84,12 +84,73 @@
                 color: #0056b3;
             }
     </style>
-    <script>function toggleForms() {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const signupForm = document.getElementById("signup-form");
+            const loginForm = document.getElementById("login-form");
+
+            // Check for "Remember me" in local storage
+            if (localStorage.getItem("rememberMe") === "true" && localStorage.getItem("username")) {
+                alert(`Welcome back, ${localStorage.getItem("username")}! Redirecting...`);
+                window.location.href = "my-flight.html"; // Redirect to the dashboard or home page
+            }
+
+            // Handle sign-up form submission
+            signupForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const username = document.getElementById("signup-username").value;
+                const email = document.getElementById("signup-email").value;
+                const password = document.getElementById("signup-password").value;
+                const confirmPassword = document.getElementById("signup-confirm-password").value;
+
+                // Validate passwords
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match!");
+                    return;
+                }
+
+                // Save user data to localStorage
+                localStorage.setItem("username", username);
+                localStorage.setItem("email", email);
+                localStorage.setItem("password", password);
+
+                alert("Sign-up successful! You can now log in.");
+                toggleForms(); // Switch to login form
+            });
+
+            // Handle login form submission
+            loginForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const username = document.getElementById("login-username").value;
+                const password = document.getElementById("login-password").value;
+                const rememberMe = document.getElementById("remember-me").checked;
+
+                // Retrieve user data from localStorage
+                const savedUsername = localStorage.getItem("username");
+                const savedPassword = localStorage.getItem("password");
+
+                // Validate credentials
+                if (username === savedUsername && password === savedPassword) {
+                    if (rememberMe) {
+                        localStorage.setItem("rememberMe", "true");
+                    } else {
+                        localStorage.removeItem("rememberMe");
+                    }
+                    alert("Login successful! Redirecting...");
+                    window.location.href = "my-flight.html"; // Redirect to the dashboard or home page
+                } else {
+                    alert("Invalid credentials. Please try again.");
+                }
+            });
+        });
+
+        function toggleForms() {
             const loginForm = document.getElementById('login-form');
             const signupForm = document.getElementById('signup-form');
             loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
             signupForm.style.display = signupForm.style.display === 'none' ? 'block' : 'none';
-        }</script>
+        }
+    </script>
 </head>
 <body>
     <div class="container">
