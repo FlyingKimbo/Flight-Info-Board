@@ -9,9 +9,6 @@
     "start": "node server.js",
     "vercel-start": "vercel dev"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
   "keywords": [],
   "license": "ISC",
   "dependencies": {
