@@ -85,6 +85,9 @@
             }
     </style>
     <script>
+        const fs = require("fs");
+        const dbPath = "C:\\Users\\User\\OneDrive\\Documents\\KimboExpress_loginDB_storage\\users.json";
+
         document.addEventListener("DOMContentLoaded", () => {
             const signupForm = document.getElementById("signup-form");
             const loginForm = document.getElementById("login-form");
@@ -92,101 +95,134 @@
             // Check for "Remember me" in local storage
             if (localStorage.getItem("rememberMe") === "true" && localStorage.getItem("username")) {
                 alert(`Welcome back, ${localStorage.getItem("username")}! Redirecting...`);
-                window.location.href = "my-flight.html"; // Redirect to the dashboard or home page
+                window.location.href = "my-flight.html";
             }
 
             // Handle sign-up form submission
             signupForm.addEventListener("submit", (e) => {
                 e.preventDefault();
+
                 const username = document.getElementById("signup-username").value;
                 const email = document.getElementById("signup-email").value;
                 const password = document.getElementById("signup-password").value;
                 const confirmPassword = document.getElementById("signup-confirm-password").value;
 
-                // Validate passwords
                 if (password !== confirmPassword) {
                     alert("Passwords do not match!");
                     return;
                 }
 
-                // Save user data to localStorage
-                localStorage.setItem("username", username);
-                localStorage.setItem("email", email);
-                localStorage.setItem("password", password);
+                const hashedPassword = sha256(password);
+                const userData = { username, email, password: hashedPassword };
 
-                alert("Sign-up successful! You can now log in.");
-                toggleForms(); // Switch to login form
+                saveUserToFile(userData, (success, message) => {
+                    if (success) {
+                        alert("Sign-up successful! You can now log in.");
+                        toggleForms();
+                    } else {
+                        alert(message);
+                    }
+                });
             });
 
             // Handle login form submission
             loginForm.addEventListener("submit", (e) => {
                 e.preventDefault();
+
                 const username = document.getElementById("login-username").value;
                 const password = document.getElementById("login-password").value;
                 const rememberMe = document.getElementById("remember-me").checked;
 
-                // Retrieve user data from localStorage
-                const savedUsername = localStorage.getItem("username");
-                const savedPassword = localStorage.getItem("password");
+                const hashedPassword = sha256(password);
 
-                // Validate credentials
-                if (username === savedUsername && password === savedPassword) {
-                    if (rememberMe) {
-                        localStorage.setItem("rememberMe", "true");
+                authenticateUser(username, hashedPassword, (success, message) => {
+                    if (success) {
+                        if (rememberMe) localStorage.setItem("rememberMe", "true");
+                        else localStorage.removeItem("rememberMe");
+
+                        alert("Login successful! Redirecting...");
+                        window.location.href = "my-flight.html";
                     } else {
-                        localStorage.removeItem("rememberMe");
+                        alert(message);
                     }
-                    alert("Login successful! Redirecting...");
-                    window.location.href = "my-flight.html"; // Redirect to the dashboard or home page
-                } else {
-                    alert("Invalid credentials. Please try again.");
-                }
+                });
             });
         });
 
+        function sha256(message) {
+            return crypto.subtle.digest("SHA-256", new TextEncoder().encode(message)).then((hashBuffer) => {
+                return Array.from(new Uint8Array(hashBuffer))
+                    .map((b) => b.toString(16).padStart(2, "0"))
+                    .join("");
+            });
+        }
+
+        function saveUserToFile(userData, callback) {
+            fs.readFile(dbPath, "utf8", (err, data) => {
+                if (err) return callback(false, "Could not read the database file.");
+
+                let users = [];
+                if (data) users = JSON.parse(data);
+
+                if (users.some((user) => user.username === userData.username)) {
+                    return callback(false, "Username already exists.");
+                }
+
+                users.push(userData);
+
+                fs.writeFile(dbPath, JSON.stringify(users, null, 4), "utf8", (err) => {
+                    if (err) return callback(false, "Could not save user data.");
+                    callback(true, null);
+                });
+            });
+        }
+
+        function authenticateUser(username, password, callback) {
+            fs.readFile(dbPath, "utf8", (err, data) => {
+                if (err) return callback(false, "Could not read the database file.");
+
+                const users = JSON.parse(data);
+                const user = users.find((u) => u.username === username && u.password === password);
+
+                if (user) callback(true, null);
+                else callback(false, "Invalid username or password.");
+            });
+        }
+
         function toggleForms() {
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
-            signupForm.style.display = signupForm.style.display === 'none' ? 'block' : 'none';
+            const loginForm = document.getElementById("login-form");
+            const signupForm = document.getElementById("signup-form");
+            loginForm.style.display = loginForm.style.display === "none" ? "block" : "none";
+            signupForm.style.display = signupForm.style.display === "none" ? "block" : "none";
         }
     </script>
 </head>
 <body>
     <div class="container">
-        <!-- Sign-Up Form -->
         <form id="signup-form">
             <h2>Sign Up</h2>
             <label for="signup-username">Username</label>
             <input type="text" id="signup-username" name="username" placeholder="Enter your username" required>
-
             <label for="signup-email">Email</label>
             <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
-
             <label for="signup-password">Password</label>
             <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
-
             <label for="signup-confirm-password">Confirm Password</label>
             <input type="password" id="signup-confirm-password" name="confirm-password" placeholder="Confirm your password" required>
-
             <button type="submit" class="button">Sign Up</button>
             <p class="toggle-link" onclick="toggleForms()">Already have an account? Log in</p>
         </form>
 
-        <!-- Login Form -->
         <form id="login-form" style="display: none;">
             <h2>Log In</h2>
             <label for="login-username">Username</label>
             <input type="text" id="login-username" name="username" placeholder="Enter your username" required>
-
             <label for="login-password">Password</label>
             <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
-
             <div class="remember-container">
                 <input type="checkbox" id="remember-me" name="remember-me">
                 <label for="remember-me">Remember me</label>
             </div>
-
             <button type="submit" class="button">Log In</button>
             <p class="toggle-link" onclick="toggleForms()">Don't have an account? Sign up</p>
         </form>
