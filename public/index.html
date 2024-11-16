@@ -44,7 +44,8 @@
                 background-color: #0056b3;
             }
     </style>
-    <script>let db;
+    <script>
+        let db;
 
         // Open the IndexedDB
         const request = indexedDB.open("UserDatabase", 1);
@@ -80,8 +81,8 @@
             };
         };
 
-        // Event listener for button clicks
-        const handleButtonClick = (event, targetPage) => {
+        // Event listener for restricted button clicks
+        const handleRestrictedButtonClick = (event, targetPage) => {
             event.preventDefault(); // Prevent default link behavior
 
             isUserRegistered((isRegistered) => {
@@ -94,16 +95,24 @@
                     window.location.href = "login-signup.html";
                 }
             });
-        };</script>
+        };
+
+        // Event listener for unrestricted button clicks
+        const handleUnrestrictedButtonClick = (event, targetPage) => {
+            event.preventDefault();
+            window.location.href = targetPage;
+        };
+    </script>
 </head>
 <body>
     <main class="container">
         <h1>Welcome to My Platform</h1>
         <div class="button-container">
-            <a href="my-flight.html" class="button" onclick="handleButtonClick(event, 'my-flight.html')">My Flight</a>
-            <a href="create-mission.html" class="button" onclick="handleButtonClick(event, 'create-mission.html')">Create Mission</a>
-            <a href="about.html" class="button" onclick="handleButtonClick(event, 'about.html')">About</a>
-            <a href="login-signup.html" class="button" onclick="handleButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
+            <a href="my-flight.html" class="button" onclick="handleRestrictedButtonClick(event, 'my-flight.html')">My Flight</a>
+            <a href="create-mission.html" class="button" onclick="handleRestrictedButtonClick(event, 'create-mission.html')">Create Mission</a>
+            <a href="active-missions.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'active-missions.html')">Active Missions</a>
+            <a href="about.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'about.html')">About</a>
+            <a href="login-signup.html" class="button" onclick="handleRestrictedButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
         </div>
     </main>
 </body>
