@@ -102,6 +102,13 @@
         request.onsuccess = (event) => {
             db = event.target.result;
             console.log("Database opened successfully!");
+
+            // Check for "Remember Me" user
+            const rememberedUser = JSON.parse(localStorage.getItem("rememberMe"));
+            if (rememberedUser) {
+                alert(`Welcome back, ${rememberedUser.username}! Redirecting...`);
+                window.location.href = "my-flight.html"; // Redirect to another page
+            }
         };
 
         request.onerror = (event) => {
@@ -116,7 +123,7 @@
             const request = objectStore.add(userData);
 
             request.onsuccess = () => {
-                callback(true, "User saved successfully! A confirmation link has been sent to your email.");
+                callback(true, "User saved successfully! You can now log in.");
             };
 
             request.onerror = () => {
@@ -147,18 +154,11 @@
 
                 const username = document.getElementById("signup-username").value;
                 const email = document.getElementById("signup-email").value;
-                const confirmEmail = document.getElementById("signup-confirm-email").value;
                 const password = document.getElementById("signup-password").value;
 
-                if (email !== confirmEmail) {
-                    alert("Email addresses do not match!");
-                    return;
-                }
-
-                saveUser({ username, email, password, confirmed: false }, (success, message) => {
+                saveUser({ username, email, password }, (success, message) => {
                     alert(message);
                     if (success) {
-                        alert("Please check your email to confirm your registration.");
                         toggleForms();
                     }
                 });
@@ -174,11 +174,6 @@
 
                 getUser(username, (user) => {
                     if (user && user.password === password) {
-                        if (!user.confirmed) {
-                            alert("Please confirm your email before logging in.");
-                            return;
-                        }
-
                         if (rememberMe) {
                             localStorage.setItem("rememberMe", JSON.stringify(user));
                         }
@@ -211,9 +206,6 @@
 
             <label for="signup-email">Email</label>
             <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
-
-            <label for="signup-confirm-email">Confirm Email</label>
-            <input type="email" id="signup-confirm-email" name="confirm-email" placeholder="Confirm your email" required>
 
             <label for="signup-password">Password</label>
             <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
