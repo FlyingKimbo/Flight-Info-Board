@@ -12,15 +12,20 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f4f4f9;
+            background: url('https://flight-info-board.vercel.app/Image/index.webp') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff; /* Ensures text is readable on the image */
         }
 
         .container {
             text-align: center;
+            background: rgba(0, 0, 0, 0.6); /* Adds a translucent background to the content */
+            padding: 20px;
+            border-radius: 10px;
         }
 
         h1 {
-            color: #333;
+            color: #fff;
         }
 
         .button-container {
@@ -106,7 +111,7 @@
 </head>
 <body>
     <main class="container">
-        <h1>Welcome SAME-DAY-DELIVERY</h1>
+        <h1>Welcome to SAME-DAY-DELIVERY</h1>
         <div class="button-container">
             <a href="my-missions.html" class="button" onclick="handleRestrictedButtonClick(event, 'my-missions.html')">My Missions</a>
             <a href="create-mission.html" class="button" onclick="handleRestrictedButtonClick(event, 'create-mission.html')">Create Mission</a>
