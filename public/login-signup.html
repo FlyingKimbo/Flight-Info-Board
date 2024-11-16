@@ -66,6 +66,16 @@
                 background-color: #003f7f;
             }
 
+        .remember-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+            .remember-container input {
+                margin-right: 10px;
+            }
+
         .toggle-link {
             text-align: center;
             margin-top: 10px;
@@ -106,7 +116,7 @@
             const request = objectStore.add(userData);
 
             request.onsuccess = () => {
-                callback(true, "User saved successfully!");
+                callback(true, "User saved successfully! A confirmation link has been sent to your email.");
             };
 
             request.onerror = () => {
@@ -137,11 +147,20 @@
 
                 const username = document.getElementById("signup-username").value;
                 const email = document.getElementById("signup-email").value;
+                const confirmEmail = document.getElementById("signup-confirm-email").value;
                 const password = document.getElementById("signup-password").value;
 
-                saveUser({ username, email, password }, (success, message) => {
+                if (email !== confirmEmail) {
+                    alert("Email addresses do not match!");
+                    return;
+                }
+
+                saveUser({ username, email, password, confirmed: false }, (success, message) => {
                     alert(message);
-                    if (success) toggleForms();
+                    if (success) {
+                        alert("Please check your email to confirm your registration.");
+                        toggleForms();
+                    }
                 });
             });
 
@@ -151,9 +170,19 @@
 
                 const username = document.getElementById("login-username").value;
                 const password = document.getElementById("login-password").value;
+                const rememberMe = document.getElementById("remember-me").checked;
 
                 getUser(username, (user) => {
                     if (user && user.password === password) {
+                        if (!user.confirmed) {
+                            alert("Please confirm your email before logging in.");
+                            return;
+                        }
+
+                        if (rememberMe) {
+                            localStorage.setItem("rememberMe", JSON.stringify(user));
+                        }
+
                         alert("Login successful! Redirecting...");
                         window.location.href = "my-flight.html"; // Redirect to another page
                     } else {
@@ -173,7 +202,7 @@
     </script>
 </head>
 <body>
-    <div class="container">
+    <main class="container" role="main">
         <!-- Sign-Up Form -->
         <form id="signup-form">
             <h2>Sign Up</h2>
@@ -182,6 +211,9 @@
 
             <label for="signup-email">Email</label>
             <input type="email" id="signup-email" name="email" placeholder="Enter your email" required>
+
+            <label for="signup-confirm-email">Confirm Email</label>
+            <input type="email" id="signup-confirm-email" name="confirm-email" placeholder="Confirm your email" required>
 
             <label for="signup-password">Password</label>
             <input type="password" id="signup-password" name="password" placeholder="Create a password" required>
@@ -199,9 +231,14 @@
             <label for="login-password">Password</label>
             <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
 
+            <div class="remember-container">
+                <input type="checkbox" id="remember-me" name="remember-me">
+                <label for="remember-me">Remember me</label>
+            </div>
+
             <button type="submit" class="button">Log In</button>
             <p class="toggle-link" onclick="toggleForms()">Don't have an account? Sign up</p>
         </form>
-    </div>
+    </main>
 </body>
 </html>
