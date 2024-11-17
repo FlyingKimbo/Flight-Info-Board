@@ -1,4 +1,4 @@
-const { createClient } = require('@supabase/supabase-js');
+const { createClient } = import('@supabase/supabase-js');
 
 // Replace these with your actual Supabase project URL and anon key
 const supabaseUrl = 'https://yddzgledjhsvpriyrjkf.supabase.co'; // Your Supabase project URL
