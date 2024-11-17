@@ -63,14 +63,13 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // Function to check if a user is registered in Supabase
-        const isUserRegistered = async (callback) => {
-            try {
-                const username = localStorage.getItem("username"); // Assuming you store the username locally
-                if (!username) {
-                    callback(false);
-                    return;
-                }
+        const isUserRegistered = async () => {
+            const username = localStorage.getItem("username"); // Assuming you store the username locally
+            if (!username) {
+                return false;
+            }
 
+            try {
                 const { data, error } = await supabase
                     .from('users') // Your Supabase table name
                     .select('username')
@@ -78,32 +77,30 @@
 
                 if (error) {
                     console.error("Supabase error:", error);
-                    callback(false);
-                    return;
+                    return false;
                 }
 
-                // Check if the user exists
-                callback(data && data.length > 0);
+                return data && data.length > 0;
             } catch (err) {
                 console.error("Error checking Supabase user registration:", err);
-                callback(false);
+                return false;
             }
         };
 
         // Event listener for restricted button clicks
-        const handleRestrictedButtonClick = (event, targetPage) => {
+        const handleRestrictedButtonClick = async (event, targetPage) => {
             event.preventDefault(); // Prevent default link behavior
 
-            isUserRegistered((isRegistered) => {
-                if (isRegistered) {
-                    // Redirect to the target page
-                    window.location.href = targetPage;
-                } else {
-                    // Redirect to signup page
-                    alert("You are not signed up yet! Redirecting to the signup page...");
-                    window.location.href = "login-signup.html";
-                }
-            });
+            const isRegistered = await isUserRegistered();
+
+            if (isRegistered) {
+                // Redirect to the target page
+                window.location.href = targetPage;
+            } else {
+                // Redirect to signup page
+                alert("You are not signed up yet! Redirecting to the signup page...");
+                window.location.href = "login-signup.html";
+            }
         };
 
         // Event listener for unrestricted button clicks
@@ -121,7 +118,7 @@
             <a href="create-mission.html" class="button" onclick="handleRestrictedButtonClick(event, 'create-mission.html')">Create Mission</a>
             <a href="active-missions.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'active-missions.html')">Active Missions</a>
             <a href="about.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'about.html')">About</a>
-            <a href="login-signup.html" class="button" onclick="handleRestrictedButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
+            <a href="login-signup.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
         </div>
     </main>
 </body>
