@@ -62,8 +62,8 @@
     </div>
 
     <script>
-        const pilotID = "646428"; // Your SimBrief Pilot ID
-        const simBriefAPI = `https://www.simbrief.com/api/xml.fetcher.php?userid=${pilotID}`;
+        const username = "FastCheetah702"; // Your SimBrief Username
+        const simBriefAPI = `https://www.simbrief.com/api/xml.fetcher.php?username=${username}`;
 
         async function fetchFlightPlan() {
             try {
@@ -90,14 +90,13 @@
 
                 // Display flight plan details
                 document.getElementById("flight-plan").innerHTML = `
-                        <div class="details">
-                            <p><strong>Departure Airport:</strong> ${departure}</p>
-                            <p><strong>Destination Airport:</strong> ${destination}</p>
-                        </div>
+                        <p><strong>Departure Airport:</strong> ${departure}</p>
+                        <p><strong>Destination Airport:</strong> ${destination}</p>
                     `;
             } catch (error) {
                 // Display error message
                 document.getElementById("error").textContent = `Error: ${error.message}`;
+                console.error("Error fetching SimBrief flight plan:", error);
             }
         }
 
