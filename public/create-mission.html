@@ -1,252 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-45NLM76RVR"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-
-        gtag('config', 'G-45NLM76RVR');
-    </script>
-
-    <title>Flight Status</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Mission</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: rgb(100, 100, 100);
-            color: antiquewhite;
-            background-image: url('https://flight-info-board.vercel.app/Image/bkgrd.png');
-            background-size: cover; /* Ensures the image covers the entire background */
-            background-position: right center; /* Centers the image */
-            background-repeat: no-repeat; /* Prevents the image from repeating */
-            background-attachment: fixed; /* Makes the background image fixed in place */
-        }
-
-        #flightTable {
-            width: 100%;
-            border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
-            border-collapse: collapse; /* To collapse borders between cells */
-            position: relative;
-	    margin-top: 200px; /* Shifts the table down by 200px */
-        }
-
-        th, td {
-            text-align: center;
-            position: relative;
-            border: 2px solid rgba(0, 0, 0, 0.3); /* Black border with 50% opacity */
-            /* padding: 10px; /* Optional: adds padding for better readability */
-            background-color: rgba(100, 100, 100, 0.3); /* Semi-transparent background to ensure text readability */
-            font-weight: bold; /* Makes the text bold */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Adds a shadow effect to the text */
-        }
-
-        .cell-content {
+            background: url('https://flight-info-board.vercel.app/Image/indexBkgrd.jpg') no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            color: #fff;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            height: 100vh;
         }
 
-            .cell-content img {
-                vertical-align: middle; /* Aligns the image vertically in the middle */
-                margin-right: 10px; /* Optional: adds space between the image and text */
-                width: 100px; /* Ensures the image width is consistent */
-                height: auto; /* Maintains the aspect ratio of the image */
-                box-shadow: 4px 4px 10px rgba(0, 0, 0, 1); /* Adds a shadow effect to the image */
-            }
-
-        .blinking-boarding {
-            animation: blinker-boarding 4s linear infinite;
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
         }
 
-        @keyframes blinker-boarding {
-            50% {
-                background-color: saddlebrown; /* Boarding color */
-            }
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 20px;
+            font-size: 32px;
         }
 
-        .blinking-departed {
-            animation: blinker-departed 4s linear infinite;
-        }
-
-        @keyframes blinker-departed {
-            50% {
-                background-color: darkslateblue; /* Departed color */
-            }
-        }
-
-        .blinking-enroute {
-            animation: blinker-enroute 4s linear infinite;
-        }
-
-        @keyframes blinker-enroute {
-            50% {
-                background-color: darkgreen; /* Enroute color */
-            }
-        }
-
-        .blinking-delayed {
-            animation: blinker-delayed 1s linear infinite;
-        }
-
-        @keyframes blinker-delayed {
-            50% {
-                background-color: red; /* Delayed color */
-            }
-        }
-
-        .blinking-landed {
-            animation: blinker-landed 2s linear infinite;
-        }
-
-        @keyframes blinker-landed {
-            50% {
-                background-color: darkblue; /* Landed color */
-            }
-        }
-
-        .blinking-deboarding {
-            animation: blinker-deboarding 4s linear infinite;
-        }
-
-        @keyframes blinker-deboarding {
-            50% {
-                background-color: darkslategrey; /* Deboarding color */
-            }
-        }
-
-
-        @keyframes opacityCycle {
-            0% {
-                opacity: 0.6;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0.6;
-            }
-        }
-
-        .flipped {
-            transform: scaleX(-1);
-        }
-
-        th.sort-asc:after {
-            content: " ▲";
-        }
-
-        th.sort-desc:after {
-            content: " ▼";
-        }
-
-        .ete-bar-container {
-            position: relative;
-            height: 20px;
-            background-color: rgba(43, 47, 49, 0.5);
-            z-index: 1;
+        .details {
             text-align: left;
-            line-height: 20px;
-            overflow: hidden;
+            margin-top: 20px;
         }
 
-        .ete-bar {
-            height: 100%;
-            background-color: seagreen;
-            opacity: 0;
-            float: right;
-            z-index: 2;
+        .details p {
+            font-size: 16px;
+            margin: 5px 0;
         }
 
-        .ete-bar-text {
-            position: absolute;
-            left: 0; /* Initial position, will be updated via JS */
-            top: 0; /* Adjust as needed */
-            z-index: 4;
-            color: white;
-            white-space: nowrap; /* Prevents the text from breaking into multiple lines */
-        }
-
-        .aircraft-image {
-            position: absolute;
-            top: -10px; /* Adjust as needed to align with the green bar */
-            height: 30px; /* Adjust as needed */
-            z-index: 4;
-            transition: left 0.1s linear; /* Smooth movement */
-        }
-
-        .jetstream-image {
-            position: absolute;
-            top: 8px; /* Adjust as needed to align with the green bar */
-            height: 11px; /* Adjust as needed */
-            opacity: 0;
-            z-index: 3;
-        }
-
-        .cloud-image {
-            position: absolute;
-            top: -20px; /* Adjust as needed to align with the green bar */
-            height: 50px; /* Adjust as needed */
-            opacity: 0;
-            z-index: 5;
-            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely */
-        }
-
-        .precip-image {
-            position: absolute;
-            top: -20px; /* Adjust as needed to align with the green bar */
-            height: 120px; /* Adjust as needed */
-            transform: rotate(100deg); /* Rotate the GIF to a fixed value */
-            opacity: 0;
-            z-index: 5;
-            float: left;
-            mix-blend-mode: screen; /* Apply the blend mode */
-            filter: brightness(5); /* Increase brightness */
-            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely           <pre id="flight-data">Loading...</pre> <pre id="saved-flight-state">Loading...</pre>*/
+        .error {
+            color: red;
+            font-size: 16px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-  <main>
-    <!-- <pre id="flight-data">Loading...</pre>-->
-    <table id="flightTable" border='1'>
-        <tr>
-            <th onclick="sortTable(0)">Aircraft</th>
-            <th>Flight Number</th>
-            <th>Departure/Location</th>
-            <th onclick="sortTable(3)">Flight Status</th>
-            <th>Destination</th>
-        </tr>
-        <tr>
-            <td colspan="5" class="ete-bar-container">
-                <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-                <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
-                <img id="aircraft-image" class="aircraft-image" src="" alt="">
-                <img id="jetstream-image" class="jetstream-image" src="" alt="">
-                <img id="cloud-image" class="cloud-image" src="" alt="">
-                <img id="precip-image" class="precip-image flipped" src="" alt="Precipitation">
-            </td>
-        </tr>
-        <tbody id="flight-rows">
-            <tr>
-                <td class="flight-aircraft">
-                    <div class="cell-content">
-                        <img class="flight-image" src="" alt="Aircraft Image" style="width:100px;height:auto;box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);">
-                        <span>Aircraft Name</span>
+    <div class="container">
+        <h1>Create Mission</h1>
+        <div id="flight-plan">
+            <p>Loading flight plan...</p>
+        </div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        const pilotID = "646428"; // Your SimBrief Pilot ID
+        const simBriefAPI = `https://www.simbrief.com/api/xml.fetcher.php?userid=${pilotID}`;
+
+        async function fetchFlightPlan() {
+            try {
+                const response = await fetch(simBriefAPI);
+                if (!response.ok) {
+                    throw new Error("Unable to fetch the flight plan. Please check the Pilot ID or try again later.");
+                }
+
+                const xmlData = await response.text();
+
+                // Parse the XML
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlData, "application/xml");
+
+                // Check for errors in the response
+                if (xmlDoc.getElementsByTagName("error").length > 0) {
+                    throw new Error(xmlDoc.getElementsByTagName("error")[0].textContent);
+                }
+
+                // Extract flight plan details
+                const departure = xmlDoc.getElementsByTagName("filed_departure")[0]?.textContent || "N/A";
+                const destination = xmlDoc.getElementsByTagName("filed_destination")[0]?.textContent || "N/A";
+                const route = xmlDoc.getElementsByTagName("route")[0]?.textContent || "N/A";
+                const aircraft = xmlDoc.getElementsByTagName("aircraft_icao")[0]?.textContent || "N/A";
+                const flightTime = xmlDoc.getElementsByTagName("ete")[0]?.textContent || "N/A";
+
+                // Display flight plan details
+                document.getElementById("flight-plan").innerHTML = `
+                    <div class="details">
+                        <p><strong>Departure:</strong> ${departure}</p>
+                        <p><strong>Destination:</strong> ${destination}</p>
+                        <p><strong>Route:</strong> ${route}</p>
+                        <p><strong>Aircraft:</strong> ${aircraft}</p>
+                        <p><strong>Estimated Time Enroute (ETE):</strong> ${flightTime}</p>
                     </div>
-                </td>
-                <td class="flight-number">Flight Number</td>
-                <td class="flight-departure">Departure</td>
-                <td class="flight-status">-</td>
-                <td class="flight-destination">-</td>
-            </tr>
-        </tbody>
-    </table>
-    <script src="script.js"></script>
-  </main>
+                `;
+            } catch (error) {
+                // Display error message
+                document.getElementById("error").textContent = error.message;
+            }
+        }
+
+        // Fetch and display the flight plan on page load
+        fetchFlightPlan();
+    </script>
 </body>
 </html>
