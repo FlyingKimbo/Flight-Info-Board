@@ -15,12 +15,12 @@
             margin: 0;
             background: url('https://flight-info-board.vercel.app/Image/indexBkgrd.jpg') no-repeat center center fixed;
             background-size: cover;
-            color: #fff; /* Ensures text is readable on the image */
+            color: #fff;
         }
 
         .container {
             text-align: center;
-            background: rgba(0, 0, 0, 0.6); /* Adds a translucent background to the content */
+            background: rgba(0, 0, 0, 0.6);
             padding: 20px;
             border-radius: 10px;
         }
@@ -30,7 +30,7 @@
             color: #fff;
             font-size: 36px;
             margin-bottom: 20px;
-            text-transform: uppercase; /* Optional: Makes all text uppercase */
+            text-transform: uppercase;
         }
 
         .button-container {
@@ -51,45 +51,43 @@
             text-decoration: none;
         }
 
-            .button:hover {
-                background-color: #0056b3;
-            }
+        .button:hover {
+            background-color: #0056b3;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        let db;
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://yddzgledjhsvpriyrjkf.supabase.co'; // Replace with your Supabase project URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZHpnbGVkamhzdnByaXlyamtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3ODM3ODYsImV4cCI6MjA0NzM1OTc4Nn0.HdfYsCeq75colO5To6o_xtHD6uRGTz3VyJCv-VCstFc'; // Replace with your Supabase anon key
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Open the IndexedDB
-        const request = indexedDB.open("UserDatabase", 1);
+        // Function to check if a user is registered in Supabase
+        const isUserRegistered = async (callback) => {
+            try {
+                const username = localStorage.getItem("username"); // Assuming you store the username locally
+                if (!username) {
+                    callback(false);
+                    return;
+                }
 
-        request.onupgradeneeded = (event) => {
-            db = event.target.result;
-            db.createObjectStore("users", { keyPath: "username" });
-        };
+                const { data, error } = await supabase
+                    .from('users') // Your Supabase table name
+                    .select('username')
+                    .eq('username', username);
 
-        request.onsuccess = (event) => {
-            db = event.target.result;
-            console.log("Database opened successfully!");
-        };
+                if (error) {
+                    console.error("Supabase error:", error);
+                    callback(false);
+                    return;
+                }
 
-        request.onerror = (event) => {
-            console.error("Database error:", event.target.error);
-        };
-
-        // Function to check if a user is registered
-        const isUserRegistered = (callback) => {
-            const transaction = db.transaction(["users"], "readonly");
-            const objectStore = transaction.objectStore("users");
-
-            const request = objectStore.getAll(); // Get all registered users
-            request.onsuccess = (event) => {
-                const users = event.target.result;
-                callback(users.length > 0); // Check if any user exists
-            };
-
-            request.onerror = () => {
-                console.error("Error checking user registration.");
+                // Check if the user exists
+                callback(data && data.length > 0);
+            } catch (err) {
+                console.error("Error checking Supabase user registration:", err);
                 callback(false);
-            };
+            }
         };
 
         // Event listener for restricted button clicks
