@@ -134,5 +134,13 @@
         "flightNumber": "SIA701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus388.png"
+    },
+    {
+        "aircraft": "KIMBO706",
+        "departure": "EGLL  ",
+        "destination": "LFPO  ",
+        "flightNumber": "KIMBO706",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO706.png"
     }
 ]
