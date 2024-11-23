@@ -134,5 +134,13 @@
         "flightNumber": "SIA701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus388.png"
+    },
+    {
+        "aircraft": "Boeing737Max",
+        "departure": "LFPO  ",
+        "destination": "EKCH  ",
+        "flightNumber": "KIMBO701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing737Max.png"
     }
 ]
