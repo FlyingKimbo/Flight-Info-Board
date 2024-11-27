@@ -33,7 +33,7 @@
     },
     {
         "aircraft": "Concorde",
-        "departure": "LSZH Zurich ",
+        "departure": "LOWW Schwechat ",
         "destination": "-",
         "flightNumber": "KIMBO704",
         "flightStatus": "-",
@@ -135,12 +135,12 @@
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus388.png"
     },
-  {
-    "aircraft": "Boeing737Max",
-    "departure": "EKCH Kastrup",
-    "destination": "-",
-    "flightNumber": "KIMBO701",
-    "flightStatus": "-",
-    "image": "/Image/Aircraft_Type/Boeing737Max.png"
-  }
+    {
+        "aircraft": "Boeing737Max",
+        "departure": "EKCH Kastrup",
+        "destination": "-",
+        "flightNumber": "KIMBO701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing737Max.png"
+    }
 ]
