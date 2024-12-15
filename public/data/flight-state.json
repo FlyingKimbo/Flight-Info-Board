@@ -142,5 +142,13 @@
         "flightNumber": "KIMBO701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing737Max.png"
+    },
+    {
+        "aircraft": "Boeing787",
+        "departure": "LFPO Orly ",
+        "destination": "EKCH Kastrup ",
+        "flightNumber": "KoreanAir701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing787.png"
     }
 ]
