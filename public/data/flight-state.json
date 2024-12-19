@@ -150,5 +150,13 @@
         "flightNumber": "KoreanAir701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing787.png"
+    },
+    {
+        "aircraft": "Boeing787",
+        "departure": "ENGM Gardermoen ",
+        "destination": "EHAM Schiphol ",
+        "flightNumber": "KoreanAirexit",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing787.png"
     }
 ]
