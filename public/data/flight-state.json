@@ -1,7 +1,7 @@
 [
     {
         "aircraft": "Concorde",
-        "departure": "EGLL Heathrow ",
+        "departure": "EKCH Kastrup",
         "destination": "-",
         "flightNumber": "KIMBO706",
         "flightStatus": "-",
@@ -9,7 +9,7 @@
     },
     {
         "aircraft": "Boeing748",
-        "departure": "CYHZ Halifax International ",
+        "departure": "KJFK Kennedy Intl ",
         "destination": "-",
         "flightNumber": "KIMBO702",
         "flightStatus": "-",
@@ -33,7 +33,7 @@
     },
     {
         "aircraft": "Concorde",
-        "departure": "LFPO Orly",
+        "departure": "LEBL Josep Tarradellas/el Prat ",
         "destination": "-",
         "flightNumber": "KIMBO704",
         "flightStatus": "-",
@@ -145,7 +145,7 @@
     },
     {
         "aircraft": "Boeing787",
-        "departure": "LFPO Orly ",
+        "departure": "LIML Linate ",
         "destination": "-",
         "flightNumber": "KoreanAir701",
         "flightStatus": "-",
