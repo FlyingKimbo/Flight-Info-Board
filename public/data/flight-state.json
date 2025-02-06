@@ -150,5 +150,13 @@
         "flightNumber": "KoreanAir701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing787.png"
+    },
+    {
+        "aircraft": "KIMBO701",
+        "departure": "EFHK Vantaa ",
+        "destination": "EDDB Berlin Brandenburg ",
+        "flightNumber": "KIMBO701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO701.png"
     }
 ]
