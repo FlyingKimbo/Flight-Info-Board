@@ -150,5 +150,13 @@
         "flightNumber": "KoreanAir701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing787.png"
+    },
+    {
+        "aircraft": "KIMBO705",
+        "departure": "OMDB Dubai Intl ",
+        "destination": "HECA Cairo Intl ",
+        "flightNumber": "KIMBO705",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/KIMBO705.png"
     }
 ]
