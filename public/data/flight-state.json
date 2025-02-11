@@ -152,11 +152,11 @@
         "image": "/Image/Aircraft_Type/Boeing787.png"
     },
     {
-        "aircraft": "AirbusA330",
+        "aircraft": "Airbus330",
         "departure": "HECA Cairo Intl ",
         "destination": "LICJ Punta Raisi ",
         "flightNumber": "MAS12",
         "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/AirbusA330.png"
+        "image": "/Image/Aircraft_Type/Airbus330.png"
     }
 ]
