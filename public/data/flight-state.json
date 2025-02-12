@@ -158,5 +158,13 @@
         "flightNumber": "MAS12",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus330.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "KORD Chicago O&#039;hare Intl ",
+        "destination": "CYYZ Lester B Pearson Intl ",
+        "flightNumber": "KIMBO10",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
