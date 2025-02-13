@@ -161,8 +161,8 @@
     },
     {
         "aircraft": "Boeing773ER",
-        "departure": "KORD Chicago O&#039;hare Intl ",
-        "destination": "CYYZ Lester B Pearson Intl ",
+        "departure": "CYYZ Lester B Pearson Intl ",
+        "destination": "-",
         "flightNumber": "KIMBO10",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER.png"
