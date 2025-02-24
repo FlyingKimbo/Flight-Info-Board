@@ -160,7 +160,7 @@
         "image": "/Image/Aircraft_Type/Airbus330.png"
     },
     {
-        "aircraft": "Boeing773ER",
+        "aircraft": "Boeing773ER-SIA",
         "departure": "CYYZ Lester B Pearson Intl ",
         "destination": "-",
         "flightNumber": "KIMBO10",
