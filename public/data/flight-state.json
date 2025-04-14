@@ -166,5 +166,13 @@
         "flightNumber": "SIA06",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "AirbusA330",
+        "departure": "LICJ Punta Raisi ",
+        "destination": "LEBL Josep Tarradellas/el Prat ",
+        "flightNumber": "MAS12",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/AirbusA330.png"
     }
 ]
