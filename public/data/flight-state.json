@@ -147,7 +147,7 @@
         "aircraft": "Boeing787",
         "departure": "LSZH Zurich",
         "destination": "-",
-        "flightNumber": "KoreanAir701",
+        "flightNumber": "KAL701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing787.png"
     },
@@ -166,5 +166,13 @@
         "flightNumber": "SIA06",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "Boeing773ER",
+        "departure": "WSSS Changi ",
+        "destination": "WMKK Kuala Lumpur Intl - Sepang ",
+        "flightNumber": "KIMBO10",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
