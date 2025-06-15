@@ -160,19 +160,11 @@
         "image": "/Image/Aircraft_Type/Airbus330.png"
     },
     {
-        "aircraft": "Boeing773ER",
+        "aircraft": "Boeing773ER-SIA",
         "departure": "CYYZ Lester B Pearson Intl ",
         "destination": "-",
         "flightNumber": "SIA06",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
-        "departure": "WSSS Changi ",
-        "destination": "WMKK Kuala Lumpur Intl - Sepang ",
-        "flightNumber": "KIMBO10",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
     }
 ]
