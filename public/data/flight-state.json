@@ -160,7 +160,7 @@
         "image": "/Image/Aircraft_Type/Airbus330.png"
     },
     {
-        "aircraft": "Boeing773ER-SIA",
+        "aircraft": "Boeing773ER",
         "departure": "CYYZ Lester B Pearson Intl ",
         "destination": "-",
         "flightNumber": "SIA06",
