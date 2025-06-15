@@ -1,177 +1,17 @@
 [
     {
-        "aircraft": "Concorde",
-        "departure": "LFPO Orly ",
-        "destination": "-",
-        "flightNumber": "KIMBO706",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Boeing748",
-        "departure": "KDCA Ronald Reagan Washington Natl ",
-        "destination": "-",
-        "flightNumber": "KIMBO702",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing748.png"
-    },
-    {
-        "aircraft": "Longitude",
-        "departure": "KSAN San Diego Intl",
-        "destination": "-",
-        "flightNumber": "KIMBO701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Longitude.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "KLAS Reid Intl  ",
-        "destination": "-",
-        "flightNumber": "KIMBO703",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "EKCH Kastrup ",
-        "destination": "-",
-        "flightNumber": "KIMBO704",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Boeing748",
-        "departure": "EHAM Schiphol ",
-        "destination": "-",
-        "flightNumber": "KIMBO706",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing748.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "KATL Hartsfield/jackson Atlanta Int ",
-        "destination": "-",
-        "flightNumber": "KIMBO708",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "OMDB Dubai Intl ",
-        "destination": "-",
-        "flightNumber": "KIMBO705",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "SBGL Galeao-antonio Carlos Jobim In ",
-        "destination": "-",
-        "flightNumber": "KIMBO702",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Longitude",
-        "departure": "KPBI Palm Beach Intl ",
-        "destination": "-",
-        "flightNumber": "KIMBO704",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Longitude.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "VRMM Maldives",
-        "destination": "-",
-        "flightNumber": "KIMBO707",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Concorde",
-        "departure": "WSSS Changi ",
-        "destination": "-",
-        "flightNumber": "KIMBO710",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Concorde.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
-        "departure": "YBBN Brisbane International ",
-        "destination": "-",
-        "flightNumber": "KIMBO702",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
-        "departure": "KDEN Denver Intl ",
-        "destination": "-",
-        "flightNumber": "KIMBO703",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
-        "departure": "VHHH Hong Kong International ",
-        "destination": "-",
-        "flightNumber": "KIMBO704",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "Boeing773ER",
-        "departure": "EFHK Vantaa",
-        "destination": "-",
-        "flightNumber": "KIMBO701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER.png"
-    },
-    {
-        "aircraft": "Airbus388",
+        "aircraft": "Airbus330-MAS",
         "departure": "LFPO Orly",
-        "destination": "-",
-        "flightNumber": "SIA701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Airbus388.png"
-    },
-    {
-        "aircraft": "Boeing737Max",
-        "departure": "EDDL Duesseldorf ",
-        "destination": "-",
-        "flightNumber": "KIMBO701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing737Max.png"
-    },
-    {
-        "aircraft": "Boeing787",
-        "departure": "LSZH Zurich",
-        "destination": "-",
-        "flightNumber": "KAL701",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing787.png"
-    },
-    {
-        "aircraft": "Airbus330",
-        "departure": "EDDS Stuttgart ",
         "destination": "-",
         "flightNumber": "MAS12",
         "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Airbus330.png"
+        "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
     },
     {
         "aircraft": "Boeing773ER-SIA",
         "departure": "CYYZ Lester B Pearson Intl ",
         "destination": "-",
         "flightNumber": "SIA06",
-        "flightStatus": "-",
-        "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
-    },
-    {
-        "aircraft": "Boeing773ER-SIA",
-        "departure": "WSSS Changi ",
-        "destination": "-",
-        "flightNumber": "SIA10",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
     }
