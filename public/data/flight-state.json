@@ -17,8 +17,8 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "LFPO Orly ",
-        "destination": "EKCH Kastrup ",
+        "departure": "EKCH Kastrup ",
+        "destination": "-",
         "flightNumber": "BAW701",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
