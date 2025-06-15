@@ -170,7 +170,7 @@
     {
         "aircraft": "Boeing773ER-SIA",
         "departure": "WSSS Changi ",
-        "destination": "WMKK Kuala Lumpur Intl - Sepang ",
+        "destination": "-",
         "flightNumber": "SIA10",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
