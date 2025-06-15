@@ -14,5 +14,13 @@
         "flightNumber": "SIA06",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "Concorde-BAW",
+        "departure": "LFPO Orly ",
+        "destination": "EKCH Kastrup ",
+        "flightNumber": "BAW701",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     }
 ]
