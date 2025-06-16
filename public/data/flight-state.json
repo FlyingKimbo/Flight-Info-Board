@@ -30,5 +30,13 @@
         "flightNumber": "SIA10",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "Concorde-BAW",
+        "departure": "KPHL Kingsford Smith",
+        "destination": "KDEN Melbourne International",
+        "flightNumber": "BAW702",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     }
 ]
