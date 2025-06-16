@@ -25,8 +25,8 @@
     },
     {
         "aircraft": "Boeing773ER-SIA",
-        "departure": "YSSY Kingsford Smith ",
-        "destination": "YMML Melbourne Intl ",
+        "departure": "YMML Melbourne Intl ",
+        "destination": "-",
         "flightNumber": "SIA10",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
