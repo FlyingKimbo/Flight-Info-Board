@@ -41,8 +41,8 @@
     },
     {
         "aircraft": "Boeing748-KAL",
-        "departure": "RKSI Incheon Intl",
-        "destination": "RJTT Tokyo (haneda) Intl",
+        "departure": "RJTT Tokyo (haneda) International",
+        "destination": "-",
         "flightNumber": "KAL703",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing748-KAL.png"
