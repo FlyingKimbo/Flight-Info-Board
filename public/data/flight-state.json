@@ -46,5 +46,13 @@
         "flightNumber": "KAL703",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing748-KAL.png"
+    },
+    {
+        "aircraft": "Concorde-BAW",
+        "departure": "WMKK Tokyo (haneda) International",
+        "destination": "RCTP Taiwan Taoyuan International",
+        "flightNumber": "BAW703",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     }
 ]
