@@ -38,5 +38,13 @@
         "flightNumber": "BAW702",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
+    },
+    {
+        "aircraft": "Boeing748-KAL",
+        "departure": "RKSI Incheon Intl",
+        "destination": "RJTT Tokyo (haneda) Intl",
+        "flightNumber": "KAL703",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing748-KAL.png"
     }
 ]
