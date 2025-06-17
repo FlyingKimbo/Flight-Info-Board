@@ -49,8 +49,8 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "WMKK Kuala Lumpur Intl - Sepang",
-        "destination": "RCTP Taiwan Taoyuan International",
+        "departure": "RCTP Taiwan Taoyuan Intl",
+        "destination": "-",
         "flightNumber": "BAW703",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
