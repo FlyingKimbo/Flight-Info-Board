@@ -54,5 +54,13 @@
         "flightNumber": "BAW703",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
+    },
+    {
+        "aircraft": "Concorde-BAW",
+        "departure": "YMML Melbourne International",
+        "destination": "NZAA Auckland International",
+        "flightNumber": "BAW704",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     }
 ]
