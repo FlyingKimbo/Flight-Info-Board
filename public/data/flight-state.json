@@ -65,8 +65,8 @@
     },
     {
         "aircraft": "Boeing773ER-SIA",
-        "departure": "CYYZ Lester B Pearson Intl",
-        "destination": "KJFK John F Kennedy Intl",
+        "departure": "KBOS Logan Intl",
+        "destination": "-",
         "flightNumber": "SIA6",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
