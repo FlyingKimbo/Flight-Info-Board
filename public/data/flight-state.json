@@ -73,8 +73,8 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "KDEN Denver Intl",
-        "destination": "CYVR Vancouver Intl",
+        "departure": "CYVR Vancouver Intl",
+        "destination": "-",
         "flightNumber": "BAW705",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
