@@ -70,5 +70,13 @@
         "flightNumber": "SIA6",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "Concorde-BAW",
+        "departure": "KDEN Denver Intl",
+        "destination": "CYVR Vancouver Intl",
+        "flightNumber": "BAW705",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     }
 ]
