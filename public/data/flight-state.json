@@ -62,5 +62,13 @@
         "flightNumber": "BAW704",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
+    },
+    {
+        "aircraft": "Boeing773ER-SIA",
+        "departure": "CYYZ Lester B Pearson Intl",
+        "destination": "KJFK John F Kennedy Intl",
+        "flightNumber": "SIA6",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
     }
 ]
