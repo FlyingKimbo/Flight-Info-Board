@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let flightChannel = null; // Store channel reference globally
     let isInitialized = false;
 
+    import { createClient } from '@supabase/supabase-js';
     // ======================= SUPABASE INTEGRATION START =======================
     const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
