@@ -629,5 +629,4 @@ document.addEventListener("DOMContentLoaded", function () {
         return matchFound;
     }
 
-    initialize();
-});
+
