@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let GreenbarPercentage = 0;
 
     // ======================= SUPABASE INTEGRATION START =======================
+    import { createClient } from '@supabase/supabase-js'; // <-- THIS IS REQUIRED
+
     const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQxNjYzNSwiZXhwIjoyMDY1OTkyNjM1fQ.zPjsH88Vq4EgMc93ddYcGtsVQ5eGL1iopCHmn6r2VIk';
 
