@@ -183,30 +183,53 @@ document.addEventListener("DOMContentLoaded", function () {
     function checkFlightStatus() {
         fetch('/api/update-flight')
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json().catch(() => {
+                    throw new Error('Invalid JSON response');
+                });
             })
             .then(data => {
-                // Validate response structure
-                if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-                    throw new Error('Empty or invalid response data');
+                // More comprehensive validation
+                if (!data || typeof data !== 'object') {
+                    throw new Error('Response is not an object');
                 }
 
                 const currentFlightKey = Object.keys(data)[0];
                 if (!currentFlightKey) {
-                    throw new Error('No flight key found in response');
+                    console.warn('No active flights found - this may be normal');
+                    return; // Exit quietly if no flights
                 }
 
                 const flightData = data[currentFlightKey];
                 if (!flightData) {
-                    throw new Error('Missing flight data');
+                    throw new Error('Flight data missing');
                 }
 
-                // Rest of your processing logic...
+                // Process the flight data
+                const matchFound = updateFlightCells(
+                    flightData.CurrentFlight,
+                    flightData.FlightStatus,
+                    flightData.OBSArrDisplay
+                );
+
+                if (!matchFound) {
+                    window.location.reload();
+                }
+
+                if (flightData.FlightStatus === "Deboarding Completed") {
+                    removeBlinking(flightData.CurrentFlight);
+                    updateFlightCells(flightData.CurrentFlight, "-", "-", flightData.OBSArrDisplay);
+                } else {
+                    setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
+                }
             })
             .catch(error => {
-                console.error('Error checking flight status:', error);
-                setTimeout(checkFlightStatus, 5000);
+                if (!error.message.includes('No active flights')) {
+                    console.error('Error checking flight status:', error);
+                }
+                setTimeout(checkFlightStatus, 10000); // Longer delay between retries
             });
     }
 
