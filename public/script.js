@@ -179,22 +179,36 @@ document.addEventListener("DOMContentLoaded", function () {
             CreateNewRow(flightData);
         });
     }
-    /*
+    
+    // Modified to work with Supabase realtime updates
     function checkFlightStatus() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightData = data[currentFlightKey];
+        // First try to get data from Supabase
+        supabase
+            .from('flights')
+            .select('CurrentFlight, FlightStatus, OBSArrDisplay, OBSDepDisplay')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+            .then(({ data: flightData, error }) => {
+                if (error) throw error;
+
+                if (!flightData) {
+                    console.log('No active flights in database');
+                    return;
+                }
+
                 const currentFlightStatus = flightData.FlightStatus;
                 const currentFlight = flightData.CurrentFlight;
 
-                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                if (!matchFound) {
-                    //CreateNewRow(flightData);
-                    window.location.reload();
-                   
+                // Original logic preserved
+                let matchFound = updateFlightCells(
+                    currentFlight,
+                    currentFlightStatus,
+                    flightData.OBSArrDisplay
+                );
 
+                if (!matchFound) {
+                    window.location.reload();
                 }
 
                 if (currentFlightStatus === "Deboarding Completed") {
@@ -202,16 +216,59 @@ document.addEventListener("DOMContentLoaded", function () {
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 }
             })
             .catch(error => {
-                console.error('Error checking flight status:', error);
+                console.error('Flight status check error:', error);
             });
     }
 
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
-    */
+    // Better alternative - realtime subscription (recommended)
+    function setupFlightStatusUpdates() {
+        return supabase.channel('flight-status-updates')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'flights'
+            }, (payload) => {
+                const flightData = processFlightData(payload, 'realtime');
+
+                // Process status updates immediately
+                const status = flightData.FlightStatus;
+                const flight = flightData.CurrentFlight;
+
+                updateFlightCells(flight, status, flightData.OBSArrDisplay);
+
+                if (status === "Deboarding Completed") {
+                    removeBlinking(flight);
+                } else {
+                    setBlinking(flight, status);
+                }
+            })
+            .subscribe();
+    }
+
+    // Initialization
+    function initFlightMonitoring() {
+        // Primary method - realtime updates
+        const channel = setupFlightStatusUpdates();
+
+        // Fallback - periodic check (optional, can adjust interval)
+        const statusCheckInterval = setInterval(checkFlightStatus, 30000);
+
+        // Cleanup function
+        return () => {
+            channel.unsubscribe();
+            clearInterval(statusCheckInterval);
+        };
+    }
+
+    // Start monitoring
+    const cleanupFlightMonitoring = initFlightMonitoring();
+
+    // Later if needed:
+    // cleanupFlightMonitoring(); // To stop all monitoring
+    
     // Modified to use already-processed flight data
     function fetchInitialETE() {
         // Listen for the first realtime update that contains StartDistance
