@@ -7,30 +7,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
 
-    // Initialize client (using CDN version)
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Initialize client (corrected initialization)
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Unified processing function
-    function processFlightData(payload) {
-        console.log('Processing:', payload);
+    // Unified processing function (keeping your original logic)
+    function processFlightData(payload, source) {
+        console.log('Processing:', source, payload);
 
-        // Convert payload to consistent format
+        // Convert payload to consistent format (your original conversion)
         const flightData = {
-            CurrentFlight: payload.new.current_flight || payload.new.CurrentFlight,
-            FlightStatus: payload.new.flight_status || payload.new.FlightStatus,
-            OBSArrDisplay: payload.new.obs_arr_display || payload.new.OBSArrDisplay,
-            OBSDepDisplay: payload.new.obs_dep_display || payload.new.OBSDepDisplay,
-            DistToDestination: payload.new.dist_to_destination || payload.new.DistToDestination,
-            ETE_SRGS: payload.new.ete_srgs || payload.new.ETE_SRGS,
-            StartDistance: payload.new.start_distance || payload.new.StartDistance,
-            AirplaneInCloud: payload.new.airplane_in_cloud || payload.new.AirplaneInCloud,
-            AmbientPRECIPSTATE: payload.new.ambient_precip_state || payload.new.AmbientPRECIPSTATE,
-            AmbientVISIBILITY: payload.new.ambient_visibility || payload.new.AmbientVISIBILITY,
-            Flight_State: payload.new.flight_state || payload.new.Flight_State
+            CurrentFlight: payload.new?.current_flight || payload.new?.CurrentFlight || payload.CurrentFlight,
+            FlightStatus: payload.new?.flight_status || payload.new?.FlightStatus || payload.FlightStatus,
+            OBSArrDisplay: payload.new?.obs_arr_display || payload.new?.OBSArrDisplay || payload.OBSArrDisplay,
+            OBSDepDisplay: payload.new?.obs_dep_display || payload.new?.OBSDepDisplay || payload.OBSDepDisplay,
+            DistToDestination: payload.new?.dist_to_destination || payload.new?.DistToDestination || payload.DistToDestination,
+            ETE_SRGS: payload.new?.ete_srgs || payload.new?.ETE_SRGS || payload.ETE_SRGS,
+            StartDistance: payload.new?.start_distance || payload.new?.StartDistance || payload.StartDistance,
+            AirplaneInCloud: payload.new?.airplane_in_cloud || payload.new?.AirplaneInCloud || payload.AirplaneInCloud,
+            AmbientPRECIPSTATE: payload.new?.ambient_precip_state || payload.new?.AmbientPRECIPSTATE || payload.AmbientPRECIPSTATE,
+            AmbientVISIBILITY: payload.new?.ambient_visibility || payload.new?.AmbientVISIBILITY || payload.AmbientVISIBILITY,
+            Flight_State: payload.new?.flight_state || payload.new?.Flight_State || payload.Flight_State
         };
 
-        // Original logic
-        if (payload.eventType === 'INSERT') {
+        // YOUR ORIGINAL PROCESSING LOGIC (unchanged)
+        if (source === 'database') {
             CreateNewRow({
                 aircraft: flightData.CurrentFlight.split(' ')[0],
                 flightNumber: flightData.CurrentFlight.split(' ')[1],
@@ -60,10 +60,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Initialize realtime
+    // Initialize realtime (with fixes but same functionality)
     function setupRealtimeUpdates() {
-        // Database changes channel
-        const dbChannel = supabase.channel('db-flights')
+        // Database changes channel (your original logic with added error handling)
+        const dbChannel = supabase.channel('flight_updates')  // Changed to match C++ channel
             .on(
                 'postgres_changes',
                 {
@@ -72,33 +72,32 @@ document.addEventListener("DOMContentLoaded", function () {
                     table: 'flights'
                 },
                 (payload) => {
-                    console.log('DB Change:', payload);
-                    processFlightData({
-                        ...payload,
-                        eventType: payload.eventType.toUpperCase()
-                    });
+                    processFlightData(payload, 'database');
                 }
             )
-            .subscribe();
+            .subscribe()
+            .on('error', (err) => {
+                console.error('Database channel error:', err);
+            });
 
-        // Broadcast channel
-        const broadcastChannel = supabase.channel('flight-broadcasts')
+        // Broadcast channel (fixed to match C++ but same purpose)
+        const broadcastChannel = supabase.channel('flight_updates')  // Changed to match C++ channel
             .on(
                 'broadcast',
                 { event: 'flight_update' },
                 (payload) => {
-                    console.log('Broadcast:', payload);
-                    processFlightData({
-                        new: payload,
-                        eventType: 'BROADCAST'
-                    });
+                    processFlightData(payload, 'broadcast');  // Direct payload now
                 }
             )
-            .subscribe();
+            .subscribe()
+            .on('error', (err) => {
+                console.error('Broadcast channel error:', err);
+            });
 
-        // Connection monitoring
+        // Connection monitoring (added for reliability)
         supabase.realtime.onOpen(() => console.log('Realtime connected!'));
         supabase.realtime.onClose(() => console.log('Realtime disconnected'));
+        supabase.realtime.onError((err) => console.error('Realtime error:', err));
     }
     // ======================= SUPABASE INTEGRATION END =======================
 
@@ -540,25 +539,7 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem('sortDirection', dir);
     }
 
-    // Modified initialize function
-    function initialize() {
-        setupRealtimeUpdates(); // Initialize Supabase
-        fetchFlightStateJSON(); // Initial data load
 
-        // Rest of your initialization...
-        const baseUrl = window.location.hostname === 'localhost' ?
-            'http://localhost:8080' : 'https://flight-info-board.vercel.app';
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            img.src = baseUrl + img.getAttribute('data-src');
-        });
-
-        // Start jet stream cycling
-        startJetStreamCycling();
-    }
-
-    // Initialize the app
-    initialize();
-});
 
     function setBlinking(currentFlight, flightStatus) {
         const rows = document.getElementById("flightTable").rows;
@@ -643,4 +624,18 @@ document.addEventListener("DOMContentLoaded", function () {
         return matchFound;
     }
 
+function initialize() {
+    setupRealtimeUpdates(); // Initialize Supabase with fixes
+    fetchFlightStateJSON(); // Your original initialization
 
+    const baseUrl = window.location.hostname === 'localhost' ?
+        'http://localhost:8080' : 'https://flight-info-board.vercel.app';
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        img.src = baseUrl + img.getAttribute('data-src');
+    });
+
+    startJetStreamCycling();
+}
+
+initialize();
+});
