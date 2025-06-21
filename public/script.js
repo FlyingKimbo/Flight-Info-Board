@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             CreateNewRow(flightData);
         });
     }
-
+    /*
     function checkFlightStatus() {
         fetch('/api/update-flight')
             .then(response => response.json())
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
-
+    */
     // Modified to use already-processed flight data
     function fetchInitialETE() {
         // Listen for the first realtime update that contains StartDistance
