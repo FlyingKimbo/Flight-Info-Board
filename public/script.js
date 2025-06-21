@@ -13,6 +13,13 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialize client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+    function fetchInitialETE() {
+        // Default value that will be overwritten by first broadcast
+        initialETE = 1000;
+        console.log("Default ETE set, waiting for first broadcast...");
+    }
+
     // Unified processing function
     function processFlightData(payload, source) {
         try {
