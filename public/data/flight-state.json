@@ -81,8 +81,8 @@
     },
     {
         "aircraft": "Boeing773ER-SIA",
-        "departure": "KBOS Logan Intl",
-        "destination": "KPHL Philadelphia Intl",
+        "departure": "KPHL Philadelphia Intl",
+        "destination": "-",
         "flightNumber": "SIA12",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
