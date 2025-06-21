@@ -212,36 +212,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
+    // Modified to use already-processed flight data
     function fetchInitialETE() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Received data:', data); // Log the entire response to check its structure
+        // Listen for the first realtime update that contains StartDistance
+        const initialETESubscription = supabase.channel('initial-ete-fetch')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'flights'
+            }, (payload) => {
+                const flightData = processFlightData(payload, 'initialLoad');
 
-                // Extract the current flight key directly from the data structure
-                const currentFlightKey = Object.keys(data)[0]; // Assuming there's only one key
-                const flightData = data[currentFlightKey];
-                console.log('Flight data:', flightData);
+                if (flightData.StartDistance > 0) {
+                    initialETE = flightData.StartDistance;
+                    console.log('Initial ETE set from realtime update:', initialETE);
+                    initialETESubscription.unsubscribe(); // Stop listening after we get our value
 
-                if (!flightData) {
-                    console.error('Current flight data is missing.');
-                    return;
-                }
-
-                const startDistance = flightData.StartDistance;
-                console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
-
-                if (isNaN(startDistance) || startDistance <= 0) {
-                    console.error('Invalid initial ETE value.');
-                    initialETE = -1; // Ensure we don't use invalid initial values
-                } else {
-                    initialETE = startDistance;
-                    updateETEbars(currentFlightKey, flightData.CurrentFlight.split(' ')[0]);
+                    // Trigger first ETE update
+                    const [aircraftType, flightNumber] = flightData.CurrentFlight.split(' ');
+                    updateETEbars(flightNumber, aircraftType);
                 }
             })
-            .catch(error => {
-                console.error('Error fetching initial ETE data:', error);
-            });
+            .subscribe();
+
+        // Fallback: Query if no realtime update comes quickly
+        setTimeout(() => {
+            if (initialETE === -1) { // If we still haven't gotten a value
+                supabase
+                    .from('flights')
+                    .select('CurrentFlight, StartDistance')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single()
+                    .then(({ data }) => {
+                        if (data?.StartDistance > 0) {
+                            initialETE = data.StartDistance;
+                            console.log('Initial ETE set from direct query:', initialETE);
+                        }
+                    })
+                    .finally(() => initialETESubscription.unsubscribe());
+            }
+        }, 2000); // Wait 2 seconds before fallback
     }
 
     function fetchCurrentFlight() {
