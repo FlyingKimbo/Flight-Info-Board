@@ -15,35 +15,34 @@ document.addEventListener("DOMContentLoaded", function () {
     // Unified processing function
     function processFlightData(payload, source) {
         try {
-            // 1. Log raw payload structure
             console.group('[Realtime Debug] Source:', source);
             console.log('Raw payload:', JSON.parse(JSON.stringify(payload)));
 
-            // Convert payload to consistent format
+            // Handle both broadcast and database payloads
+            const receivedData = source === 'broadcast' ? payload.payload : payload.new || payload;
+
             const flightData = {
-                CurrentFlight: payload.new?.current_flight || payload.new?.CurrentFlight || payload.CurrentFlight,
-                FlightStatus: payload.new?.flight_status || payload.new?.FlightStatus || payload.FlightStatus,
-                OBSArrDisplay: payload.new?.obs_arr_display || payload.new?.OBSArrDisplay || payload.OBSArrDisplay,
-                OBSDepDisplay: payload.new?.obs_dep_display || payload.new?.OBSDepDisplay || payload.OBSDepDisplay,
-                DistToDestination: payload.new?.dist_to_destination || payload.new?.DistToDestination || payload.DistToDestination,
-                ETE_SRGS: payload.new?.ete_srgs || payload.new?.ETE_SRGS || payload.ETE_SRGS,
-                StartDistance: payload.new?.start_distance || payload.new?.StartDistance || payload.StartDistance,
-                AirplaneInCloud: payload.new?.airplane_in_cloud || payload.new?.AirplaneInCloud || payload.AirplaneInCloud,
-                AmbientPRECIPSTATE: payload.new?.ambient_precip_state || payload.new?.AmbientPRECIPSTATE || payload.AmbientPRECIPSTATE,
-                AmbientVISIBILITY: payload.new?.ambient_visibility || payload.new?.AmbientVISIBILITY || payload.AmbientVISIBILITY,
-                Flight_State: payload.new?.flight_state || payload.new?.Flight_State || payload.Flight_State
+                CurrentFlight: receivedData.current_flight || receivedData.CurrentFlight,
+                FlightStatus: receivedData.flight_status || receivedData.FlightStatus,
+                OBSArrDisplay: receivedData.obs_arr_display || receivedData.OBSArrDisplay,
+                OBSDepDisplay: receivedData.obs_dep_display || receivedData.OBSDepDisplay,
+                DistToDestination: receivedData.dist_to_destination || receivedData.DistToDestination,
+                ETE_SRGS: receivedData.ete_srgs || receivedData.ETE_SRGS,
+                StartDistance: receivedData.start_distance || receivedData.StartDistance,
+                AirplaneInCloud: receivedData.airplane_in_cloud || receivedData.AirplaneInCloud,
+                AmbientPRECIPSTATE: receivedData.ambient_precip_state || receivedData.AmbientPRECIPSTATE,
+                AmbientVISIBILITY: receivedData.ambient_visibility || receivedData.AmbientVISIBILITY,
+                Flight_State: receivedData.flight_state || receivedData.Flight_State
             };
 
-            // 3. Log processed data
             console.log('Processed flight data:', flightData);
             console.groupEnd();
 
-            // 4. Debug output to HTML (optional)
+            // Debug output
             const debugDiv = document.getElementById('debug-output') || createDebugOutput();
             debugDiv.innerHTML = `<pre>Last received: ${new Date().toISOString()}\n${JSON.stringify(flightData, null, 2)}</pre>`;
 
-
-            // Original processing logic
+            // Original processing logic (unchanged)
             if (source === 'database') {
                 CreateNewRow({
                     aircraft: flightData.CurrentFlight.split(' ')[0],
@@ -76,8 +75,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
             }
 
-
-
             return flightData;
 
         } catch (error) {
@@ -86,48 +83,58 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Initialize realtime
+    // Initialize realtime with enhanced error handling
     function setupRealtimeUpdates() {
         if (flightChannel) return;
 
         try {
-            // Single channel for both database changes and broadcasts
             flightChannel = supabase.channel('flight_updates')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*',
-                        schema: 'public',
-                        table: 'flights'
-                    },
-                    (payload) => {
-                        processFlightData(payload, 'database');
-                    }
-                )
-                .on(
-                    'broadcast',
-                    { event: 'flight_update' },
-                    (payload) => {
-                        processFlightData(payload, 'broadcast');
-                    }
-                )
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'flights'
+                }, (payload) => {
+                    processFlightData(payload, 'database');
+                })
+                .on('broadcast', { event: 'flight_update' }, (payload) => {
+                    // Special handling for C++ broadcast format
+                    console.log('C++ Broadcast received:', payload);
+                    processFlightData(payload, 'broadcast');
+                })
                 .subscribe((status, err) => {
                     if (err) {
-                        console.error('Realtime subscription error:', err);
-                        flightChannel = null;
-                    }
-                    if (status === 'SUBSCRIBED') {
+                        console.error('Subscription error:', err);
+                        // Auto-resubscribe after delay
+                        setTimeout(setupRealtimeUpdates, 5000);
+                    } else if (status === 'SUBSCRIBED') {
                         console.log('Realtime connected!');
-                    }
-                    if (status === 'CLOSED') {
-                        console.log('Realtime disconnected');
-                        flightChannel = null;
+                        // Initial data fetch for ETE calculation
+                        fetchInitialETE();
                     }
                 });
+
+            // WebSocket connection monitoring
+            supabase.realtime.onOpen(() => console.log('WebSocket connected'));
+            supabase.realtime.onClose(() => {
+                console.log('WebSocket disconnected - reconnecting');
+                flightChannel = null;
+                setTimeout(setupRealtimeUpdates, 1000);
+            });
+            supabase.realtime.onError((err) => console.error('WebSocket error:', err));
+
         } catch (error) {
-            console.error('Error setting up realtime:', error);
-            flightChannel = null;
+            console.error('Realtime setup error:', error);
+            setTimeout(setupRealtimeUpdates, 5000);
         }
+    }
+
+    // Helper function for visible debug output
+    function createDebugOutput() {
+        const div = document.createElement('div');
+        div.id = 'debug-output';
+        div.style = 'position:fixed; bottom:0; right:0; background:#fff; padding:10px; z-index:9999; border:1px solid red; max-height:200px; overflow:auto;';
+        document.body.appendChild(div);
+        return div;
     }
 
     // ======================= SUPABASE INTEGRATION END =======================
@@ -208,6 +215,14 @@ document.addEventListener("DOMContentLoaded", function () {
             .single()
             .then(({ data: flightData, error }) => {
                 if (error) throw error;
+
+                // Process data (map back to camelCase if needed)
+                const processedData = {
+                    CurrentFlight: flightData.current_flight,
+                    FlightStatus: flightData.flight_status,
+                    OBSArrDisplay: flightData.obs_arr_display,
+                    OBSDepDisplay: flightData.obs_dep_display
+                };
 
                 if (!flightData) {
                     console.log('No active flights in database');
