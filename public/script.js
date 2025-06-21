@@ -182,56 +182,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function checkFlightStatus() {
         fetch('/api/update-flight')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json().catch(() => {
-                    throw new Error('Invalid JSON response');
-                });
-            })
+            .then(response => response.json())
             .then(data => {
-                // More comprehensive validation
-                if (!data || typeof data !== 'object') {
-                    throw new Error('Response is not an object');
-                }
-
                 const currentFlightKey = Object.keys(data)[0];
-                if (!currentFlightKey) {
-                    console.warn('No active flights found - this may be normal');
-                    return; // Exit quietly if no flights
-                }
-
                 const flightData = data[currentFlightKey];
-                if (!flightData) {
-                    throw new Error('Flight data missing');
-                }
+                const currentFlightStatus = flightData.FlightStatus;
+                const currentFlight = flightData.CurrentFlight;
 
-                // Process the flight data
-                const matchFound = updateFlightCells(
-                    flightData.CurrentFlight,
-                    flightData.FlightStatus,
-                    flightData.OBSArrDisplay
-                );
-
+                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 if (!matchFound) {
+                    //CreateNewRow(flightData);
                     window.location.reload();
+
+
                 }
 
-                if (flightData.FlightStatus === "Deboarding Completed") {
-                    removeBlinking(flightData.CurrentFlight);
-                    updateFlightCells(flightData.CurrentFlight, "-", "-", flightData.OBSArrDisplay);
+                if (currentFlightStatus === "Deboarding Completed") {
+                    removeBlinking(currentFlight);
+                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
-                    setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
+                    setBlinking(currentFlight, currentFlightStatus);
+                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 }
             })
             .catch(error => {
-                if (!error.message.includes('No active flights')) {
-                    console.error('Error checking flight status:', error);
-                }
-                setTimeout(checkFlightStatus, 10000); // Longer delay between retries
+                console.error('Error checking flight status:', error);
             });
     }
+
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
