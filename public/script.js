@@ -654,7 +654,7 @@ document.addEventListener("DOMContentLoaded", function () {
         startJetStreamCycling();
 
         // Start periodic checks
-        setInterval(checkFlightStatus, 5000);
+        //setInterval(checkFlightStatus, 5000);
         setInterval(fetchFlightData, 5000);
     }
 
