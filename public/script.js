@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
    
 
     const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQxNjYzNSwiZXhwIjoyMDY1OTkyNjM1fQ.zPjsH88Vq4EgMc93ddYcGtsVQ5eGL1iopCHmn6r2VIk';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
 
     // Initialize Supabase client
     const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);

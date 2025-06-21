@@ -1,1 +1,18 @@
 https://jwwaxqfckxmppsncvfbo.supabase.co/realtime/v1/broadcast
+
+
+
+
+
+curl -X POST "https://jwwaxqfckxmppsncvfbo.supabase.co/realtime/v1/broadcast" ^
+-H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDQxNjYzNSwiZXhwIjoyMDY1OTkyNjM1fQ.zPjsH88Vq4EgMc93ddYcGtsVQ5eGL1iopCHmn6r2VIk" ^
+-H "Content-Type: application/json" ^
+-d "{\"event\":\"test\", \"payload\":{\"message\":\"hello\"}}"
+
+Invoke-RestMethod -Uri "https://jwwaxqfckxmppsncvfbo.supabase.co/realtime/v1/broadcast" `
+-Method POST `
+-Headers @{
+  "apikey" = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo";  # Replace with your anon key
+  "Content-Type" = "application/json"
+} `
+-Body '{"event":"test", "payload":{"message":"hello"}}'
