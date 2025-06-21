@@ -2,103 +2,118 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
+    let flightChannel = null; // Store channel reference globally
+    let isInitialized = false;
 
     // ======================= SUPABASE INTEGRATION START =======================
     const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
 
-    // Initialize client (corrected initialization)
+    // Initialize client
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Unified processing function (keeping your original logic)
+    // Unified processing function
     function processFlightData(payload, source) {
-        console.log('Processing:', source, payload);
+        try {
+            console.log('Processing:', source, payload);
 
-        // Convert payload to consistent format (your original conversion)
-        const flightData = {
-            CurrentFlight: payload.new?.current_flight || payload.new?.CurrentFlight || payload.CurrentFlight,
-            FlightStatus: payload.new?.flight_status || payload.new?.FlightStatus || payload.FlightStatus,
-            OBSArrDisplay: payload.new?.obs_arr_display || payload.new?.OBSArrDisplay || payload.OBSArrDisplay,
-            OBSDepDisplay: payload.new?.obs_dep_display || payload.new?.OBSDepDisplay || payload.OBSDepDisplay,
-            DistToDestination: payload.new?.dist_to_destination || payload.new?.DistToDestination || payload.DistToDestination,
-            ETE_SRGS: payload.new?.ete_srgs || payload.new?.ETE_SRGS || payload.ETE_SRGS,
-            StartDistance: payload.new?.start_distance || payload.new?.StartDistance || payload.StartDistance,
-            AirplaneInCloud: payload.new?.airplane_in_cloud || payload.new?.AirplaneInCloud || payload.AirplaneInCloud,
-            AmbientPRECIPSTATE: payload.new?.ambient_precip_state || payload.new?.AmbientPRECIPSTATE || payload.AmbientPRECIPSTATE,
-            AmbientVISIBILITY: payload.new?.ambient_visibility || payload.new?.AmbientVISIBILITY || payload.AmbientVISIBILITY,
-            Flight_State: payload.new?.flight_state || payload.new?.Flight_State || payload.Flight_State
-        };
+            // Convert payload to consistent format
+            const flightData = {
+                CurrentFlight: payload.new?.current_flight || payload.new?.CurrentFlight || payload.CurrentFlight,
+                FlightStatus: payload.new?.flight_status || payload.new?.FlightStatus || payload.FlightStatus,
+                OBSArrDisplay: payload.new?.obs_arr_display || payload.new?.OBSArrDisplay || payload.OBSArrDisplay,
+                OBSDepDisplay: payload.new?.obs_dep_display || payload.new?.OBSDepDisplay || payload.OBSDepDisplay,
+                DistToDestination: payload.new?.dist_to_destination || payload.new?.DistToDestination || payload.DistToDestination,
+                ETE_SRGS: payload.new?.ete_srgs || payload.new?.ETE_SRGS || payload.ETE_SRGS,
+                StartDistance: payload.new?.start_distance || payload.new?.StartDistance || payload.StartDistance,
+                AirplaneInCloud: payload.new?.airplane_in_cloud || payload.new?.AirplaneInCloud || payload.AirplaneInCloud,
+                AmbientPRECIPSTATE: payload.new?.ambient_precip_state || payload.new?.AmbientPRECIPSTATE || payload.AmbientPRECIPSTATE,
+                AmbientVISIBILITY: payload.new?.ambient_visibility || payload.new?.AmbientVISIBILITY || payload.AmbientVISIBILITY,
+                Flight_State: payload.new?.flight_state || payload.new?.Flight_State || payload.Flight_State
+            };
 
-        // YOUR ORIGINAL PROCESSING LOGIC (unchanged)
-        if (source === 'database') {
-            CreateNewRow({
-                aircraft: flightData.CurrentFlight.split(' ')[0],
-                flightNumber: flightData.CurrentFlight.split(' ')[1],
-                departure: flightData.OBSDepDisplay,
-                destination: flightData.OBSArrDisplay,
-                flightStatus: flightData.FlightStatus,
-                image: `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`
-            });
-        }
+            // Original processing logic
+            if (source === 'database') {
+                CreateNewRow({
+                    aircraft: flightData.CurrentFlight.split(' ')[0],
+                    flightNumber: flightData.CurrentFlight.split(' ')[1],
+                    departure: flightData.OBSDepDisplay,
+                    destination: flightData.OBSArrDisplay,
+                    flightStatus: flightData.FlightStatus,
+                    image: `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`
+                });
+            }
 
-        updateFlightCells(
-            flightData.CurrentFlight,
-            flightData.FlightStatus,
-            flightData.OBSArrDisplay,
-            flightData.OBSDepDisplay
-        );
+            updateFlightCells(
+                flightData.CurrentFlight,
+                flightData.FlightStatus,
+                flightData.OBSArrDisplay,
+                flightData.OBSDepDisplay
+            );
 
-        if (initialETE === -1 && flightData.StartDistance > 0) {
-            initialETE = flightData.StartDistance;
-        }
-        updateETEbars(flightData.CurrentFlight.split(' ')[1], flightData.CurrentFlight.split(' ')[0]);
+            if (initialETE === -1 && flightData.StartDistance > 0) {
+                initialETE = flightData.StartDistance;
+            }
 
-        if (flightData.FlightStatus === "Deboarding Completed") {
-            removeBlinking(flightData.CurrentFlight);
-        } else {
-            setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
+            if (flightData.CurrentFlight) {
+                updateETEbars(flightData.CurrentFlight.split(' ')[1], flightData.CurrentFlight.split(' ')[0]);
+            }
+
+            if (flightData.FlightStatus === "Deboarding Completed") {
+                removeBlinking(flightData.CurrentFlight);
+            } else if (flightData.FlightStatus) {
+                setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
+            }
+        } catch (error) {
+            console.error('Error processing flight data:', error);
         }
     }
 
-    // Initialize realtime (with fixes but same functionality)
+    // Initialize realtime
     function setupRealtimeUpdates() {
-        // Database changes channel (your original logic with added error handling)
-        const dbChannel = supabase.channel('flight_updates')  // Changed to match C++ channel
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'flights'
-                },
-                (payload) => {
-                    processFlightData(payload, 'database');
-                }
-            )
-            .subscribe()
-            .on('error', (err) => {
-                console.error('Database channel error:', err);
+        if (flightChannel) return;
+
+        try {
+            // Single channel for both database changes and broadcasts
+            flightChannel = supabase.channel('flight_updates')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'flights'
+                    },
+                    (payload) => {
+                        processFlightData(payload, 'database');
+                    }
+                )
+                .on(
+                    'broadcast',
+                    { event: 'flight_update' },
+                    (payload) => {
+                        processFlightData(payload, 'broadcast');
+                    }
+                )
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('Realtime connected!');
+                    }
+                });
+
+            supabase.realtime.onClose(() => {
+                console.log('Realtime disconnected');
+                flightChannel = null;
             });
 
-        // Broadcast channel (fixed to match C++ but same purpose)
-        const broadcastChannel = supabase.channel('flight_updates')  // Changed to match C++ channel
-            .on(
-                'broadcast',
-                { event: 'flight_update' },
-                (payload) => {
-                    processFlightData(payload, 'broadcast');  // Direct payload now
-                }
-            )
-            .subscribe()
-            .on('error', (err) => {
-                console.error('Broadcast channel error:', err);
+            supabase.realtime.onError((error) => {
+                console.error('Realtime error:', error);
+                flightChannel = null;
             });
-
-        // Connection monitoring (added for reliability)
-        supabase.realtime.onOpen(() => console.log('Realtime connected!'));
-        supabase.realtime.onClose(() => console.log('Realtime disconnected'));
-        supabase.realtime.onError((err) => console.error('Realtime error:', err));
+        } catch (error) {
+            console.error('Error setting up realtime:', error);
+        }
     }
+
     // ======================= SUPABASE INTEGRATION END =======================
 
     function CreateNewRow(flightData) {
@@ -168,35 +183,45 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function checkFlightStatus() {
         fetch('/api/update-flight')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightData = data[currentFlightKey];
-                const currentFlightStatus = flightData.FlightStatus;
-                const currentFlight = flightData.CurrentFlight;
-
-                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                if (!matchFound) {
-                    //CreateNewRow(flightData);
-                    window.location.reload();
-                   
-
+                if (!data || Object.keys(data).length === 0) {
+                    throw new Error('Empty response data');
                 }
 
-                if (currentFlightStatus === "Deboarding Completed") {
-                    removeBlinking(currentFlight);
-                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
+                const currentFlightKey = Object.keys(data)[0];
+                const flightData = data[currentFlightKey];
+
+                if (!flightData) {
+                    throw new Error('Missing flight data');
+                }
+
+                const matchFound = updateFlightCells(
+                    flightData.CurrentFlight,
+                    flightData.FlightStatus,
+                    flightData.OBSArrDisplay
+                );
+
+                if (!matchFound) {
+                    window.location.reload();
+                }
+
+                if (flightData.FlightStatus === "Deboarding Completed") {
+                    removeBlinking(flightData.CurrentFlight);
+                    updateFlightCells(flightData.CurrentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
-                    setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                    setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
                 }
             })
             .catch(error => {
                 console.error('Error checking flight status:', error);
+                // Retry after delay
+                setTimeout(checkFlightStatus, 5000);
             });
     }
-
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
@@ -245,20 +270,23 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    async function fetchFlightData() {
-        try {
-            const response = await fetch('/api/update-flight');
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Received data:', data);
-                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
-            } else {
-                document.getElementById('flight-data').textContent = 'Error fetching data';
-            }
-        } catch (error) {
-            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
-        }
+    function fetchFlightData() {
+        const displayElement = document.getElementById('flight-data');
+        if (!displayElement) return;
+
+        fetch('/api/update-flight')
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                displayElement.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                displayElement.textContent = 'Error: ' + error.message;
+            });
     }
+
 
     // Fetch data every 5 seconds
     setInterval(fetchFlightData, 5000);
@@ -624,18 +652,26 @@ document.addEventListener("DOMContentLoaded", function () {
         return matchFound;
     }
 
-function initialize() {
-    setupRealtimeUpdates(); // Initialize Supabase with fixes
-    fetchFlightStateJSON(); // Your original initialization
+    function initialize() {
+        if (isInitialized) return;
+        isInitialized = true;
 
-    const baseUrl = window.location.hostname === 'localhost' ?
-        'http://localhost:8080' : 'https://flight-info-board.vercel.app';
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        img.src = baseUrl + img.getAttribute('data-src');
-    });
+        setupRealtimeUpdates();
+        fetchFlightStateJSON();
 
-    startJetStreamCycling();
-}
+        const baseUrl = window.location.hostname === 'localhost' ?
+            'http://localhost:8080' : 'https://flight-info-board.vercel.app';
 
-initialize();
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            img.src = baseUrl + img.getAttribute('data-src');
+        });
+
+        startJetStreamCycling();
+
+        // Start periodic checks
+        setInterval(checkFlightStatus, 5000);
+        setInterval(fetchFlightData, 5000);
+    }
+
+    initialize();
 });
