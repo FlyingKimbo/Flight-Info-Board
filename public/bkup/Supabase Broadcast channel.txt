@@ -1,0 +1,1 @@
+https://jwwaxqfckxmppsncvfbo.supabase.co/realtime/v1/broadcast
