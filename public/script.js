@@ -113,15 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 });
 
-            // FIXED WebSocket connection monitoring
-            const socket = supabase.realtime.getSocket();
-            socket.onopen = () => console.log('WebSocket connected');
-            socket.onclose = () => {
-                console.log('WebSocket disconnected - reconnecting');
-                flightChannel = null;
-                setTimeout(setupRealtimeUpdates, 1000);
-            };
-            socket.onerror = (err) => console.error('WebSocket error:', err);
+            
 
         } catch (error) {
             console.error('Realtime setup error:', error);
@@ -220,6 +212,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         table.querySelector('tbody').appendChild(newRow);
+    }
+
+    function startJetStreamCycling() {
+        let imageIndex = 1;
+        setInterval(() => {
+            const jetStreamImage = document.getElementById('jetstream-image');
+            if (jetStreamImage) {
+                jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+                imageIndex = (imageIndex % 5) + 1; // Cycle through 1 to 5
+            }
+        }, 20); // Change image every 20ms
     }
 
     function updateETEbars(flightData) {
