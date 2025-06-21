@@ -112,24 +112,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     processFlightData(payload, 'database');
                 })
                 .on('broadcast', { event: 'flight_update' }, (payload) => {
-                    // Special handling for C++ broadcast format
-                    console.log('C++ Broadcast received:', payload);
+                    console.log("RAW BROADCAST:", payload); // <-- ONLY ADDED THIS LINE
                     processFlightData(payload, 'broadcast');
                 })
                 .subscribe((status, err) => {
                     if (err) {
                         console.error('Subscription error:', err);
-                        // Auto-resubscribe after delay
                         setTimeout(setupRealtimeUpdates, 5000);
                     } else if (status === 'SUBSCRIBED') {
                         console.log('Realtime connected!');
-                        // Initial data fetch for ETE calculation
-                        //fetchInitialETE();
                     }
                 });
-
-            
-
         } catch (error) {
             console.error('Realtime setup error:', error);
             setTimeout(setupRealtimeUpdates, 5000);
