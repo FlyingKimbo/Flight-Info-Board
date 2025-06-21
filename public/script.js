@@ -357,116 +357,101 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 20); // Change image every 20ms
     }
 
-    function updateETEbars(currentFlightKey, aircraftType) {
+    function updateETEbars(flightData) {
         if (initialETE === -1) {
             return;
         }
 
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const flightData = data[currentFlightKey];
-                console.log('Flight data for update:', flightData);
+        // No API fetch needed - flightData comes directly from Supabase
+        console.log('Flight data for update:', flightData);
 
-                if (!flightData) {
-                    console.error('Current flight data is missing.');
-                    return;
+        if (!flightData) {
+            console.error('Current flight data is missing.');
+            return;
+        }
+
+        const eteData = flightData.DistToDestination;
+        const eteBar = document.getElementById('ete-bar');
+        const aircraftImage = document.getElementById('aircraft-image');
+        const eteText = document.getElementById('ete-bar-text');
+        const jetStreamImage = document.getElementById('jetstream-image');
+        const cloudImage = document.getElementById('cloud-image');
+        const precipImage = document.getElementById('precip-image');
+
+        if (eteBar && eteData !== undefined) {
+            const ete = eteData;
+            const etePercentage = Math.min((ete / initialETE) * 100, 100);
+            GreenbarPercentage = etePercentage;
+            console.log('ETE Percentage:', etePercentage);
+            eteBar.style.width = etePercentage + '%';
+            eteBar.style.opacity = 1;
+
+            // Directly use flightData instead of fetchAirplaneInCloud()
+            if (flightData.AirplaneInCloud === 1) {
+                if (!cloudOpacityInterval) {
+                    startCloudOpacityCycling(cloudImage);
+                    cloudImage.style.opacity = 1;
                 }
+            } else {
+                clearInterval(cloudOpacityInterval);
+                cloudOpacityInterval = null;
+                cloudImage.style.opacity = 0;
+            }
 
-                const eteData = flightData.DistToDestination;
-                const eteBar = document.getElementById('ete-bar');
-                const aircraftImage = document.getElementById('aircraft-image');
-                const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                const jetStreamImage = document.getElementById('jetstream-image');
-                const cloudImage = document.getElementById('cloud-image');
-                const precipImage = document.getElementById('precip-image'); // New precipitation image element
+            switch (true) {
+                case (etePercentage > 0 && etePercentage <= 100):
+                    eteText.style.opacity = 1;
+                    aircraftImage.style.opacity = 1;
+                    updatePositions();
 
-                if (eteBar && eteData !== undefined) {
-                    const ete = eteData;
-                    const etePercentage = Math.min((ete / initialETE) * 100, 100);
-                    GreenbarPercentage = etePercentage;
-                    console.log('ETE Percentage:', etePercentage);
-                    eteBar.style.width = etePercentage + '%';
-                    eteBar.style.opacity = 1; // Ensure the green bar is always visible
-
-                    fetchAirplaneInCloud().then(airplaneInCloud => {
-                        if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
-                            if (!cloudOpacityInterval) {
-                                startCloudOpacityCycling(cloudImage);
-                                cloudImage.style.opacity = 1;
-                            }
-                        } else {
-                            clearInterval(cloudOpacityInterval);
-                            cloudOpacityInterval = null;
-                            cloudImage.style.opacity = 0;
+                    // Directly use flightData instead of fetchFlight_State()
+                    if (flightData.Flight_State) {
+                        if (flightData.Flight_State.includes('Landed')) {
+                            jetStreamImage.style.opacity = 0;
+                        } else if (flightData.Flight_State.includes('Airborne')) {
+                            updatePositions();
+                            jetStreamImage.style.opacity = 1;
                         }
-                    });
-
-                    switch (true) {
-                        case (etePercentage > 0 && etePercentage <= 100):
-                            eteText.style.opacity = 1;
-                            aircraftImage.style.opacity = 1;
-                            updatePositions();
-
-                            fetchFlight_State().then(flightState => {
-                                if (flightState) {
-                                    if (flightState.includes('Landed')) {
-                                        jetStreamImage.style.opacity = 0;
-                                    } else if (flightState.includes('Airborne')) {
-                                        updatePositions();
-                                        jetStreamImage.style.opacity = 1;
-                                    }
-                                }
-                            });
-                            break;
-                        case (etePercentage == 0):
-                            eteText.style.opacity = 1;
-                            aircraftImage.style.opacity = 1;
-                            updatePositions();
-                            jetStreamImage.style.opacity = 0;
-
-                            break;
-                        case (etePercentage < 0):
-                            eteText.style.opacity = 0;
-                            aircraftImage.style.opacity = 0;
-                            updatePositions();
-                            jetStreamImage.style.opacity = 0;
-                            break;
-                        default:
-                            // Handle default case if needed
-                            break;
                     }
+                    break;
+                case (etePercentage == 0):
+                    eteText.style.opacity = 1;
+                    aircraftImage.style.opacity = 1;
+                    updatePositions();
+                    jetStreamImage.style.opacity = 0;
+                    break;
+                case (etePercentage < 0):
+                    eteText.style.opacity = 0;
+                    aircraftImage.style.opacity = 0;
+                    updatePositions();
+                    jetStreamImage.style.opacity = 0;
+                    break;
+                default:
+                    break;
+            }
 
-                    aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
-                    cloudImage.src = `/Image/Cloud/Cloud1.png`;
+            const [aircraftType] = flightData.CurrentFlight.split(' ');
+            aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+            cloudImage.src = `/Image/Cloud/Cloud1.png`;
 
-                    const distanceText = flightData.DistToDestination + " KM";
-                    const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
-                    eteText.textContent = combinedText; // Update text content with combined ETE and Distance
+            const distanceText = flightData.DistToDestination + " KM";
+            const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
+            eteText.textContent = combinedText;
 
-                    const precipState = flightData.AmbientPRECIPSTATE;
-                    if (precipState === 4) {
-                        precipImage.src = '/Image/Precip/rain1.gif';
-                        precipImage.style.opacity = 1;
-                    } else if (precipState === 8) {
-                        precipImage.src = '/Image/Precip/snow1.gif';
-                        precipImage.style.opacity = 1;
-                    } else {
-                        precipImage.style.opacity = 0;
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching ETE data:', error);
-                const eteBar = document.getElementById('ete-bar');
-                const aircraftImage = document.getElementById('aircraft-image');
-                const eteText = document.getElementById('ete-bar-text'); // ETE text element
-                eteBar.style.width = '0%';
-                eteBar.style.opacity = 0;
-                aircraftImage.style.opacity = 0;
-                eteText.style.opacity = 0;
-            });
+            const precipState = flightData.AmbientPRECIPSTATE;
+            if (precipState === 4) {
+                precipImage.src = '/Image/Precip/rain1.gif';
+                precipImage.style.opacity = 1;
+            } else if (precipState === 8) {
+                precipImage.src = '/Image/Precip/snow1.gif';
+                precipImage.style.opacity = 1;
+            } else {
+                precipImage.style.opacity = 0;
+            }
+        }
     }
+
+    // Error handling now happens in the calling function
 
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
