@@ -12,63 +12,82 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Realtime subscription function
     function setupRealtimeUpdates() {
-        const channel = supabase.channel('custom-all-channel')
+        // Create two separate channels: one for database changes, one for broadcasts
+        const dbChannel = supabase.channel('db-changes-channel')
             .on(
                 'postgres_changes',
                 { event: '*', schema: 'public', table: 'flights' },
                 (payload) => {
-                    console.log('Realtime update received:', payload);
-
-                    // Convert Supabase payload to your existing format
-                    const flightData = {
-                        CurrentFlight: payload.new.current_flight,
-                        FlightStatus: payload.new.flight_status,
-                        OBSArrDisplay: payload.new.obs_arr_display,
-                        OBSDepDisplay: payload.new.obs_dep_display,
-                        DistToDestination: payload.new.dist_to_destination,
-                        ETE_SRGS: payload.new.ete_srgs,
-                        StartDistance: payload.new.start_distance,
-                        AirplaneInCloud: payload.new.airplane_in_cloud,
-                        AmbientPRECIPSTATE: payload.new.ambient_precip_state,
-                        AmbientVISIBILITY: payload.new.ambient_visibility,
-                        Flight_State: payload.new.flight_state
-                    };
-
-                    // Update table if new flight added
-                    if (payload.eventType === 'INSERT') {
-                        CreateNewRow({
-                            aircraft: payload.new.current_flight.split(' ')[0],
-                            flightNumber: payload.new.current_flight.split(' ')[1],
-                            departure: payload.new.obs_dep_display,
-                            destination: payload.new.obs_arr_display,
-                            flightStatus: payload.new.flight_status,
-                            image: `/Image/Aircraft_Type/${payload.new.current_flight.split(' ')[0]}.png`
-                        });
-                    }
-
-                    // Update existing flight
-                    updateFlightCells(
-                        flightData.CurrentFlight,
-                        flightData.FlightStatus,
-                        flightData.OBSArrDisplay,
-                        flightData.OBSDepDisplay
-                    );
-
-                    // Update ETE bars if needed
-                    if (initialETE === -1 && flightData.StartDistance > 0) {
-                        initialETE = flightData.StartDistance;
-                    }
-                    updateETEbars(flightData.CurrentFlight.split(' ')[1], flightData.CurrentFlight.split(' ')[0]);
-
-                    // Handle blinking status
-                    if (flightData.FlightStatus === "Deboarding Completed") {
-                        removeBlinking(flightData.CurrentFlight);
-                    } else {
-                        setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
-                    }
+                    console.log('Database change received:', payload);
+                    processFlightData(payload);
                 }
             )
             .subscribe();
+
+        const broadcastChannel = supabase.channel('broadcast-channel')
+            .on(
+                'broadcast',
+                { event: 'flight_update' },
+                (payload) => {
+                    console.log('Broadcast received:', payload);
+                    processFlightData({
+                        new: payload,  // Wrap broadcast data to match postgres_changes format
+                        eventType: 'BROADCAST'
+                    });
+                }
+            )
+            .subscribe();
+
+        // Unified processing function to handle both database changes and broadcasts
+        function processFlightData(payload) {
+            // Convert payload to your existing format (works for both sources)
+            const flightData = {
+                CurrentFlight: payload.new.current_flight || payload.new.CurrentFlight,
+                FlightStatus: payload.new.flight_status || payload.new.FlightStatus,
+                OBSArrDisplay: payload.new.obs_arr_display || payload.new.OBSArrDisplay,
+                OBSDepDisplay: payload.new.obs_dep_display || payload.new.OBSDepDisplay,
+                DistToDestination: payload.new.dist_to_destination || payload.new.DistToDestination,
+                ETE_SRGS: payload.new.ete_srgs || payload.new.ETE_SRGS,
+                StartDistance: payload.new.start_distance || payload.new.StartDistance,
+                AirplaneInCloud: payload.new.airplane_in_cloud || payload.new.AirplaneInCloud,
+                AmbientPRECIPSTATE: payload.new.ambient_precip_state || payload.new.AmbientPRECIPSTATE,
+                AmbientVISIBILITY: payload.new.ambient_visibility || payload.new.AmbientVISIBILITY,
+                Flight_State: payload.new.flight_state || payload.new.Flight_State
+            };
+
+            // Original logic preserved exactly
+            if (payload.eventType === 'INSERT') {
+                CreateNewRow({
+                    aircraft: flightData.CurrentFlight.split(' ')[0],
+                    flightNumber: flightData.CurrentFlight.split(' ')[1],
+                    departure: flightData.OBSDepDisplay,
+                    destination: flightData.OBSArrDisplay,
+                    flightStatus: flightData.FlightStatus,
+                    image: `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`
+                });
+            }
+
+            updateFlightCells(
+                flightData.CurrentFlight,
+                flightData.FlightStatus,
+                flightData.OBSArrDisplay,
+                flightData.OBSDepDisplay
+            );
+
+            if (initialETE === -1 && flightData.StartDistance > 0) {
+                initialETE = flightData.StartDistance;
+            }
+            updateETEbars(flightData.CurrentFlight.split(' ')[1], flightData.CurrentFlight.split(' ')[0]);
+
+            if (flightData.FlightStatus === "Deboarding Completed") {
+                removeBlinking(flightData.CurrentFlight);
+            } else {
+                setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
+            }
+        }
+
+        // Return channels for potential unsubscription
+        return { dbChannel, broadcastChannel };
     }
     // ======================= SUPABASE INTEGRATION END =======================
 
