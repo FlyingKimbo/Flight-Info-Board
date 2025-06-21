@@ -137,16 +137,19 @@ document.addEventListener("DOMContentLoaded", function () {
             .select('CurrentFlight, StartDistance')
             .order('created_at', { ascending: false })
             .limit(1)
-            .single()
             .then(({ data, error }) => {
-                if (error) throw error;
-                if (data?.StartDistance > 0) {
-                    initialETE = data.StartDistance;
+                if (error) {
+                    console.error('ETE fetch error:', error.message);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    initialETE = data[0].StartDistance || 1000; // Fallback to 1000 if null
                     console.log('Initial ETE set:', initialETE);
                 }
             })
             .catch(error => {
-                console.error('Error fetching initial ETE:', error);
+                console.error('ETE fetch failed:', error);
             });
     }
 
