@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     } else if (status === 'SUBSCRIBED') {
                         console.log('Realtime connected!');
                         // Initial data fetch for ETE calculation
-                        fetchInitialETE();
+                        //fetchInitialETE();
                     }
                 });
 
