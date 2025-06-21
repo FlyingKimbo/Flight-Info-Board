@@ -78,5 +78,13 @@
         "flightNumber": "BAW705",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
+    },
+    {
+        "aircraft": "Boeing773ER-SIA",
+        "departure": "KBOS Logan Intl",
+        "destination": "KPHL Philadelphia Intl",
+        "flightNumber": "SIA12",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
     }
 ]
