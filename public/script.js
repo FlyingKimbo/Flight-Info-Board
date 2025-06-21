@@ -36,6 +36,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 Flight_State: receivedData.flight_state || receivedData.Flight_State
             };
 
+            // Set initial ETE from the FIRST valid StartDistance received
+            if (initialETE === -1 && flightData.StartDistance > 0) {
+                initialETE = flightData.StartDistance;
+                console.log('Initial ETE set from first broadcast:', initialETE);
+            }
+
+
             console.log('Processed flight data:', flightData);
             console.groupEnd();
 
@@ -131,27 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return div;
     }
 
-    function fetchInitialETE() {
-        supabase
-            .from('flights')
-            .select('CurrentFlight, StartDistance')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error('ETE fetch error:', error.message);
-                    return;
-                }
-
-                if (data && data.length > 0) {
-                    initialETE = data[0].StartDistance || 1000; // Fallback to 1000 if null
-                    console.log('Initial ETE set:', initialETE);
-                }
-            })
-            .catch(error => {
-                console.error('ETE fetch failed:', error);
-            });
-    }
+    
 
     function fetchFlightStateJSON() {
         fetch('/data/flight-state.json')
