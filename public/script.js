@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // Unified processing function
     function processFlightData(payload, source) {
         try {
-            console.log('Processing:', source, payload);
+            // 1. Log raw payload structure
+            console.group('[Realtime Debug] Source:', source);
+            console.log('Raw payload:', JSON.parse(JSON.stringify(payload)));
 
             // Convert payload to consistent format
             const flightData = {
@@ -31,6 +33,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 AmbientVISIBILITY: payload.new?.ambient_visibility || payload.new?.AmbientVISIBILITY || payload.AmbientVISIBILITY,
                 Flight_State: payload.new?.flight_state || payload.new?.Flight_State || payload.Flight_State
             };
+
+            // 3. Log processed data
+            console.log('Processed flight data:', flightData);
+            console.groupEnd();
+
+            // 4. Debug output to HTML (optional)
+            const debugDiv = document.getElementById('debug-output') || createDebugOutput();
+            debugDiv.innerHTML = `<pre>Last received: ${new Date().toISOString()}\n${JSON.stringify(flightData, null, 2)}</pre>`;
+
 
             // Original processing logic
             if (source === 'database') {
@@ -64,8 +75,14 @@ document.addEventListener("DOMContentLoaded", function () {
             } else if (flightData.FlightStatus) {
                 setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
             }
+
+
+
+            return flightData;
+
         } catch (error) {
-            console.error('Error processing flight data:', error);
+            console.error('Error processing flight data:', error, payload);
+            throw error;
         }
     }
 
