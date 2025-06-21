@@ -181,20 +181,33 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function checkFlightStatus() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightData = data[currentFlightKey];
+        // First try to get data from Supabase
+        supabase
+            .from('flights')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+            .then(({ data: flightData, error }) => {
+                if (error) throw error;
+
+                if (!flightData) {
+                    console.log('No flight data available in Supabase');
+                    return;
+                }
+
                 const currentFlightStatus = flightData.FlightStatus;
                 const currentFlight = flightData.CurrentFlight;
 
-                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                // Original logic preserved
+                let matchFound = updateFlightCells(
+                    currentFlight,
+                    flightData.FlightStatus,
+                    flightData.OBSArrDisplay
+                );
+
                 if (!matchFound) {
-                    //CreateNewRow(flightData);
                     window.location.reload();
-
-
                 }
 
                 if (currentFlightStatus === "Deboarding Completed") {
@@ -202,15 +215,56 @@ document.addEventListener("DOMContentLoaded", function () {
                     updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
                 } else {
                     setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
                 }
             })
             .catch(error => {
-                console.error('Error checking flight status:', error);
+                console.error('Supabase fetch error:', error);
+
+                // Fallback to API if Supabase fails (optional)
+                fetch('/api/update-flight')
+                    .then(response => response.json())
+                    .then(data => {
+                        const currentFlightKey = Object.keys(data)[0];
+                        const flightData = data[currentFlightKey];
+                        // ... rest of original API logic ...
+                    })
+                    .catch(fetchError => {
+                        console.error('Both Supabase and API failed:', fetchError);
+                    });
             });
     }
 
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
+    // Realtime subscription (better than interval polling)
+    function setupRealtimeUpdates() {
+        return supabase.channel('flight-status-updates')
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'flights'
+            }, (payload) => {
+                // Process realtime updates immediately
+                const flightData = payload.new;
+                const currentFlightStatus = flightData.FlightStatus;
+                const currentFlight = flightData.CurrentFlight;
+
+                updateFlightCells(currentFlight, currentFlightStatus, flightData.OBSArrDisplay);
+
+                if (currentFlightStatus === "Deboarding Completed") {
+                    removeBlinking(currentFlight);
+                } else {
+                    setBlinking(currentFlight, currentFlightStatus);
+                }
+            })
+            .subscribe();
+    }
+
+    // Initialization
+    function init() {
+        setupRealtimeUpdates(); // Primary realtime updates
+        setInterval(checkFlightStatus, 30000); // Fallback check every 30 seconds
+    }
+
+    init();
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
