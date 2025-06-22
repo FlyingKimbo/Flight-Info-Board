@@ -2,169 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-    let flightChannel = null; // Store channel reference globally
-    let isInitialized = false;
-
-    //import { createClient } from '@supabase/supabase-js';
-    // ======================= SUPABASE INTEGRATION START =======================
-    const SUPABASE_URL = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
-
-    // Initialize client
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-
-    function fetchInitialETE() {
-        // Default value that will be overwritten by first broadcast
-        initialETE = 1000;
-        console.log("Default ETE set, waiting for first broadcast...");
-    }
-
-    // Unified processing function
-    function processFlightData(payload, source) {
-        try {
-            console.group('[Realtime Debug] Source:', source);
-            console.log('Raw payload:', JSON.parse(JSON.stringify(payload)));
-
-            // Handle both broadcast and database payloads
-            const receivedData = source === 'broadcast' ? payload.payload : payload.new || payload;
-
-            const flightData = {
-                CurrentFlight: receivedData.current_flight || receivedData.CurrentFlight,
-                FlightStatus: receivedData.flight_status || receivedData.FlightStatus,
-                OBSArrDisplay: receivedData.obs_arr_display || receivedData.OBSArrDisplay,
-                OBSDepDisplay: receivedData.obs_dep_display || receivedData.OBSDepDisplay,
-                DistToDestination: receivedData.dist_to_destination || receivedData.DistToDestination,
-                ETE_SRGS: receivedData.ete_srgs || receivedData.ETE_SRGS,
-                StartDistance: receivedData.start_distance || receivedData.StartDistance,
-                AirplaneInCloud: receivedData.airplane_in_cloud || receivedData.AirplaneInCloud,
-                AmbientPRECIPSTATE: receivedData.ambient_precip_state || receivedData.AmbientPRECIPSTATE,
-                AmbientVISIBILITY: receivedData.ambient_visibility || receivedData.AmbientVISIBILITY,
-                Flight_State: receivedData.flight_state || receivedData.Flight_State
-            };
-
-            // Set initial ETE from the FIRST valid StartDistance received
-            if (initialETE === -1 && flightData.StartDistance > 0) {
-                initialETE = flightData.StartDistance;
-                console.log('Initial ETE set from first broadcast:', initialETE);
-            }
-
-
-            console.log('Processed flight data:', flightData);
-            console.groupEnd();
-
-            // Debug output
-            const debugDiv = document.getElementById('debug-output') || createDebugOutput();
-            debugDiv.innerHTML = `<pre>Last received: ${new Date().toISOString()}\n${JSON.stringify(flightData, null, 2)}</pre>`;
-
-            // Original processing logic (unchanged)
-            if (source === 'database') {
-                CreateNewRow({
-                    aircraft: flightData.CurrentFlight.split(' ')[0],
-                    flightNumber: flightData.CurrentFlight.split(' ')[1],
-                    departure: flightData.OBSDepDisplay,
-                    destination: flightData.OBSArrDisplay,
-                    flightStatus: flightData.FlightStatus,
-                    image: `/Image/Aircraft_Type/${flightData.CurrentFlight.split(' ')[0]}.png`
-                });
-            }
-
-            updateFlightCells(
-                flightData.CurrentFlight,
-                flightData.FlightStatus,
-                flightData.OBSArrDisplay,
-                flightData.OBSDepDisplay
-            );
-
-            if (initialETE === -1 && flightData.StartDistance > 0) {
-                initialETE = flightData.StartDistance;
-            }
-
-            if (flightData.CurrentFlight) {
-                updateETEbars(flightData);
-            }
-
-            if (flightData.FlightStatus === "Deboarding Completed") {
-                removeBlinking(flightData.CurrentFlight);
-            } else if (flightData.FlightStatus) {
-                setBlinking(flightData.CurrentFlight, flightData.FlightStatus);
-            }
-
-            return flightData;
-
-        } catch (error) {
-            console.error('Error processing flight data:', error, payload);
-            throw error;
-        }
-    }
-
-    // Initialize realtime with enhanced error handling
-    function setupRealtimeUpdates() {
-        if (flightChannel) return;
-
-        try {
-            flightChannel = supabase.channel('flight_updates')
-                .on('postgres_changes', {
-                    event: '*',
-                    schema: 'public',
-                    table: 'flights'
-                }, (payload) => {
-                    processFlightData(payload, 'database');
-                })
-                .on('broadcast', { event: 'flight_update' }, (payload) => {
-                    console.log("RAW BROADCAST:", payload); // <-- ONLY ADDED THIS LINE
-                    processFlightData(payload, 'broadcast');
-                })
-                .subscribe((status, err) => {
-                    if (err) {
-                        console.error('Subscription error:', err);
-                        setTimeout(setupRealtimeUpdates, 5000);
-                    } else if (status === 'SUBSCRIBED') {
-                        console.log('Realtime connected!');
-                    }
-                });
-        } catch (error) {
-            console.error('Realtime setup error:', error);
-            setTimeout(setupRealtimeUpdates, 5000);
-        }
-    }
-
-    // Helper function for visible debug output
-    function createDebugOutput() {
-        const div = document.createElement('div');
-        div.id = 'debug-output';
-        div.style = 'position:fixed; bottom:0; right:0; background:#fff; padding:10px; z-index:9999; border:1px solid red; max-height:200px; overflow:auto;';
-        document.body.appendChild(div);
-        return div;
-    }
-
-    
-
-    function fetchFlightStateJSON() {
-        fetch('/data/flight-state.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched data:', data); // Log the fetched data
-                updateTableFromJSON(data);
-            })
-            .catch(error => {
-                console.error('Error fetching flight state JSON:', error);
-            });
-    }
-
-    function updateTableFromJSON(data) {
-        const tableBody = document.getElementById('flight-rows');
-        tableBody.innerHTML = ''; // Clear existing rows
-
-        data.forEach(flightData => {
-            CreateNewRow(flightData);
-        });
-    }
+   
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
@@ -205,6 +43,174 @@ document.addEventListener("DOMContentLoaded", function () {
         table.querySelector('tbody').appendChild(newRow);
     }
 
+    function fetchFlightStateJSON() {
+        fetch('/data/flight-state.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched data:', data); // Log the fetched data
+                updateTableFromJSON(data);
+            })
+            .catch(error => {
+                console.error('Error fetching flight state JSON:', error);
+            });
+    }
+
+    function updateTableFromJSON(data) {
+        const tableBody = document.getElementById('flight-rows');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(flightData => {
+            CreateNewRow(flightData);
+        });
+    }
+
+    function checkFlightStatus() {
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const flightData = data[currentFlightKey];
+                const currentFlightStatus = flightData.FlightStatus;
+                const currentFlight = flightData.CurrentFlight;
+
+                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                if (!matchFound) {
+                    //CreateNewRow(flightData);
+                    window.location.reload();
+                   
+
+                }
+
+                if (currentFlightStatus === "Deboarding Completed") {
+                    removeBlinking(currentFlight);
+                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
+                } else {
+                    setBlinking(currentFlight, currentFlightStatus);
+                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking flight status:', error);
+            });
+    }
+
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
+
+    function fetchInitialETE() {
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data); // Log the entire response to check its structure
+
+                // Extract the current flight key directly from the data structure
+                const currentFlightKey = Object.keys(data)[0]; // Assuming there's only one key
+                const flightData = data[currentFlightKey];
+                console.log('Flight data:', flightData);
+
+                if (!flightData) {
+                    console.error('Current flight data is missing.');
+                    return;
+                }
+
+                const startDistance = flightData.StartDistance;
+                console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
+
+                if (isNaN(startDistance) || startDistance <= 0) {
+                    console.error('Invalid initial ETE value.');
+                    initialETE = -1; // Ensure we don't use invalid initial values
+                } else {
+                    initialETE = startDistance;
+                    updateETEbars(currentFlightKey, flightData.CurrentFlight.split(' ')[0]);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching initial ETE data:', error);
+            });
+    }
+
+    function fetchCurrentFlight() {
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Assuming the response is JSON
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const currentFlight = data[currentFlightKey].CurrentFlight;
+                console.log('Fetched Current Flight:', currentFlight);
+                return currentFlight;
+            })
+            .catch(error => {
+                console.error('Error fetching current flight data:', error);
+                return null;
+            });
+    }
+
+    async function fetchFlightData() {
+        try {
+            const response = await fetch('/api/update-flight');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Received data:', data);
+                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
+            } else {
+                document.getElementById('flight-data').textContent = 'Error fetching data';
+            }
+        } catch (error) {
+            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
+        }
+    }
+
+    // Fetch data every 5 seconds
+    setInterval(fetchFlightData, 5000);
+
+    function fetchAirplaneInCloud() {
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const airplaneInCloud = data[currentFlightKey].AirplaneInCloud;
+                console.log('Airplane In Cloud:', airplaneInCloud);
+                return airplaneInCloud;
+            })
+            .catch(error => {
+                console.error('Error fetching AirplaneInCloud status data:', error);
+                return null;
+            });
+    }
+
+    function fetchAmbientPrecipState() {
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const precipState = data[currentFlightKey].AmbientPRECIPSTATE;
+                console.log('AmbientPRECIPSTATE:', precipState);
+                return precipState;
+            })
+            .catch(error => {
+                console.error('Error fetching AirplaneInCloud status data:', error);
+                return null;
+            });
+    }
+
+    function fetchFlight_State() {
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Parse the response as JSON
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const flightState = data[currentFlightKey].Flight_State;
+                console.log('Flight State:', flightState);
+                return flightState;
+            })
+            .catch(error => {
+                console.error('Error fetching Flight_State data:', error);
+                return null;
+            });
+    }
+
     function startJetStreamCycling() {
         let imageIndex = 1;
         setInterval(() => {
@@ -216,102 +222,122 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 20); // Change image every 20ms
     }
 
-    function updateETEbars(flightData) {
+    function updateETEbars(currentFlightKey, aircraftType) {
         if (initialETE === -1) {
             return;
         }
 
-        console.log('Flight data for update:', flightData);
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                const flightData = data[currentFlightKey];
+                console.log('Flight data for update:', flightData);
 
-        if (!flightData) {
-            console.error('Current flight data is missing.');
-            return;
-        }
-
-        const eteData = flightData.DistToDestination;
-        const eteBar = document.getElementById('ete-bar');
-        const aircraftImage = document.getElementById('aircraft-image');
-        const eteText = document.getElementById('ete-bar-text');
-        const jetStreamImage = document.getElementById('jetstream-image');
-        const cloudImage = document.getElementById('cloud-image');
-        const precipImage = document.getElementById('precip-image');
-
-        if (eteBar && eteData !== undefined) {
-            const ete = eteData;
-            const etePercentage = Math.min((ete / initialETE) * 100, 100);
-            GreenbarPercentage = etePercentage;
-            console.log('ETE Percentage:', etePercentage);
-            eteBar.style.width = etePercentage + '%';
-            eteBar.style.opacity = 1;
-
-            if (flightData.AirplaneInCloud === 1) {
-                if (!cloudOpacityInterval) {
-                    startCloudOpacityCycling(cloudImage);
-                    cloudImage.style.opacity = 1;
+                if (!flightData) {
+                    console.error('Current flight data is missing.');
+                    return;
                 }
-            } else {
-                clearInterval(cloudOpacityInterval);
-                cloudOpacityInterval = null;
-                cloudImage.style.opacity = 0;
-            }
 
-            switch (true) {
-                case (etePercentage > 0 && etePercentage <= 100):
-                    eteText.style.opacity = 1;
-                    aircraftImage.style.opacity = 1;
-                    updatePositions();
+                const eteData = flightData.DistToDestination;
+                const eteBar = document.getElementById('ete-bar');
+                const aircraftImage = document.getElementById('aircraft-image');
+                const eteText = document.getElementById('ete-bar-text'); // ETE text element
+                const jetStreamImage = document.getElementById('jetstream-image');
+                const cloudImage = document.getElementById('cloud-image');
+                const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
-                    if (flightData.Flight_State) {
-                        if (flightData.Flight_State.includes('Landed')) {
-                            jetStreamImage.style.opacity = 0;
-                        } else if (flightData.Flight_State.includes('Airborne')) {
-                            updatePositions();
-                            jetStreamImage.style.opacity = 1;
+                if (eteBar && eteData !== undefined) {
+                    const ete = eteData;
+                    const etePercentage = Math.min((ete / initialETE) * 100, 100);
+                    GreenbarPercentage = etePercentage;
+                    console.log('ETE Percentage:', etePercentage);
+                    eteBar.style.width = etePercentage + '%';
+                    eteBar.style.opacity = 1; // Ensure the green bar is always visible
+
+                    fetchAirplaneInCloud().then(airplaneInCloud => {
+                        if (airplaneInCloud === 1) { // Check if airplaneInCloud is exactly 1
+                            if (!cloudOpacityInterval) {
+                                startCloudOpacityCycling(cloudImage);
+                                cloudImage.style.opacity = 1;
+                            }
+                        } else {
+                            clearInterval(cloudOpacityInterval);
+                            cloudOpacityInterval = null;
+                            cloudImage.style.opacity = 0;
                         }
+                    });
+
+                    switch (true) {
+                        case (etePercentage > 0 && etePercentage <= 100):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
+                            updatePositions();
+
+                            fetchFlight_State().then(flightState => {
+                                if (flightState) {
+                                    if (flightState.includes('Landed')) {
+                                        jetStreamImage.style.opacity = 0;
+                                    } else if (flightState.includes('Airborne')) {
+                                        updatePositions();
+                                        jetStreamImage.style.opacity = 1;
+                                    }
+                                }
+                            });
+                            break;
+                        case (etePercentage == 0):
+                            eteText.style.opacity = 1;
+                            aircraftImage.style.opacity = 1;
+                            updatePositions();
+                            jetStreamImage.style.opacity = 0;
+
+                            break;
+                        case (etePercentage < 0):
+                            eteText.style.opacity = 0;
+                            aircraftImage.style.opacity = 0;
+                            updatePositions();
+                            jetStreamImage.style.opacity = 0;
+                            break;
+                        default:
+                            // Handle default case if needed
+                            break;
                     }
-                    break;
-                case (etePercentage == 0):
-                    eteText.style.opacity = 1;
-                    aircraftImage.style.opacity = 1;
-                    updatePositions();
-                    jetStreamImage.style.opacity = 0;
-                    break;
-                case (etePercentage < 0):
-                    eteText.style.opacity = 0;
-                    aircraftImage.style.opacity = 0;
-                    updatePositions();
-                    jetStreamImage.style.opacity = 0;
-                    break;
-                default:
-                    break;
-            }
 
-            const [aircraftType] = flightData.CurrentFlight.split(' ');
-            aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-            cloudImage.src = `/Image/Cloud/Cloud1.png`;
+                    aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`; // Set the appropriate aircraft image
+                    cloudImage.src = `/Image/Cloud/Cloud1.png`;
 
-            const distanceText = flightData.DistToDestination + " KM";
-            const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
-            eteText.textContent = combinedText;
+                    const distanceText = flightData.DistToDestination + " KM";
+                    const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
+                    eteText.textContent = combinedText; // Update text content with combined ETE and Distance
 
-            const precipState = flightData.AmbientPRECIPSTATE;
-            if (precipState === 4) {
-                precipImage.src = '/Image/Precip/rain1.gif';
-                precipImage.style.opacity = 1;
-            } else if (precipState === 8) {
-                precipImage.src = '/Image/Precip/snow1.gif';
-                precipImage.style.opacity = 1;
-            } else {
-                precipImage.style.opacity = 0;
-            }
-        }
+                    const precipState = flightData.AmbientPRECIPSTATE;
+                    if (precipState === 4) {
+                        precipImage.src = '/Image/Precip/rain1.gif';
+                        precipImage.style.opacity = 1;
+                    } else if (precipState === 8) {
+                        precipImage.src = '/Image/Precip/snow1.gif';
+                        precipImage.style.opacity = 1;
+                    } else {
+                        precipImage.style.opacity = 0;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching ETE data:', error);
+                const eteBar = document.getElementById('ete-bar');
+                const aircraftImage = document.getElementById('aircraft-image');
+                const eteText = document.getElementById('ete-bar-text'); // ETE text element
+                eteBar.style.width = '0%';
+                eteBar.style.opacity = 0;
+                aircraftImage.style.opacity = 0;
+                eteText.style.opacity = 0;
+            });
     }
 
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
-        let direction = 1;
-        const increment = 0.01;
-        const intervalTime = 30;
+        let direction = 1; // 1 for increasing, -1 for decreasing
+        const increment = 0.01; // Smaller increment for smoother transition
+        const intervalTime = 30; // Smaller interval for more frequent updates
 
         cloudOpacityInterval = setInterval(() => {
             opacity += direction * increment;
@@ -323,7 +349,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 direction = 1;
             }
             cloudImage.style.opacity = opacity;
-        }, intervalTime);
+        }, intervalTime); // Adjust the interval as needed
     }
 
     function updatePositions() {
@@ -334,10 +360,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
-        const eteText = document.getElementById('ete-bar-text');
+        const eteText = document.getElementById('ete-bar-text'); // ETE text element
         const jetstream = document.getElementById('jetstream-image');
         const cloud = document.getElementById('cloud-image');
-        const precipImage = document.getElementById('precip-image');
+        const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
         const barWidth = eteBar.getBoundingClientRect().width;
         const containerRight = eteBar.parentElement.getBoundingClientRect().right;
@@ -346,13 +372,15 @@ document.addEventListener("DOMContentLoaded", function () {
         const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
         const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
         const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
-        const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix);
+        const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
 
         aircraftImage.style.left = `${imagePosition}px`;
         eteText.style.left = `${textPosition}px`;
         jetstream.style.left = `${jetstream_imagePosition}px`;
         cloud.style.left = `${cloud_imagePosition}px`;
         precipImage.style.left = `${precip_imagePosition}px`;
+
+        //aircraftImage.style.opacity = 1; // Make sure the image is visible
     }
 
     function sortTable(columnIndex, dir = 'asc') {
@@ -362,6 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
         var shouldSwitch, i;
         var switchcount = 0;
 
+        // Clear existing sort indicators
         var headers = table.getElementsByTagName("th");
         for (i = 0; i < headers.length; i++) {
             headers[i].classList.remove("sort-asc", "sort-desc");
@@ -369,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         while (switching) {
             switching = false;
-            var rowsArray = Array.prototype.slice.call(rows, 2);
+            var rowsArray = Array.prototype.slice.call(rows, 2); // Skip the header row and the green bar row
 
             for (i = 0; i < rowsArray.length - 1; i++) {
                 shouldSwitch = false;
@@ -401,24 +430,69 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
 
+        // Add sort indicator to the sorted column header
         if (dir == "asc") {
             headers[columnIndex].classList.add("sort-asc");
         } else {
             headers[columnIndex].classList.add("sort-desc");
         }
 
+        // Save sort state
         localStorage.setItem('sortColumnIndex', columnIndex);
         localStorage.setItem('sortDirection', dir);
     }
 
+    function initialize() {
+        // Fetch and update the table from flight-state.json
+        fetchFlightStateJSON();
+
+        // Set image paths
+        const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            img.src = baseUrl + img.getAttribute('data-src');
+            console.log('Setting image src:', img.src); // Debugging line
+        });
+
+        // Restore sort state
+        var sortColumnIndex = localStorage.getItem('sortColumnIndex');
+        var sortDirection = localStorage.getItem('sortDirection');
+        if (sortColumnIndex !== null && sortDirection !== null) {
+            sortTable(parseInt(sortColumnIndex), sortDirection);
+        } else {
+            // Default sort by Flight Status on first load
+            sortTable(3, 'asc');
+        }
+
+        // Initial fetch
+        fetchFlightData();
+
+        // Fetch initial ETE value
+        fetchInitialETE();
+
+        // Automatically sort by Flight Status every 20000 milliseconds
+        setInterval(function () {
+            sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
+        }, 20000);
+
+        // Refresh the Greenbar function every 1000 milliseconds
+        setInterval(function () {
+            fetchCurrentFlight().then(currentFlightKey => {
+                updateETEbars(currentFlightKey, currentFlightKey.split(' ')[0]);
+            });
+        }, 2000);
+
+        // Start jet stream cycling
+        startJetStreamCycling();
+    }
+
     function setBlinking(currentFlight, flightStatus) {
         const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) {
+        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
             const cells = rows[i].cells;
             const aircraft = cells[0].textContent.trim();
             const flightNumber = cells[1].textContent.trim();
             if (`${aircraft} ${flightNumber}` === currentFlight) {
-                removeBlinkingClasses(cells);
+                removeBlinkingClasses(cells); // Remove any existing blinking classes
                 const blinkingClass = getBlinkingClass(flightStatus);
                 cells[0].classList.add(blinkingClass);
                 cells[1].classList.add(blinkingClass);
@@ -433,7 +507,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function removeBlinking(currentFlight) {
         const rows = document.getElementById("flightTable").rows;
-        for (let i = 2; i < rows.length; i++) {
+        for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
             const cells = rows[i].cells;
             const aircraft = cells[0].textContent.trim();
             const flightNumber = cells[1].textContent.trim();
@@ -492,23 +566,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
         return matchFound;
-    }
-
-    function initialize() {
-        if (isInitialized) return;
-        isInitialized = true;
-
-        setupRealtimeUpdates();
-        fetchFlightStateJSON();
-        startJetStreamCycling();
-
-        // Set base URL for images
-        const baseUrl = window.location.hostname === 'localhost' ?
-            'http://localhost:8080' : 'https://flight-info-board.vercel.app';
-
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            img.src = baseUrl + img.getAttribute('data-src');
-        });
     }
 
     initialize();
