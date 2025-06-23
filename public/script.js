@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 image: `/Image/Aircraft_Type/${flight.current_flight}.png`
             });
         });
-        /*
+        
         // Add completed flights
         completed.forEach(flight => {
             const row = CreateNewRow({
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             row.classList.add('static-flight');
         });
-        */
+        
     }
 
 
