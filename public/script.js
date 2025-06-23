@@ -79,8 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            return {
-                active: activeFlights || [],
+           return {
+                //active: activeFlights || [],
                 completed: completedFlights || []
             };
         } catch (error) {
