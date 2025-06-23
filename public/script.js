@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .from('flights_realtime')
                 .select('*')
                 .neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
-                /order('created_at', { ascending: false });
+                .order('created_at', { ascending: false });
 
             //2. Fetch historical flights exactly as stored (no filtering)
             const { data: completedFlights } = await supabase
