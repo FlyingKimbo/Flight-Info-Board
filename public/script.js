@@ -66,21 +66,21 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            // 1. Fetch active flights, excluding those with flightstatus = "-"
-            //const { data: activeFlights } = await supabase
-                //.from('flights_realtime')
-                //.select('*')
-                //.neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
-                //.order('created_at', { ascending: false });
+            //1. Fetch active flights, excluding those with flightstatus = "-"
+            const { data: activeFlights } = await supabase
+                .from('flights_realtime')
+                .select('*')
+                .neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
+                /order('created_at', { ascending: false });
 
-            // 2. Fetch historical flights exactly as stored (no filtering)
+            //2. Fetch historical flights exactly as stored (no filtering)
             const { data: completedFlights } = await supabase
                 .from('flights_static')
                 .select('*')
                 .order('created_at', { ascending: false });
 
            return {
-                //active: activeFlights || [],
+                active: activeFlights || [],
                 completed: completedFlights || []
             };
         } catch (error) {
