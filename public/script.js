@@ -1,8 +1,54 @@
-// Wait for everything to load
+// Import Supabase at the top of your file
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+// Initialize Supabase
+const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Verify connection
+supabase.from('flights_realtime').select('*').limit(1)
+    .then(({ data, error }) => {
+        if (error) {
+            console.error('Connection failed:', error)
+            showErrorToUser()
+        } else {
+            console.log('Connection successful:', data)
+            initializeApp()
+        }
+    })
+
+function initializeApp() {
+    // Your existing application code
+    let initialETE = -1
+    let cloudOpacityInterval
+    let GreenbarPercentage = 0
+
+    // Rest of your original code...
+}
+
+function showErrorToUser() {
+    // Display user-friendly error message
+    const errorDiv = document.createElement('div')
+    errorDiv.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: #ff4444;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    z-index: 1000;
+  `
+    errorDiv.textContent = 'Connection to flight data failed. Please refresh the page.'
+    document.body.prepend(errorDiv)
+}
+
 document.addEventListener("DOMContentLoaded", function () {
     // Initialize Supabase client
-    const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
+   // const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
+    //const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
 
     // Check if Supabase is loaded
     if (typeof createClient === 'undefined') {
@@ -10,8 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // Create client
-    const supabase = createClient(supabaseUrl, supabaseKey);
+   
 
     // Now use supabase in your code
     let initialETE = -1;
