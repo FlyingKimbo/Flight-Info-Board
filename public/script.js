@@ -192,18 +192,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchInitialETE() {
         try {
+            // Fetch the most recent flight data from Supabase
             const { data, error } = await supabase
                 .from('flights_realtime')
                 .select('start_distance, current_flight')
+                .order('created_at', { ascending: false })
                 .limit(1);
 
             if (error) throw error;
-            if (data && data.length > 0) {
-                initialETE = data[0].start_distance;
-                updateETEbars(data[0].current_flight, data[0].current_flight.split(' ')[0]);
+
+            console.log('Received data:', data); // Log the response
+
+            if (!data || data.length === 0) {
+                console.error('Current flight data is missing.');
+                return;
+            }
+
+            const flightData = data[0];
+            const startDistance = flightData.start_distance;
+            console.log('Extracted start_distance:', startDistance);
+
+            if (isNaN(startDistance) || startDistance <= 0) {
+                console.error('Invalid initial ETE value.');
+                initialETE = -1;
+            } else {
+                initialETE = startDistance;
+                // Note: Changed to use flightData.current_flight to match Supabase column name
+                updateETEbars(flightData.current_flight, flightData.current_flight.split(' ')[0]);
             }
         } catch (error) {
-            console.error('Error fetching initial ETE:', error);
+            console.error('Error fetching initial ETE data:', error);
         }
     }
 
