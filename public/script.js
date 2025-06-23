@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return { active: [], completed: [] };
         }
     }
-
+    /*
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
         const newRow = document.createElement('tr');
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         table.querySelector('tbody').appendChild(newRow);
     }
-
+    */
     async function updateFlightTable() {
         const tableBody = document.getElementById('flight-rows');
         tableBody.innerHTML = '';
