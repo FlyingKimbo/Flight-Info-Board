@@ -130,13 +130,17 @@ document.addEventListener("DOMContentLoaded", function () {
     
     async function updateFlightTable() {
         const tableBody = document.getElementById('flight-rows');
-        tableBody.innerHTML = '';
+        tableBody.innerHTML = ''; // Clear table first
 
         const { active, completed } = await fetchAllFlights();
 
-        // Process active flights (only if flightStatus !== "-")
+        // Debug log to verify data
+        console.log('Active flights:', active);
+        console.log('Completed flights:', completed);
+
+        // Process active flights
         active.forEach(flight => {
-            if (flight.flightStatus !== "-") {  // Skip if status is "-"
+            if (flight.flightStatus !== "-") {
                 CreateNewRow({
                     aircraft: flight.current_flight,
                     departure: flight.obsDepDisplay,
@@ -148,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
-        // Add completed flights (unchanged)
+        // Process ALL completed flights
         completed.forEach(flight => {
             const row = CreateNewRow({
                 aircraft: flight.aircraft,
@@ -190,55 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Status check failed:', error);
         }
     }
-    /*
-    function fetchInitialETE() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                console.log('Received data:', data); // Log the entire response to check its structure
-
-                // Extract the current flight key directly from the data structure
-                const currentFlightKey = Object.keys(data)[0]; // Assuming there's only one key
-                const flightData = data[currentFlightKey];
-                console.log('Flight data:', flightData);
-
-                if (!flightData) {
-                    console.error('Current flight data is missing.');
-                    return;
-                }
-
-                const startDistance = flightData.StartDistance;
-                console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
-
-                if (isNaN(startDistance) || startDistance <= 0) {
-                    console.error('Invalid initial ETE value.');
-                    initialETE = -1; // Ensure we don't use invalid initial values
-                } else {
-                    initialETE = startDistance;
-                    updateETEbars(currentFlightKey, flightData.CurrentFlight.split(' ')[0]);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching initial ETE data:', error);
-            });
-    }
-
-    function fetchCurrentFlight() {
-        return fetch('/api/update-flight')
-            .then(response => response.json()) // Assuming the response is JSON
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const currentFlight = data[currentFlightKey].CurrentFlight;
-                console.log('Fetched Current Flight:', currentFlight);
-                return currentFlight;
-            })
-            .catch(error => {
-                console.error('Error fetching current flight data:', error);
-                return null;
-            });
-    }
-
-    */
+    
     function fetchAirplaneInCloud() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
