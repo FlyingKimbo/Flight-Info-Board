@@ -165,32 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
 
-    function updateTableFromJSON(data) {
-        const tableBody = document.getElementById('flight-rows');
-        tableBody.innerHTML = ''; // Clear table first
-
-        // Ensure data is an array and not empty
-        if (!Array.isArray(data)){
-            console.error("Data is not an array:", data);
-            return;
-        }
-
-        // Process each flight in the array
-        data.forEach((flight) => {
-            // Map Supabase fields to your expected format
-            const rowData = {
-                aircraft: flight.current_flight || flight.aircraft,
-                departure: flight.obsDepDisplay || flight.departure,
-                destination: flight.obsArrDisplay || flight.destination,
-                flightNumber: flight.flightNumber || flight.current_flight?.split(' ').pop(),
-                flightStatus: flight.flightStatus,
-                image: flight.image || `/Image/Aircraft_Type/${flight.current_flight || flight.aircraft}.png`
-            };
-
-            // Create a row for each flight
-            CreateNewRow(rowData);
-        });
-    }
+    
 
     // 4. Status Checking System -----------------------------------------------
     async function checkFlightStatus() {
@@ -565,7 +540,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Supabase change - Replaced fetchFlightData()
         checkFlightStatus(); // Now uses Supabase instead of API endpoint
-        updateTableFromJSON();
+        
      
 
         // Fetch initial ETE value
