@@ -565,7 +565,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Supabase change - Replaced fetchFlightData()
         checkFlightStatus(); // Now uses Supabase instead of API endpoint
-
+        updateTableFromJSON();
      
 
         // Fetch initial ETE value
