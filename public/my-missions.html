@@ -249,7 +249,21 @@
             </tr>
         </tbody>
     </table>
- <script src="supabase_lib.js"></script>
+ <!-- 2. Initialize Supabase in a separate script -->
+  <script>
+    // Initialize ONCE when page loads
+    const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
+    const supabaseKey = 'your-anon-key-here';
+    
+    // Official initialization method
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    
+    // Verify connection
+    supabase.from('flights_realtime').select('*').limit(1)
+      .then(response => console.log('Connection test:', response.data))
+      .catch(error => console.error('Connection failed:', error));
+  </script>
+
     <script src="script.js"></script>
   </main>
 </body>
