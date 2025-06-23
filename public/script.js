@@ -105,74 +105,85 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
     
-    function CreateNewRow(flightData) {
+    
+    
+    async function updateFlightTable() {
+        // 1. Fetch data
+        const { active, completed } = await fetchAllFlights();
+        const tableBody = document.getElementById('flightTable').querySelector('tbody');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        // 2. Render static flights (always)
+        completed.forEach(flight => {
+            const row = createFlightRow(flight, true); // `isStatic=true`
+            tableBody.appendChild(row);
+        });
+
+        // 3. Render active flights (only if no "-" status in realtime)
+        active.forEach(flight => {
+            const row = createFlightRow(flight, false); // `isStatic=false`
+            tableBody.appendChild(row);
+        });
+    }
+
+
+    function createFlightRow(flight, isStatic = false) {
         const table = document.getElementById("flightTable");
         const newRow = document.createElement('tr');
 
+        // Map data fields (works for both realtime and static flights)
+        const aircraft = flight.current_flight || flight.aircraft || 'N/A';
+        const flightNumber = flight.flightnumber || (aircraft ? aircraft.split(' ').pop() : 'N/A');
+        const departure = flight.obsdepdisplay || flight.departure || 'N/A';
+        const destination = flight.obsarrdisplay || flight.destination || 'N/A';
+        const flightStatus = flight.flightstatus || flight.flightStatus || 'N/A';
+        const imagePath = flight.image || `/Image/Aircraft_Type/${aircraft}.png`;
+
+        // Create cells
         const aircraftCell = document.createElement('td');
         const flightNumberCell = document.createElement('td');
         const departureCell = document.createElement('td');
         const flightStatusCell = document.createElement('td');
         const destinationCell = document.createElement('td');
 
-        // Add content to the new cells
+        // Fill cells
         aircraftCell.style.textAlign = 'center';
         const img = document.createElement('img');
-        img.src = flightData.image;
+        img.src = imagePath;
         img.alt = 'Aircraft Image';
         img.style.width = '100px';
         img.style.height = 'auto';
+        img.onerror = () => { img.src = '/default-aircraft.png'; }; // Fallback if image fails
         aircraftCell.appendChild(img);
-        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
+        aircraftCell.appendChild(document.createTextNode(` ${aircraft}`));
 
-        flightNumberCell.textContent = flightData.flightNumber;
-        departureCell.textContent = flightData.departure;
-        flightStatusCell.textContent = flightData.flightStatus;
-        destinationCell.textContent = flightData.destination;
+        flightNumberCell.textContent = flightNumber;
+        departureCell.textContent = departure;
+        flightStatusCell.textContent = flightStatus;
+        destinationCell.textContent = destination;
 
+        // Append cells to row
         newRow.appendChild(aircraftCell);
         newRow.appendChild(flightNumberCell);
         newRow.appendChild(departureCell);
         newRow.appendChild(flightStatusCell);
         newRow.appendChild(destinationCell);
 
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        if (blinkingClass) {
-            newRow.classList.add(blinkingClass);
+        // Add blinking class based on flight status (only for active flights)
+        if (!isStatic) {
+            const blinkingClass = getBlinkingClass(flightStatus);
+            if (blinkingClass) {
+                flightStatusCell.classList.add(blinkingClass); // Only blink status cell
+            }
         }
 
-        table.querySelector('tbody').appendChild(newRow);
+        // Mark static flights for CSS styling (optional)
+        if (isStatic) {
+            newRow.classList.add('static-flight');
+        }
+
+        return newRow;
     }
-    
-    async function updateFlightTable() {
-        const tableBody = document.getElementById('flight-rows');
-        tableBody.innerHTML = ''; // Clear table first
-
-        const { active, completed } = await fetchAllFlights();
-
-        // Debug log to verify data
-        console.log('Active flights:', active);
-        console.log('Completed flights:', completed);
-
-        // Process active flights
-  
-
-        // Process ALL completed flights
-        completed.forEach(flight => {
-            const row = CreateNewRow({
-                aircraft: flight.aircraft,
-                departure: flight.departure,
-                destination: flight.destination,
-                flightNumber: flight.flightNumber,
-                flightStatus: flight.flightStatus,
-                image: flight.image
-            });
-            row.classList.add('static-flight');
-        });
-    }
-
-
-    
 
     
 
