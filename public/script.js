@@ -63,44 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
 
-    function CreateNewRow(flightData) {
-        const table = document.getElementById("flightTable");
-        const newRow = document.createElement('tr');
-
-        const aircraftCell = document.createElement('td');
-        const flightNumberCell = document.createElement('td');
-        const departureCell = document.createElement('td');
-        const flightStatusCell = document.createElement('td');
-        const destinationCell = document.createElement('td');
-
-        // Add content to the new cells
-        aircraftCell.style.textAlign = 'center';
-        const img = document.createElement('img');
-        img.src = flightData.image;
-        img.alt = 'Aircraft Image';
-        img.style.width = '100px';
-        img.style.height = 'auto';
-        aircraftCell.appendChild(img);
-        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
-
-        flightNumberCell.textContent = flightData.flightNumber;
-        departureCell.textContent = flightData.departure;
-        flightStatusCell.textContent = flightData.flightStatus;
-        destinationCell.textContent = flightData.destination;
-
-        newRow.appendChild(aircraftCell);
-        newRow.appendChild(flightNumberCell);
-        newRow.appendChild(departureCell);
-        newRow.appendChild(flightStatusCell);
-        newRow.appendChild(destinationCell);
-
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        if (blinkingClass) {
-            newRow.classList.add(blinkingClass);
-        }
-
-        table.querySelector('tbody').appendChild(newRow);
-    }
+    
 
 
     // 1. Flight Data Functions -------------------------------------------------
@@ -167,62 +130,56 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    function createFlightRow(flight, isStatic = false) {
+    function createFlightRow(flightData, isStatic = false) {
         const table = document.getElementById("flightTable");
+        const tbody = table.querySelector('tbody');
         const newRow = document.createElement('tr');
 
-        // Map data fields (works for both realtime and static flights)
-        const aircraft = flight.current_flight || flight.aircraft || 'N/A';
-        const flightNumber = flight.flightnumber || (aircraft ? aircraft.split(' ').pop() : 'N/A');
-        const departure = flight.obsdepdisplay || flight.departure || 'N/A';
-        const destination = flight.obsarrdisplay || flight.destination || 'N/A';
-        const flightStatus = flight.flightstatus || flight.flightStatus || 'N/A';
-        const imagePath = flight.image || `/Image/Aircraft_Type/${aircraft}.png`;
-
-        // Create cells
+        // Create cells (preserving your exact structure)
         const aircraftCell = document.createElement('td');
         const flightNumberCell = document.createElement('td');
         const departureCell = document.createElement('td');
         const flightStatusCell = document.createElement('td');
         const destinationCell = document.createElement('td');
 
-        // Fill cells
+        // Set cell content (unchanged from your original)
         aircraftCell.style.textAlign = 'center';
         const img = document.createElement('img');
-        img.src = imagePath;
+        img.src = flightData.image;
         img.alt = 'Aircraft Image';
         img.style.width = '100px';
         img.style.height = 'auto';
-        img.onerror = () => { img.src = '/default-aircraft.png'; }; // Fallback if image fails
+        img.onerror = function () { this.src = '/default-aircraft.png'; }; // Added fallback
         aircraftCell.appendChild(img);
-        aircraftCell.appendChild(document.createTextNode(` ${aircraft}`));
+        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
 
-        flightNumberCell.textContent = flightNumber;
-        departureCell.textContent = departure;
-        flightStatusCell.textContent = flightStatus;
-        destinationCell.textContent = destination;
+        flightNumberCell.textContent = flightData.flightNumber;
+        departureCell.textContent = flightData.departure;
+        flightStatusCell.textContent = flightData.flightStatus;
+        destinationCell.textContent = flightData.destination;
 
-        // Append cells to row
+        // Append cells (unchanged)
         newRow.appendChild(aircraftCell);
         newRow.appendChild(flightNumberCell);
         newRow.appendChild(departureCell);
         newRow.appendChild(flightStatusCell);
         newRow.appendChild(destinationCell);
 
-        // Add blinking class based on flight status (only for active flights)
+        // MODIFIED: Conditional blinking based on isStatic
         if (!isStatic) {
-            const blinkingClass = getBlinkingClass(flightStatus);
+            const blinkingClass = getBlinkingClass(flightData.flightStatus);
             if (blinkingClass) {
                 flightStatusCell.classList.add(blinkingClass); // Only blink status cell
             }
         }
 
-        // Mark static flights for CSS styling (optional)
+        // NEW: Add static flight class if needed
         if (isStatic) {
             newRow.classList.add('static-flight');
         }
 
-        return newRow;
+        tbody.appendChild(newRow);
+        return newRow; // Return the row for potential chaining
     }
 
     
