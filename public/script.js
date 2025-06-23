@@ -1,11 +1,19 @@
-// Initialize Supabase ONLY ONCE (global scope)
-const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-const supabaseKey = 'eyJhbGci...'; // Your key
-const supabase = createClient(supabaseUrl, supabaseKey);
-
+// Wait for everything to load
 document.addEventListener("DOMContentLoaded", function () {
-    // Now you can use the existing 'supabase' variable
-    // No need to re-declare!
+    // Initialize Supabase client
+    const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
+
+    // Check if Supabase is loaded
+    if (typeof createClient === 'undefined') {
+        console.error('Supabase library not loaded! Check script loading order.');
+        return;
+    }
+
+    // Create client
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Now use supabase in your code
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
