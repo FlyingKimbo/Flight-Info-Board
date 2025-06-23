@@ -66,16 +66,17 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            // Get active flights
+            // 1. Fetch ALL active flights exactly as they exist in Supabase
             const { data: activeFlights } = await supabase
                 .from('flights_realtime')
                 .select('*')
-                .neq('flightStatus', 'Completed');
+                .order('created_at', { ascending: false });
 
-            // Get completed flights
+            // 2. Fetch historical flights exactly as stored
             const { data: completedFlights } = await supabase
                 .from('flights_static')
-                .select('*');
+                .select('*')
+                .order('created_at', { ascending: false });
 
             return {
                 active: activeFlights || [],
