@@ -112,10 +112,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
     async function updateFlightTable() {
         const { active, completed } = await fetchAllFlights();
-        const tbody = document.querySelector("#flightTable tbody");
-        tbody.innerHTML = "";
+        const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
 
-        // Active flights (realtime, with effects)
+        // Clear existing rows (preserves headers)
+        tbody.innerHTML = '';
+
+        // Process active flights (if any)
         active.forEach(flight => {
             CreateNewRow({
                 image: `/Image/Aircraft_Type/${flight.current_flight}.png`,
@@ -127,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
-        // Static flights (historical, no effects)
+        // Process static flights
         completed.forEach(flight => {
             CreateNewRow({
                 image: flight.image,
@@ -136,7 +138,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 departure: flight.departure,
                 flightStatus: flight.flightStatus,
                 destination: flight.destination
-            }, true);  // ← Key difference
+            });
         });
     }
 
