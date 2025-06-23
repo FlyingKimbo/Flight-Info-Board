@@ -69,42 +69,37 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            // 1. First, check if flights_realtime has any valid status (not "-")
-            const { data: realtimeFlights, error: realtimeError } = await supabase
+            // Use correct column name (flight_status instead of flightstatus)
+            const { data: ignoreRealtime } = await supabase
                 .from('flights_realtime')
-                .select('flightstatus')
-                .neq('flightstatus', '-')
-                .limit(1); // Check if at least one valid flight exists
+                .select('flight_status')
+                .eq('flight_status', '-')
+                .limit(1);
 
-            if (realtimeError) throw realtimeError;
-
-            let activeFlights = [];
-            // Only fetch full realtime data if valid flights exist
-            if (realtimeFlights && realtimeFlights.length > 0) {
-                const { data: activeData, error: activeError } = await supabase
-                    .from('flights_realtime')
-                    .select('*')
-                    .neq('flightstatus', '-')
-                    .order('created_at', { ascending: false });
-                if (activeError) throw activeError;
-                activeFlights = activeData || [];
-            }
-
-            // 2. Always fetch static flights (regardless of realtime status)
-            const { data: completedFlights, error: staticError } = await supabase
+            // Always fetch static flights
+            const { data: staticFlights } = await supabase
                 .from('flights_static')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (staticError) throw staticError;
+            // Fetch realtime flights only if no "-" status exists
+            let activeFlights = [];
+            if (!ignoreRealtime || ignoreRealtime.length === 0) {
+                const { data: realtimeData } = await supabase
+                    .from('flights_realtime')
+                    .select('*')
+                    .neq('flight_status', '-')  // Correct column name
+                    .order('created_at', { ascending: false });
+                activeFlights = realtimeData || [];
+            }
 
             return {
-                active: activeFlights, // Empty if realtime has "-", else filtered data
-                completed: completedFlights || []
+                active: activeFlights,
+                completed: staticFlights || []
             };
         } catch (error) {
             console.error('Supabase fetch error:', error);
-            return { active: [], completed: [] }; // Fallback
+            return { active: [], completed: [] };
         }
     }
     
@@ -195,6 +190,22 @@ document.addEventListener("DOMContentLoaded", function () {
         return newRow; // Return the row for potential chaining
     }
 
+    async function fetchInitialETE() {
+        try {
+            const { data, error } = await supabase
+                .from('flights_realtime')
+                .select('start_distance, current_flight')
+                .limit(1);
+
+            if (error) throw error;
+            if (data && data.length > 0) {
+                initialETE = data[0].start_distance;
+                updateETEbars(data[0].current_flight, data[0].current_flight.split(' ')[0]);
+            }
+        } catch (error) {
+            console.error('Error fetching initial ETE:', error);
+        }
+    }
 
     
 
