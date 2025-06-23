@@ -62,7 +62,47 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-   
+
+    function CreateNewRow(flightData) {
+        const table = document.getElementById("flightTable");
+        const newRow = document.createElement('tr');
+
+        const aircraftCell = document.createElement('td');
+        const flightNumberCell = document.createElement('td');
+        const departureCell = document.createElement('td');
+        const flightStatusCell = document.createElement('td');
+        const destinationCell = document.createElement('td');
+
+        // Add content to the new cells
+        aircraftCell.style.textAlign = 'center';
+        const img = document.createElement('img');
+        img.src = flightData.image;
+        img.alt = 'Aircraft Image';
+        img.style.width = '100px';
+        img.style.height = 'auto';
+        aircraftCell.appendChild(img);
+        aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
+
+        flightNumberCell.textContent = flightData.flightNumber;
+        departureCell.textContent = flightData.departure;
+        flightStatusCell.textContent = flightData.flightStatus;
+        destinationCell.textContent = flightData.destination;
+
+        newRow.appendChild(aircraftCell);
+        newRow.appendChild(flightNumberCell);
+        newRow.appendChild(departureCell);
+        newRow.appendChild(flightStatusCell);
+        newRow.appendChild(destinationCell);
+
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
+        if (blinkingClass) {
+            newRow.classList.add(blinkingClass);
+        }
+
+        table.querySelector('tbody').appendChild(newRow);
+    }
+
+
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
