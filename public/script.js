@@ -1,8 +1,38 @@
 document.addEventListener("DOMContentLoaded", function () {
+
+
+    // Initialize Supabase
+    const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
+    const supabaseKey = 'your-anon-key-here';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
    
+    // 1. Flight Data Functions -------------------------------------------------
+    async function fetchAllFlights() {
+        try {
+            // Get active flights
+            const { data: activeFlights } = await supabase
+                .from('flights_realtime')
+                .select('*')
+                .neq('flightStatus', 'Completed');
+
+            // Get completed flights
+            const { data: completedFlights } = await supabase
+                .from('flights_static')
+                .select('*');
+
+            return {
+                active: activeFlights || [],
+                completed: completedFlights || []
+            };
+        } catch (error) {
+            console.error('Supabase fetch error:', error);
+            return { active: [], completed: [] };
+        }
+    }
 
     function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
@@ -43,22 +73,40 @@ document.addEventListener("DOMContentLoaded", function () {
         table.querySelector('tbody').appendChild(newRow);
     }
 
-    function fetchFlightStateJSON() {
-        fetch('/data/flight-state.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Fetched data:', data); // Log the fetched data
-                updateTableFromJSON(data);
-            })
-            .catch(error => {
-                console.error('Error fetching flight state JSON:', error);
+    async function updateFlightTable() {
+        const tableBody = document.getElementById('flight-rows');
+        tableBody.innerHTML = '';
+
+        const { active, completed } = await fetchAllFlights();
+
+        // Process active flights
+        active.forEach(flight => {
+            CreateNewRow({
+                aircraft: flight.current_flight,
+                departure: flight.obsDepDisplay,
+                destination: flight.obsArrDisplay,
+                flightNumber: flight.current_flight.split(' ').pop(),
+                flightStatus: flight.flightStatus,
+                image: `/Image/Aircraft_Type/${flight.current_flight}.png`
             });
+        });
+
+        // Add completed flights
+        completed.forEach(flight => {
+            const row = CreateNewRow({
+                aircraft: flight.aircraft,
+                departure: flight.departure,
+                destination: flight.destination,
+                flightNumber: flight.flightNumber,
+                flightStatus: 'Completed',
+                image: flight.image
+            });
+            row.classList.add('static-flight');
+        });
     }
+
+
+    
 
     function updateTableFromJSON(data) {
         const tableBody = document.getElementById('flight-rows');
@@ -69,37 +117,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    function checkFlightStatus() {
-        fetch('/api/update-flight')
-            .then(response => response.json())
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightData = data[currentFlightKey];
-                const currentFlightStatus = flightData.FlightStatus;
-                const currentFlight = flightData.CurrentFlight;
+    // 4. Status Checking System -----------------------------------------------
+    async function checkFlightStatus() {
+        try {
+            const { data } = await supabase
+                .from('flights_realtime')
+                .select('current_flight, flightStatus, obsArrDisplay');
 
-                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                if (!matchFound) {
-                    //CreateNewRow(flightData);
-                    window.location.reload();
-                   
+            if (data?.length > 0) {
+                const flight = data[0];
+                const fullFlightId = `${flight.current_flight} ${flight.current_flight.split(' ').pop()}`;
 
-                }
+                const matchFound = updateFlightCells(
+                    fullFlightId,
+                    flight.flightStatus,
+                    flight.obsArrDisplay
+                );
 
-                if (currentFlightStatus === "Deboarding Completed") {
-                    removeBlinking(currentFlight);
-                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
-                } else {
-                    setBlinking(currentFlight, currentFlightStatus);
-                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
-                }
-            })
-            .catch(error => {
-                console.error('Error checking flight status:', error);
-            });
+                if (!matchFound) window.location.reload();
+            }
+        } catch (error) {
+            console.error('Status check failed:', error);
+        }
     }
-
-    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
 
     function fetchInitialETE() {
         fetch('/api/update-flight')
@@ -148,23 +188,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    async function fetchFlightData() {
-        try {
-            const response = await fetch('/api/update-flight');
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Received data:', data);
-                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
-            } else {
-                document.getElementById('flight-data').textContent = 'Error fetching data';
-            }
-        } catch (error) {
-            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
-        }
-    }
-
-    // Fetch data every 5 seconds
-    setInterval(fetchFlightData, 5000);
 
     function fetchAirplaneInCloud() {
         return fetch('/api/update-flight')
@@ -443,8 +466,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function initialize() {
-        // Fetch and update the table from flight-state.json
-        fetchFlightStateJSON();
+        // Supabase change - Replaced fetchFlightStateJSON() with Supabase version
+        updateFlightTable(); // Now handles both realtime and static flights from Supabase
+
+
 
         // Set image paths
         const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
@@ -463,8 +488,10 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        // Initial fetch
-        fetchFlightData();
+        // Supabase change - Replaced fetchFlightData()
+        checkFlightStatus(); // Now uses Supabase instead of API endpoint
+
+     
 
         // Fetch initial ETE value
         fetchInitialETE();
@@ -474,11 +501,15 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
-        // Refresh the Greenbar function every 1000 milliseconds
         setInterval(function () {
-            fetchCurrentFlight().then(currentFlightKey => {
-                updateETEbars(currentFlightKey, currentFlightKey.split(' ')[0]);
-            });
+            // Supabase change - Updated to use current_flight from Supabase
+            supabase.from('flights_realtime')
+                .select('current_flight')
+                .then(({ data }) => {
+                    if (data?.length > 0) {
+                        updateETEbars(data[0].current_flight, data[0].current_flight.split(' ')[0]);
+                    }
+                });
         }, 2000);
 
         // Start jet stream cycling
