@@ -1,4 +1,4 @@
-// Import Supabase at the top of your file
+﻿// Import Supabase at the top of your file
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Initialize Supabase
@@ -111,21 +111,32 @@ document.addEventListener("DOMContentLoaded", function () {
     
     
     async function updateFlightTable() {
-        // 1. Fetch data
         const { active, completed } = await fetchAllFlights();
-        const tableBody = document.getElementById('flightTable').querySelector('tbody');
-        tableBody.innerHTML = ''; // Clear existing rows
+        const tbody = document.querySelector("#flightTable tbody");
+        tbody.innerHTML = "";
 
-        // 2. Render static flights (always)
-        completed.forEach(flight => {
-            const row = CreateNewRow(flight, true); // `isStatic=true`
-            tableBody.appendChild(row);
+        // Active flights (realtime, with effects)
+        active.forEach(flight => {
+            CreateNewRow({
+                image: `/Image/Aircraft_Type/${flight.current_flight}.png`,
+                aircraft: flight.current_flight,
+                flightNumber: flight.current_flight.split(' ').pop(),
+                departure: flight.obsdepdisplay,
+                flightStatus: flight.flightstatus,
+                destination: flight.obsarrdisplay
+            });
         });
 
-        // 3. Render active flights (only if no "-" status in realtime)
-        active.forEach(flight => {
-            const row = CreateNewRow(flight, false); // `isStatic=false`
-            tableBody.appendChild(row);
+        // Static flights (historical, no effects)
+        completed.forEach(flight => {
+            CreateNewRow({
+                image: flight.image,
+                aircraft: flight.aircraft,
+                flightNumber: flight.flightnumber,
+                departure: flight.departure,
+                flightStatus: flight.flightStatus,
+                destination: flight.destination
+            }, true);  // ← Key difference
         });
     }
 
