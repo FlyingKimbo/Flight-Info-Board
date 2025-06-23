@@ -80,7 +80,7 @@
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
     },
     {
-        "aircraft": "Boeing773ER-BAW",
+        "aircraft": "Concorde-BAW",
         "departure": "EDDL Duesseldorf",
         "destination": "EFHK Vantaa",
         "flightNumber": "BAW706",
