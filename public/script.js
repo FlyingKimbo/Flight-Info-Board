@@ -66,26 +66,42 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            //1. Fetch active flights, excluding those with flightstatus = "-"
-            const { data: activeFlights } = await supabase
+            // 1. First, check if flights_realtime has any valid status (not "-")
+            const { data: realtimeFlights, error: realtimeError } = await supabase
                 .from('flights_realtime')
-                .select('*')
-                .neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
-                .order('created_at', { ascending: false });
+                .select('flightstatus')
+                .neq('flightstatus', '-')
+                .limit(1); // Check if at least one valid flight exists
 
-            //2. Fetch historical flights exactly as stored (no filtering)
-            const { data: completedFlights } = await supabase
+            if (realtimeError) throw realtimeError;
+
+            let activeFlights = [];
+            // Only fetch full realtime data if valid flights exist
+            if (realtimeFlights && realtimeFlights.length > 0) {
+                const { data: activeData, error: activeError } = await supabase
+                    .from('flights_realtime')
+                    .select('*')
+                    .neq('flightstatus', '-')
+                    .order('created_at', { ascending: false });
+                if (activeError) throw activeError;
+                activeFlights = activeData || [];
+            }
+
+            // 2. Always fetch static flights (regardless of realtime status)
+            const { data: completedFlights, error: staticError } = await supabase
                 .from('flights_static')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-           return {
-                active: activeFlights || [],
+            if (staticError) throw staticError;
+
+            return {
+                active: activeFlights, // Empty if realtime has "-", else filtered data
                 completed: completedFlights || []
             };
         } catch (error) {
             console.error('Supabase fetch error:', error);
-            return { active: [], completed: [] };
+            return { active: [], completed: [] }; // Fallback
         }
     }
     
@@ -139,18 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.log('Completed flights:', completed);
 
         // Process active flights
-        active.forEach(flight => {
-            if (flight.flightStatus !== "-") {
-                CreateNewRow({
-                    aircraft: flight.current_flight,
-                    departure: flight.obsDepDisplay,
-                    destination: flight.obsArrDisplay,
-                    flightNumber: flight.current_flight.split(' ').pop(),
-                    flightStatus: flight.flightStatus,
-                    image: `/Image/Aircraft_Type/${flight.current_flight}.png`
-                });
-            }
-        });
+  
 
         // Process ALL completed flights
         completed.forEach(flight => {
