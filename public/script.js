@@ -67,11 +67,11 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchAllFlights() {
         try {
             // 1. Fetch active flights, excluding those with flightstatus = "-"
-            const { data: activeFlights } = await supabase
-                .from('flights_realtime')
-                .select('*')
-                .neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
-                .order('created_at', { ascending: false });
+            //const { data: activeFlights } = await supabase
+                //.from('flights_realtime')
+                //.select('*')
+                //.neq('flightstatus', '-')  // Exclude flights where flightstatus is "-"
+                //.order('created_at', { ascending: false });
 
             // 2. Fetch historical flights exactly as stored (no filtering)
             const { data: completedFlights } = await supabase
