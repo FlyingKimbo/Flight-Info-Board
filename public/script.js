@@ -1,163 +1,26 @@
-﻿// Import Supabase at the top of your file
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-// Initialize Supabase
-const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-// Verify connection
-supabase.from('flights_realtime').select('*').limit(1)
-    .then(({ data, error }) => {
-        if (error) {
-            console.error('Connection failed:', error)
-            showErrorToUser()
-        } else {
-            console.log('Connection successful:', data)
-            initializeApp()
-        }
-    })
-
-function initializeApp() {
-    // Your existing application code
-    let initialETE = -1
-    let cloudOpacityInterval
-    let GreenbarPercentage = 0
-
-    // Rest of your original code...
-}
-
-function showErrorToUser() {
-    // Display user-friendly error message
-    const errorDiv = document.createElement('div')
-    errorDiv.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: #ff4444;
-    color: white;
-    padding: 15px;
-    text-align: center;
-    z-index: 1000;
-  `
-    errorDiv.textContent = 'Connection to flight data failed. Please refresh the page.'
-    document.body.prepend(errorDiv)
-}
-
 document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Supabase client
-    const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
-
-    // Check if Supabase is loaded
-    if (typeof createClient === 'undefined') {
-        console.error('Supabase library not loaded! Check script loading order.');
-        return;
-    }
-
-   
-
-    // Now use supabase in your code
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
+   
 
-    
-
-
-    // 1. Flight Data Functions -------------------------------------------------
-    async function fetchAllFlights() {
-        try {
-            // Use correct column name (flight_status instead of flightstatus)
-            const { data: ignoreRealtime } = await supabase
-                .from('flights_realtime')
-                .select('flight_status')
-                .eq('flight_status', '-')
-                .limit(1);
-
-            // Always fetch static flights
-            const { data: staticFlights } = await supabase
-                .from('flights_static')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            // Fetch realtime flights only if no "-" status exists
-            let activeFlights = [];
-            if (!ignoreRealtime || ignoreRealtime.length === 0) {
-                const { data: realtimeData } = await supabase
-                    .from('flights_realtime')
-                    .select('*')
-                    .neq('flight_status', '-')  // Correct column name
-                    .order('created_at', { ascending: false });
-                activeFlights = realtimeData || [];
-            }
-
-            return {
-                active: activeFlights,
-                completed: staticFlights || []
-            };
-        } catch (error) {
-            console.error('Supabase fetch error:', error);
-            return { active: [], completed: [] };
-        }
-    }
-    
-    
-    
-    async function updateFlightTable() {
-        const { active, completed } = await fetchAllFlights();
-        const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
-
-        // Clear existing rows (preserves headers)
-        tbody.innerHTML = '';
-
-        // Process active flights (if any)
-        active.forEach(flight => {
-            CreateNewRow({
-                image: `/Image/Aircraft_Type/${flight.current_flight}.png`,
-                aircraft: flight.current_flight,
-                flightNumber: flight.current_flight.split(' ').pop(),
-                departure: flight.obsdepdisplay,
-                flightStatus: flight.flightstatus,
-                destination: flight.obsarrdisplay
-            });
-        });
-
-        // Process static flights
-        completed.forEach(flight => {
-            CreateNewRow({
-                image: flight.image,
-                aircraft: flight.aircraft,
-                flightNumber: flight.flightnumber,
-                departure: flight.departure,
-                flightStatus: flight.flightStatus,
-                destination: flight.destination
-            });
-        });
-    }
-
-
-    function CreateNewRow(flightData, isStatic = false) {
+    function CreateNewRow(flightData) {
         const table = document.getElementById("flightTable");
-        const tbody = table.querySelector('tbody');
         const newRow = document.createElement('tr');
 
-        // Create cells (preserving your exact structure)
         const aircraftCell = document.createElement('td');
         const flightNumberCell = document.createElement('td');
         const departureCell = document.createElement('td');
         const flightStatusCell = document.createElement('td');
         const destinationCell = document.createElement('td');
 
-        // Set cell content (unchanged from your original)
+        // Add content to the new cells
         aircraftCell.style.textAlign = 'center';
         const img = document.createElement('img');
         img.src = flightData.image;
         img.alt = 'Aircraft Image';
         img.style.width = '100px';
         img.style.height = 'auto';
-        img.onerror = function () { this.src = '/default-aircraft.png'; }; // Added fallback
         aircraftCell.appendChild(img);
         aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
 
@@ -166,91 +29,143 @@ document.addEventListener("DOMContentLoaded", function () {
         flightStatusCell.textContent = flightData.flightStatus;
         destinationCell.textContent = flightData.destination;
 
-        // Append cells (unchanged)
         newRow.appendChild(aircraftCell);
         newRow.appendChild(flightNumberCell);
         newRow.appendChild(departureCell);
         newRow.appendChild(flightStatusCell);
         newRow.appendChild(destinationCell);
 
-        // MODIFIED: Conditional blinking based on isStatic
-        if (!isStatic) {
-            const blinkingClass = getBlinkingClass(flightData.flightStatus);
-            if (blinkingClass) {
-                flightStatusCell.classList.add(blinkingClass); // Only blink status cell
-            }
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
+        if (blinkingClass) {
+            newRow.classList.add(blinkingClass);
         }
 
-        // NEW: Add static flight class if needed
-        if (isStatic) {
-            newRow.classList.add('static-flight');
-        }
-
-        tbody.appendChild(newRow);
-        return newRow; // Return the row for potential chaining
+        table.querySelector('tbody').appendChild(newRow);
     }
 
-    async function fetchInitialETE() {
+    function fetchFlightStateJSON() {
+        fetch('/data/flight-state.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetched data:', data); // Log the fetched data
+                updateTableFromJSON(data);
+            })
+            .catch(error => {
+                console.error('Error fetching flight state JSON:', error);
+            });
+    }
+
+    function updateTableFromJSON(data) {
+        const tableBody = document.getElementById('flight-rows');
+        tableBody.innerHTML = ''; // Clear existing rows
+
+        data.forEach(flightData => {
+            CreateNewRow(flightData);
+        });
+    }
+
+    function checkFlightStatus() {
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const flightData = data[currentFlightKey];
+                const currentFlightStatus = flightData.FlightStatus;
+                const currentFlight = flightData.CurrentFlight;
+
+                let matchFound = updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                if (!matchFound) {
+                    //CreateNewRow(flightData);
+                    window.location.reload();
+                   
+
+                }
+
+                if (currentFlightStatus === "Deboarding Completed") {
+                    removeBlinking(currentFlight);
+                    updateFlightCells(currentFlight, "-", "-", flightData.OBSArrDisplay);
+                } else {
+                    setBlinking(currentFlight, currentFlightStatus);
+                    updateFlightCells(currentFlight, flightData.FlightStatus, flightData.OBSArrDisplay);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking flight status:', error);
+            });
+    }
+
+    setInterval(checkFlightStatus, 5000); // This sets the interval to check the flight status every 5 seconds
+
+    function fetchInitialETE() {
+        fetch('/api/update-flight')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Received data:', data); // Log the entire response to check its structure
+
+                // Extract the current flight key directly from the data structure
+                const currentFlightKey = Object.keys(data)[0]; // Assuming there's only one key
+                const flightData = data[currentFlightKey];
+                console.log('Flight data:', flightData);
+
+                if (!flightData) {
+                    console.error('Current flight data is missing.');
+                    return;
+                }
+
+                const startDistance = flightData.StartDistance;
+                console.log('Extracted StartDistance:', startDistance); // Log the extracted StartDistance
+
+                if (isNaN(startDistance) || startDistance <= 0) {
+                    console.error('Invalid initial ETE value.');
+                    initialETE = -1; // Ensure we don't use invalid initial values
+                } else {
+                    initialETE = startDistance;
+                    updateETEbars(currentFlightKey, flightData.CurrentFlight.split(' ')[0]);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching initial ETE data:', error);
+            });
+    }
+
+    function fetchCurrentFlight() {
+        return fetch('/api/update-flight')
+            .then(response => response.json()) // Assuming the response is JSON
+            .then(data => {
+                const currentFlightKey = Object.keys(data)[0];
+                const currentFlight = data[currentFlightKey].CurrentFlight;
+                console.log('Fetched Current Flight:', currentFlight);
+                return currentFlight;
+            })
+            .catch(error => {
+                console.error('Error fetching current flight data:', error);
+                return null;
+            });
+    }
+
+    async function fetchFlightData() {
         try {
-            // Fetch the most recent flight data from Supabase
-            const { data, error } = await supabase
-                .from('flights_realtime')
-                .select('start_distance, current_flight')
-                .order('created_at', { ascending: false })
-                .limit(1);
-
-            if (error) throw error;
-
-            console.log('Received data:', data); // Log the response
-
-            if (!data || data.length === 0) {
-                console.error('Current flight data is missing.');
-                return;
-            }
-
-            const flightData = data[0];
-            const startDistance = flightData.start_distance;
-            console.log('Extracted start_distance:', startDistance);
-
-            if (isNaN(startDistance) || startDistance <= 0) {
-                console.error('Invalid initial ETE value.');
-                initialETE = -1;
+            const response = await fetch('/api/update-flight');
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Received data:', data);
+                document.getElementById('flight-data').textContent = JSON.stringify(data, null, 2);
             } else {
-                initialETE = startDistance;
-                // Note: Changed to use flightData.current_flight to match Supabase column name
-                updateETEbars(flightData.current_flight, flightData.current_flight.split(' ')[0]);
+                document.getElementById('flight-data').textContent = 'Error fetching data';
             }
         } catch (error) {
-            console.error('Error fetching initial ETE data:', error);
+            document.getElementById('flight-data').textContent = 'Fetch error: ' + error.message;
         }
     }
 
-    
+    // Fetch data every 5 seconds
+    setInterval(fetchFlightData, 5000);
 
-    // 4. Status Checking System -----------------------------------------------
-    async function checkFlightStatus() {
-        try {
-            const { data } = await supabase
-                .from('flights_realtime')
-                .select('current_flight, flightStatus, obsArrDisplay');
-
-            if (data?.length > 0) {
-                const flight = data[0];
-                const fullFlightId = `${flight.current_flight} ${flight.current_flight.split(' ').pop()}`;
-
-                const matchFound = updateFlightCells(
-                    fullFlightId,
-                    flight.flightStatus,
-                    flight.obsArrDisplay
-                );
-
-                if (!matchFound) window.location.reload();
-            }
-        } catch (error) {
-            console.error('Status check failed:', error);
-        }
-    }
-    
     function fetchAirplaneInCloud() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
@@ -528,10 +443,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function initialize() {
-        // Supabase change - Replaced fetchFlightStateJSON() with Supabase version
-        updateFlightTable(); // Now handles both realtime and static flights from Supabase
-
-
+        // Fetch and update the table from flight-state.json
+        fetchFlightStateJSON();
 
         // Set image paths
         const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
@@ -550,10 +463,8 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, 'asc');
         }
 
-        // Supabase change - Replaced fetchFlightData()
-        checkFlightStatus(); // Now uses Supabase instead of API endpoint
-        
-     
+        // Initial fetch
+        fetchFlightData();
 
         // Fetch initial ETE value
         fetchInitialETE();
@@ -563,15 +474,11 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
+        // Refresh the Greenbar function every 1000 milliseconds
         setInterval(function () {
-            // Supabase change - Updated to use current_flight from Supabase
-            supabase.from('flights_realtime')
-                .select('current_flight')
-                .then(({ data }) => {
-                    if (data?.length > 0) {
-                        updateETEbars(data[0].current_flight, data[0].current_flight.split(' ')[0]);
-                    }
-                });
+            fetchCurrentFlight().then(currentFlightKey => {
+                updateETEbars(currentFlightKey, currentFlightKey.split(' ')[0]);
+            });
         }, 2000);
 
         // Start jet stream cycling
