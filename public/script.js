@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 departure: flight.departure,
                 destination: flight.destination,
                 flightNumber: flight.flightNumber,
-                flightStatus: 'Completed',
+                flightStatus: '-',
                 image: flight.image
             });
             row.classList.add('static-flight');
