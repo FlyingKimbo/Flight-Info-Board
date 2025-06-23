@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 destination: flight.obsArrDisplay,
                 flightNumber: flight.current_flight.split(' ').pop(),
                 flightStatus: flight.flightStatus,
-                image: `/Image/Aircraft_Type/${encodeURIComponent(flight.current_flight)}.png`
+                image: `/Image/Aircraft_Type/${flight.current_flight}.png`
             });
         });
         /*
