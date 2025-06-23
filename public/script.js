@@ -167,21 +167,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function updateTableFromJSON(data) {
         const tableBody = document.getElementById('flight-rows');
-        tableBody.innerHTML = ''; // Clear existing rows
+        tableBody.innerHTML = ''; // Clear table first
 
-        data.forEach(supabaseFlight => {
-            // Transform Supabase data structure to match CreateNewRow's expected format
+        // Ensure data is an array and not empty
+        if (!Array.isArray(data)){
+            console.error("Data is not an array:", data);
+            return;
+        }
+
+        // Process each flight in the array
+        data.forEach((flight) => {
+            // Map Supabase fields to your expected format
             const rowData = {
-                aircraft: supabaseFlight.aircraft || supabaseFlight.current_flight,
-                departure: supabaseFlight.departure || supabaseFlight.obsDepDisplay,
-                destination: supabaseFlight.destination || supabaseFlight.obsArrDisplay,
-                flightNumber: supabaseFlight.flightNumber ||
-                    (supabaseFlight.current_flight ? supabaseFlight.current_flight.split(' ').pop() : ''),
-                flightStatus: supabaseFlight.flightStatus,
-                image: supabaseFlight.image ||
-                    `/Image/Aircraft_Type/${supabaseFlight.current_flight || supabaseFlight.aircraft}.png`
+                aircraft: flight.current_flight || flight.aircraft,
+                departure: flight.obsDepDisplay || flight.departure,
+                destination: flight.obsArrDisplay || flight.destination,
+                flightNumber: flight.flightNumber || flight.current_flight?.split(' ').pop(),
+                flightStatus: flight.flightStatus,
+                image: flight.image || `/Image/Aircraft_Type/${flight.current_flight || flight.aircraft}.png`
             };
 
+            // Create a row for each flight
             CreateNewRow(rowData);
         });
     }
