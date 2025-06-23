@@ -134,19 +134,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const { active, completed } = await fetchAllFlights();
 
-        // Process active flights
+        // Process active flights (only if flightStatus !== "-")
         active.forEach(flight => {
-            CreateNewRow({
-                aircraft: flight.current_flight,
-                departure: flight.obsDepDisplay,
-                destination: flight.obsArrDisplay,
-                flightNumber: flight.current_flight.split(' ').pop(),
-                flightStatus: flight.flightStatus,
-                image: `/Image/Aircraft_Type/${flight.current_flight}.png`
-            });
+            if (flight.flightStatus !== "-") {  // Skip if status is "-"
+                CreateNewRow({
+                    aircraft: flight.current_flight,
+                    departure: flight.obsDepDisplay,
+                    destination: flight.obsArrDisplay,
+                    flightNumber: flight.current_flight.split(' ').pop(),
+                    flightStatus: flight.flightStatus,
+                    image: `/Image/Aircraft_Type/${flight.current_flight}.png`
+                });
+            }
         });
-        
-        // Add completed flights
+
+        // Add completed flights (unchanged)
         completed.forEach(flight => {
             const row = CreateNewRow({
                 aircraft: flight.aircraft,
@@ -158,7 +160,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
             row.classList.add('static-flight');
         });
-        
     }
 
 
@@ -168,8 +169,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const tableBody = document.getElementById('flight-rows');
         tableBody.innerHTML = ''; // Clear existing rows
 
-        data.forEach(flightData => {
-            CreateNewRow(flightData);
+        data.forEach(supabaseFlight => {
+            // Transform Supabase data structure to match CreateNewRow's expected format
+            const rowData = {
+                aircraft: supabaseFlight.aircraft || supabaseFlight.current_flight,
+                departure: supabaseFlight.departure || supabaseFlight.obsDepDisplay,
+                destination: supabaseFlight.destination || supabaseFlight.obsArrDisplay,
+                flightNumber: supabaseFlight.flightNumber ||
+                    (supabaseFlight.current_flight ? supabaseFlight.current_flight.split(' ').pop() : ''),
+                flightStatus: supabaseFlight.flightStatus,
+                image: supabaseFlight.image ||
+                    `/Image/Aircraft_Type/${supabaseFlight.current_flight || supabaseFlight.aircraft}.png`
+            };
+
+            CreateNewRow(rowData);
         });
     }
 
