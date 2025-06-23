@@ -190,7 +190,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error('Status check failed:', error);
         }
     }
-
+    /*
     function fetchInitialETE() {
         fetch('/api/update-flight')
             .then(response => response.json())
@@ -238,7 +238,7 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-
+    */
     function fetchAirplaneInCloud() {
         return fetch('/api/update-flight')
             .then(response => response.json()) // Parse the response as JSON
