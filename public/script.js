@@ -183,36 +183,37 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchInitialETE() {
         try {
-            // Fetch the most recent flight data from Supabase
-            const { data, error } = await supabase
-                .from('flights_realtime')
-                .select('start_distance, current_flight')
-                .order('created_at', { ascending: false })
-                .limit(1);
+            // Get data exclusively from fetchAllFlights()
+            const { active } = await fetchAllFlights();
 
-            if (error) throw error;
-
-            console.log('Received data:', data); // Log the response
-
-            if (!data || data.length === 0) {
-                console.error('Current flight data is missing.');
+            if (!active || active.length === 0) {
+                console.log('No flights with valid status - skipping ETE calculation');
+                initialETE = -1; // Explicitly set invalid state
                 return;
             }
 
-            const flightData = data[0];
+            // Use the most recent active flight (pre-filtered and ordered)
+            const flightData = active[0];
             const startDistance = flightData.start_distance;
-            console.log('Extracted start_distance:', startDistance);
+
+            console.log('Processing ETE for:', {
+                flight: flightData.current_flight,
+                distance: startDistance
+            });
 
             if (isNaN(startDistance) || startDistance <= 0) {
-                console.error('Invalid initial ETE value.');
+                console.error('Invalid ETE value');
                 initialETE = -1;
             } else {
                 initialETE = startDistance;
-                // Note: Changed to use flightData.current_flight to match Supabase column name
-                updateETEbars(flightData.current_flight, flightData.current_flight.split(' ')[0]);
+                updateETEbars(
+                    flightData.current_flight,
+                    flightData.current_flight.split(' ')[0] // aircraft type
+                );
             }
         } catch (error) {
-            console.error('Error fetching initial ETE data:', error);
+            console.error('ETE processing failed:', error);
+            initialETE = -1; // Ensure known state on failure
         }
     }
 
@@ -330,6 +331,156 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 20); // Change image every 20ms
     }
 
+    async function fetchInitialETE() {
+        try {
+            const { active } = await fetchAllFlights();
+
+            if (!active || active.length === 0) {
+                console.log('No active flights with valid status - skipping ETE');
+                resetETEVisuals(); // Clear UI elements
+                initialETE = -1;
+                return;
+            }
+
+            const flightData = active[0]; // Most recent flight
+            const startDistance = flightData.start_distance;
+
+            console.log('Processing ETE for flight:', {
+                flight: flightData.current_flight,
+                distance: startDistance
+            });
+
+            if (isNaN(startDistance) || startDistance <= 0) {
+                console.error('Invalid ETE value');
+                initialETE = -1;
+                resetETEVisuals();
+            } else {
+                initialETE = startDistance;
+                // Call updateETEbars with additional required data
+                updateETEbars(
+                    flightData.current_flight,
+                    flightData.current_flight.split(' ')[0], // aircraftType
+                    {
+                        DistToDestination: flightData.dist_to_destination,
+                        ETE_SRGS: flightData.ete_srgs,
+                        AmbientPRECIPSTATE: flightData.ambient_precipstate
+                    }
+                );
+            }
+        } catch (error) {
+            console.error('ETE processing failed:', error);
+            initialETE = -1;
+            resetETEVisuals();
+        }
+    }
+
+    // Helper to clear UI elements
+    function resetETEVisuals() {
+        const elements = [
+            'ete-bar', 'aircraft-image', 'ete-bar-text',
+            'jetstream-image', 'cloud-image', 'precip-image'
+        ].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.opacity = 0;
+        });
+        clearInterval(cloudOpacityInterval);
+        cloudOpacityInterval = null;
+    }
+
+    // Modified to accept direct flight data
+    function updateETEbars(currentFlightKey, aircraftType, flightData) {
+        if (initialETE === -1) {
+            resetETEVisuals();
+            return;
+        }
+
+        console.log('Updating ETE bars with:', flightData);
+
+        const eteData = flightData.DistToDestination;
+        const eteBar = document.getElementById('ete-bar');
+        const aircraftImage = document.getElementById('aircraft-image');
+        const eteText = document.getElementById('ete-bar-text');
+        const jetStreamImage = document.getElementById('jetstream-image');
+        const cloudImage = document.getElementById('cloud-image');
+        const precipImage = document.getElementById('precip-image');
+
+        if (!eteBar || eteData === undefined) {
+            console.error('ETE elements missing');
+            return;
+        }
+
+        const ete = eteData;
+        const etePercentage = Math.min((ete / initialETE) * 100, 100);
+        GreenbarPercentage = etePercentage;
+        console.log('ETE Percentage:', etePercentage);
+
+        // Main ETE Bar Update
+        eteBar.style.width = etePercentage + '%';
+        eteBar.style.opacity = 1;
+
+        // Cloud Handling (preserve original logic)
+        fetchAirplaneInCloud().then(airplaneInCloud => {
+            if (airplaneInCloud === 1) {
+                if (!cloudOpacityInterval) {
+                    startCloudOpacityCycling(cloudImage);
+                    cloudImage.style.opacity = 1;
+                }
+            } else {
+                clearInterval(cloudOpacityInterval);
+                cloudOpacityInterval = null;
+                cloudImage.style.opacity = 0;
+            }
+        });
+
+        // State-based Visuals
+        switch (true) {
+            case (etePercentage > 0 && etePercentage <= 100):
+                eteText.style.opacity = 1;
+                aircraftImage.style.opacity = 1;
+                updatePositions();
+
+                fetchFlight_State().then(flightState => {
+                    if (flightState) {
+                        if (flightState.includes('Landed')) {
+                            jetStreamImage.style.opacity = 0;
+                        } else if (flightState.includes('Airborne')) {
+                            updatePositions();
+                            jetStreamImage.style.opacity = 1;
+                        }
+                    }
+                });
+                break;
+
+            case (etePercentage == 0):
+                eteText.style.opacity = 1;
+                aircraftImage.style.opacity = 1;
+                updatePositions();
+                jetStreamImage.style.opacity = 0;
+                break;
+
+            case (etePercentage < 0):
+                eteText.style.opacity = 0;
+                aircraftImage.style.opacity = 0;
+                updatePositions();
+                jetStreamImage.style.opacity = 0;
+                break;
+        }
+
+        // Image Updates
+        aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        cloudImage.src = `/Image/Cloud/Cloud1.png`;
+
+        // Text and Precipitation
+        const distanceText = flightData.DistToDestination + " KM";
+        const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
+        eteText.textContent = combinedText;
+
+        const precipState = flightData.AmbientPRECIPSTATE;
+        precipImage.src = precipState === 4 ? '/Image/Precip/rain1.gif' :
+            precipState === 8 ? '/Image/Precip/snow1.gif' : '';
+        precipImage.style.opacity = [4, 8].includes(precipState) ? 1 : 0;
+    }
+    /*
     function updateETEbars(currentFlightKey, aircraftType) {
         if (initialETE === -1) {
             return;
@@ -440,7 +591,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 eteText.style.opacity = 0;
             });
     }
-
+    */
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
         let direction = 1; // 1 for increasing, -1 for decreasing
