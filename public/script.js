@@ -83,9 +83,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     //.order('created_at', { ascending: false }),
 
                 // Realtime flights (only required fields)
-                /*
+                
                 supabase.from('flights_realtime')
                     .select(`current_flight,
+                    split_part(current_flight, ' ', 1) as aircraft_type,
                     flight_status,
                     start_distance,
                     airplane_in_cloud,
@@ -98,9 +99,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     flight_state,
                     created_at
                 `)
-                */
-                supabase.from('flights_realtime')
-                    .select(`*`)
+                
+                
                     .in('flight_status', VALID_REALTIME_STATUSES)
                     .order('created_at', { ascending: false })
             ]);
@@ -410,7 +410,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Modified to accept direct flight data
-    function updateETEbars(aircraftType, flightData) {
+    function updateETEbars(flightData) {
+        // Early exit if initial ETE not set
         if (initialETE === -1) {
             resetETEVisuals();
             return;
@@ -418,7 +419,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log('Updating ETE bars with:', flightData);
 
-        const eteData = flightData.dist_to_destination;
+        // Get DOM elements
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
         const eteText = document.getElementById('ete-bar-text');
@@ -426,13 +427,14 @@ document.addEventListener("DOMContentLoaded", function () {
         const cloudImage = document.getElementById('cloud-image');
         const precipImage = document.getElementById('precip-image');
 
-        if (!eteBar || eteData === undefined) {
-            console.error('ETE elements missing');
+        // Validate required elements and data
+        if (!eteBar || !flightData?.dist_to_destination) {
+            console.error('ETE elements or data missing');
             return;
         }
 
-        const ete = eteData;
-        const etePercentage = Math.min((ete / initialETE) * 100, 100);
+        // Calculate ETE percentage
+        const etePercentage = Math.min((flightData.dist_to_destination / initialETE) * 100, 100);
         GreenbarPercentage = etePercentage;
         console.log('ETE Percentage:', etePercentage);
 
@@ -440,20 +442,17 @@ document.addEventListener("DOMContentLoaded", function () {
         eteBar.style.width = etePercentage + '%';
         eteBar.style.opacity = 1;
 
-        // Cloud Handling (preserve original logic)
-        const airplaneInCloud = fetchAirplaneInCloud(flightData); // No await neededd 
-
-            if (airplaneInCloud === 1) {
-                if (!cloudOpacityState.interval) {
-                    startCloudOpacityCycling(cloudImage);
-                    cloudImage.style.opacity = 1;
-                }
-            } else {
-                
-                stopCloudOpacityCycling();
-                cloudImage.style.opacity = 0;
+        // Cloud Handling
+        const airplaneInCloud = flightData.airplane_in_cloud;
+        if (airplaneInCloud === 1) {
+            if (!cloudOpacityState.interval) {
+                startCloudOpacityCycling(cloudImage);
+                cloudImage.style.opacity = 1;
             }
-        
+        } else {
+            stopCloudOpacityCycling();
+            cloudImage.style.opacity = 0;
+        }
 
         // State-based Visuals
         switch (true) {
@@ -462,19 +461,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 aircraftImage.style.opacity = 1;
                 updatePositions();
 
-                const flightState = fetchFlight_State(flightData); // No await needed 
-                    if (flightState) {
-                        if (flightState.includes('Landed')) {
-                            jetStreamImage.style.opacity = 0;
-                        } else if (flightState.includes('Airborne')) {
-                            updatePositions();
-                            jetStreamImage.style.opacity = 1;
-                        }
+                if (flightData.flight_state) {
+                    if (flightData.flight_state.includes('Landed')) {
+                        jetStreamImage.style.opacity = 0;
+                    } else if (flightData.flight_state.includes('Airborne')) {
+                        updatePositions();
+                        jetStreamImage.style.opacity = 1;
                     }
-                
+                }
                 break;
 
-            case (etePercentage == 0):
+            case (etePercentage === 0):
                 eteText.style.opacity = 1;
                 aircraftImage.style.opacity = 1;
                 updatePositions();
@@ -490,15 +487,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Image Updates
+        const aircraftType = flightData.current_flight?.split(' ')[0] || 'default';
         aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-        cloudImage.src = `/Image/Cloud/Cloud1.png`;
+        cloudImage.src = '/Image/Cloud/Cloud1.png';
 
         // Text and Precipitation
-        const distanceText = flightData.DistToDestination + " KM";
-        const combinedText = `${flightData.ETE_SRGS.trim()} | ${distanceText}`;
+        const distanceText = `${flightData.dist_to_destination} KM`;
+        const combinedText = `${flightData.ete_srgs?.trim() || ''} | ${distanceText}`;
         eteText.textContent = combinedText;
 
-        const precipState = flightData.AmbientPRECIPSTATE;
+        // Precipitation handling
+        const precipState = flightData.ambient_precipstate;
         precipImage.src = precipState === 4 ? '/Image/Precip/rain1.gif' :
             precipState === 8 ? '/Image/Precip/snow1.gif' : '';
         precipImage.style.opacity = [4, 8].includes(precipState) ? 1 : 0;
