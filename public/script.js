@@ -488,7 +488,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Image Updates
         const aircraftType = flightData.current_flight?.split(' ')[0] || 'default';
-        aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        aircraftImage.src = `/Image/Aircraft_Type/${flightData.aircraft_type}.png`;
         cloudImage.src = '/Image/Cloud/Cloud1.png';
 
         // Text and Precipitation
