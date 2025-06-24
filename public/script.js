@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     dist_to_destination,
                     ete_srgs,
                     ambient_precipstate,
+                    ambient_visibility,
                     dep_display,
                     arr_display,
                     flight_state
