@@ -112,18 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Clear existing rows (preserves headers)
         tbody.innerHTML = '';
 
-        // Process active flights (if any)
-        active.forEach(flight => {
-            CreateNewRow({
-                image: `/Image/Aircraft_Type/${flight.current_flight}.png`,
-                aircraft: flight.current_flight,
-                flightNumber: flight.current_flight.split(' ').pop(),
-                departure: flight.obsdepdisplay,
-                flightStatus: flight.flightstatus,
-                destination: flight.obsarrdisplay
-            });
-        });
-
+      
         // Process static flights
         completed.forEach(flight => {
             CreateNewRow({
