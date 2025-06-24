@@ -277,17 +277,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // 3. Check if we should update
             const shouldUpdate =
-                realtimeData?.flightStatus &&
-                !["-", ""].includes(realtimeData.flightStatus) &&
-                validStatuses.has(realtimeData.flightStatus);
+                realtimeData?.flight_status &&
+                !["-", ""].includes(realtimeData.flight_status) &&
+                validStatuses.has(realtimeData.flight_status);
 
             if (shouldUpdate) {
                 const fullFlightId = `${realtimeData.current_flight} ${realtimeData.current_flight.split(' ').pop()}`;
 
                 updateFlightCells(
                     fullFlightId,
-                    realtimeData.flightStatus,
-                    realtimeData.obsArrDisplay
+                    realtimeData.flight_status,
+                    realtimeData.arr_display
                 );
                 return;
             }
@@ -295,9 +295,9 @@ document.addEventListener("DOMContentLoaded", function () {
             // 4. No update needed - log reason
             console.log(
                 !realtimeData ? "No realtime data" :
-                    !realtimeData.flightStatus ? "Empty flight status" :
-                        ["-", ""].includes(realtimeData.flightStatus) ? "Status is '-' or blank" :
-                            `Status '${realtimeData.flightStatus}' not in allowed values`
+                    !realtimeData.flight_status ? "Empty flight status" :
+                        ["-", ""].includes(realtimeData.flight_status) ? "Status is '-' or blank" :
+                            `Status '${realtimeData.flight_status}' not in allowed values`
             );
 
         } catch (error) {
