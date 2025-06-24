@@ -829,7 +829,7 @@ document.addEventListener("DOMContentLoaded", function () {
         setInterval(function () {
             // Supabase change - Updated to use current_flight from Supabase
             supabase.from('flights_realtime')
-                .select('current_flight')
+                .select('current_flight, ete_srgc')
                 .then(({ data }) => {
                     if (data?.length > 0) {
                         updateETEbars(data[0]);  // Pass the entire flight object
