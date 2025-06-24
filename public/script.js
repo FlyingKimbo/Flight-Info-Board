@@ -336,16 +336,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Then modify where it's called in updateETEbars():
-    const flightState = fetchFlight_State(flightData); // No await needed
-    if (flightState) {
-        if (flightState.includes('Landed')) {
-            jetStreamImage.style.opacity = 0;
-        } else if (flightState.includes('Airborne')) {
-            updatePositions();
-            jetStreamImage.style.opacity = 1;
-        }
-    }
+
 
     function startJetStreamCycling() {
         let imageIndex = 1;
@@ -467,7 +458,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 aircraftImage.style.opacity = 1;
                 updatePositions();
 
-                fetchFlight_State().then(flightState => {
+                const flightState = fetchFlight_State(flightData); // No await needed 
                     if (flightState) {
                         if (flightState.includes('Landed')) {
                             jetStreamImage.style.opacity = 0;
@@ -476,7 +467,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             jetStreamImage.style.opacity = 1;
                         }
                     }
-                });
+                
                 break;
 
             case (etePercentage == 0):
