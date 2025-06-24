@@ -417,13 +417,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Modified to accept direct flight data
     function updateETEbars(flightData) {
-        // Validate essential parameters
-        if (!flightData || initialETE === -1) {
-            resetETEVisuals();
+        // Validate input
+        if (!flightData || !flightData.dist_to_destination) {
+            console.error('Missing required flight data');
             return;
         }
 
-    
+
+        // Get aircraft type
+        const aircraftType = flightData.current_flight.split(' ')[0];
 
         // Get DOM elements with null checks
         const eteBar = document.getElementById('ete-bar');
@@ -433,9 +435,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const cloudImage = document.getElementById('cloud-image');
         const precipImage = document.getElementById('precip-image');
 
-        // Validate all required elements exist
-        if (!eteBar || !aircraftImage || !eteText || !jetStreamImage || !cloudImage || !precipImage) {
-            console.error('Required DOM elements missing');
+        // Verify elements exist
+        if (!eteBar) {
+            console.error('ETE bar element missing');
             return;
         }
 
@@ -454,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function () {
         eteBar.style.opacity = '1';
 
         // Update aircraft image
-        const aircraftType = flightData.current_flight.split(' ')[0];
+       //const aircraftType = flightData.current_flight.split(' ')[0];
         aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
         aircraftImage.style.opacity = '1';
 
