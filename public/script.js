@@ -84,8 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Realtime flights (only required fields)
                 supabase.from('flights_realtime')
-                    .select(`
-                    current_flight,
+                    .select(`current_flight,
                     flight_status,
                     start_distance,
                     airplane_in_cloud,
@@ -95,7 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ambient_visibility,
                     dep_display,
                     arr_display,
-                    flight_state
+                    flight_state,
                     created_at
                 `)
                     .in('flight_status', VALID_REALTIME_STATUSES)
