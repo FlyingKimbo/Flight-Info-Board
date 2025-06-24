@@ -65,26 +65,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
     
 
+    // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+    // Constants for maintainability
+    const VALID_REALTIME_STATUSES = [
+        'Boarding',
+        'Departed',
+        'Delayed',
+        'Enroute',
+        'Landed',
+        'Deboarding Completed'
+    ];
 
-    // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            // Fetch ONLY static flights
-            const { data: staticFlights, error } = await supabase
-                .from('flights_static')
-                .select('*')
-                .order('created_at', { ascending: false });
+            // Execute both queries in parallel
+            const [staticResult, realtimeResult] = await Promise.all([
+                supabase.from('flights_static')
+                    .select('*')
+                    .order('created_at', { ascending: false }),
 
-            if (error) throw error;
+                supabase.from('flights_realtime')
+                    .select('*')
+                    .in('flight_status', VALID_REALTIME_STATUSES)
+                    .order('created_at', { ascending: false })
+            ]);
 
-            // Return structure matches original but with empty active array
+            // Error handling for each query
+            if (staticResult.error) throw staticResult.error;
+            if (realtimeResult.error) throw realtimeResult.error;
+
             return {
-                active: [], // No realtime flights
-                completed: staticFlights || [] // Only static flights
+                active: realtimeResult.data || [],
+                completed: staticResult.data || []
             };
 
         } catch (error) {
-            console.error('Failed to fetch static flights:', error);
+            console.error('Flight data fetch error:', error);
             return { active: [], completed: [] };
         }
     }
@@ -102,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Process static flights
         completed.forEach(flight => {
             CreateNewRow({
-                image: flight.image,
+                image: flight.image, // the "image"" must match exactly in flights_static
                 aircraft: flight.aircraft,
                 flightNumber: flight.flightnumber,
                 departure: flight.departure,
