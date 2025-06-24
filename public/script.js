@@ -70,11 +70,11 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchAllFlights() {
         try {
             // Use correct column name (flight_status instead of flightstatus)
-            const { data: ignoreRealtime } = await supabase
-                .from('flights_realtime')
-                .select('flight_status')
-                .eq('flight_status', '-')
-                .limit(1);
+            //const { data: ignoreRealtime } = await supabase
+                //.from('flights_realtime')
+                //.select('flight_status')
+                //.eq('flight_status', '-')
+                //.limit(1);
 
             // Always fetch static flights
             const { data: staticFlights } = await supabase
