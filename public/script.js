@@ -82,8 +82,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     .select('*')
                     .order('created_at', { ascending: false }),
 
+                // Realtime flights (only required fields)
                 supabase.from('flights_realtime')
-                    .select('*')
+                    .select(`
+                    current_flight,
+                    flight_status,
+                    start_distance,
+                    airplane_in_cloud,
+                    dist_to_destination,
+                    ete_srgs,
+                    ambient_precipstate,
+                    dep_display,
+                    arr_display,
+                    created_at
+                `)
                     .in('flight_status', VALID_REALTIME_STATUSES)
                     .order('created_at', { ascending: false })
             ]);
