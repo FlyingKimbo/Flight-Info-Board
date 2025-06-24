@@ -104,9 +104,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     flight_state,
                     created_at
                 `)
-                    .in('flight_status', VALID_REALTIME_STATUSES || ['Airborne', 'Scheduled']) // Fallback
+                    .in('flight_status', VALID_REALTIME_STATUSES) 
                     .order('created_at', { ascending: false })
-                    .limit(100)  // Add limit for safety
+                    //.limit(100)  // Add limit for safety
             ]);
 
             // More detailed error handling
