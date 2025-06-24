@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 `)
                     .in('flight_status', VALID_REALTIME_STATUSES)
                     .order('created_at', { ascending: false })
-                    .limit(10)  // Only need recent active flights
+                    .limit(1)  // Only need recent active flights
             ]);
 
             // Error handling for both queries
