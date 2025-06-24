@@ -423,6 +423,8 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+    
+
         // Get DOM elements with null checks
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
@@ -452,7 +454,7 @@ document.addEventListener("DOMContentLoaded", function () {
         eteBar.style.opacity = '1';
 
         // Update aircraft image
-        const aircraftType = flightData.aircraft_type || flightData.current_flight?.split(' ')[0] || 'default';
+        const aircraftType = flightData.current_flight.split(' ')[0];
         aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
         aircraftImage.style.opacity = '1';
 
@@ -801,7 +803,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 .select('current_flight')
                 .then(({ data }) => {
                     if (data?.length > 0) {
-                        updateETEbars(data[0].current_flight, data[0].current_flight.split(' ')[0]);
+                        updateETEbars(data[0]);  // Pass the entire flight object
                     }
                 });
         }, 2000);
