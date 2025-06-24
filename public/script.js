@@ -63,15 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
 
-    // Constants for maintainability
-    const VALID_REALTIME_STATUSES = [
-        'Boarding',
-        'Departed',
-        'Delayed',
-        'Enroute',
-        'Landed',
-        'Deboarding Completed'
-    ];
 
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
