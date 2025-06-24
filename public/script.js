@@ -5,6 +5,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
 const supabase = createClient(supabaseUrl, supabaseKey)
+let initialETE = -1
+let cloudOpacityInterval
+let GreenbarPercentage = 0
+
 
 // Verify connection
 supabase.from('flights_realtime').select('*').limit(1)
@@ -18,14 +22,7 @@ supabase.from('flights_realtime').select('*').limit(1)
         }
     })
 
-function initializeApp() {
-    // Your existing application code
-    let initialETE = -1
-    let cloudOpacityInterval
-    let GreenbarPercentage = 0
 
-    // Rest of your original code...
-}
 
 function showErrorToUser() {
     // Display user-friendly error message
@@ -63,7 +60,25 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
 
+    // Subscribe to flight state changes
+    const subscription = supabase
+        .channel('flight-state-changes')
+        .on(
+            'postgres_changes',
+            {
+                event: 'UPDATE', // Trigger on updates
+                schema: 'public',
+                table: 'flights_realtime',
+            },
+            (payload) => {
+                console.log('Flight state changed:', payload.new.flight_state);
+                updateETEbars(payload.new); // Update UI
+            }
+        )
+        .subscribe();
 
+    // Later, unsubscribe:
+    // subscription.unsubscribe();
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     const VALID_REALTIME_STATUSES = ['Boarding', 'Departed', 'Delayed', 'Enroute', 'Landed', 'Deboarding Completed'];
@@ -345,23 +360,25 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function fetchFlight_State(flightData) {
+    async function fetchFlight_State() {
         try {
-            // Use data already fetched from Supabase
-            if (!flightData || !flightData.flight_state) {
-                console.warn('No flight state data available');
-                return null;
-            }
+            // Fetch the single flight record (no ID filtering)
+            const { data, error } = await supabase
+                .from('flights_realtime')
+                .select('flight_state')
+                .single(); // Ensures only 1 record is returned
 
-            const flightState = flightData.flight_state;
-            console.log('Flight State:', flightState);
-            return flightState;
+            if (error) throw error;
+            if (!data) throw new Error("No flight data found");
+
+            return data.flight_state;
 
         } catch (error) {
-            console.error('Error processing flight state:', error);
-            return null;
+            console.error("Error fetching flight state:", error.message);
+            return null; // Fallback if error
         }
     }
+        
 
 
 
@@ -436,6 +453,9 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateETEbars(flightData) {
         // Reset visuals if no valid data
         resetETEVisuals();
+
+
+
 
         if (!flightData) {
             console.warn('No flight data provided');
