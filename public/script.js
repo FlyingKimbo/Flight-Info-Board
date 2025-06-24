@@ -234,7 +234,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 .from('flights_realtime')
                 .select('current_flight, flightStatus, obsArrDisplay');
 
-            if (data?.length > 0) {
+            // Only proceed if there's data AND flightStatus is exactly "Boarding"
+            if (data?.length > 0 && data[0].flightStatus === "Boarding") {
                 const flight = data[0];
                 const fullFlightId = `${flight.current_flight} ${flight.current_flight.split(' ').pop()}`;
 
@@ -244,10 +245,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     flight.obsArrDisplay
                 );
 
-                if (!matchFound) window.location.reload();
+                if (!matchFound) {
+                    console.warn("No matching cells found - data may be outdated");
+                    // Removed automatic reload to prevent loops
+                }
+            } else {
+                console.log("Skipped processing - Flight not in Boarding status");
             }
         } catch (error) {
             console.error('Status check failed:', error);
+            // Consider adding user notification here
         }
     }
     
