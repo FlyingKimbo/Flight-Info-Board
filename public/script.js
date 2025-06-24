@@ -75,15 +75,37 @@ document.addEventListener("DOMContentLoaded", function () {
         'Deboarding Completed'
     ];
 
+    const VALID_REALTIME_STATUSES = [
+        'Boarding',
+        'Departed',
+        'Delayed',
+        'Enroute',
+        'Landed',
+        'Deboarding Completed'
+    ];
+
     async function fetchAllFlights() {
         try {
+            // Select SPECIFIC fields needed by all functions
             const [staticResult, realtimeResult] = await Promise.all([
+                // Static flights (all fields)
                 supabase.from('flights_static')
                     .select('*')
                     .order('created_at', { ascending: false }),
 
+                // Realtime flights (only required fields)
                 supabase.from('flights_realtime')
-                    .select('*')
+                    .select(`
+                    current_flight,
+                    flight_status,
+                    start_distance,
+                    airplane_in_cloud,
+                    dist_to_destination,
+                    ete_srgs,
+                    ambient_precipstate,
+                    dep_display,
+                    arr_display
+                `)
                     .in('flight_status', VALID_REALTIME_STATUSES)
                     .order('created_at', { ascending: false })
             ]);
