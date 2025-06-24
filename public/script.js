@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }));
 
             return {
+                
                 active,
                 completed
             };
@@ -441,8 +442,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Validate required fields
         const requiredFields = [
-            'dist_to_destination',
             'ete_srgs',
+            'dist_to_destination',
             'current_flight',
             'flight_state',
             'airplane_in_cloud',
