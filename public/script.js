@@ -275,19 +275,22 @@ document.addEventListener("DOMContentLoaded", function () {
         if (arrival) document.getElementById('arrival-display').textContent = arrival;
     }
     
-    function fetchAirplaneInCloud() {
-        return fetch('/api/update-flight')
-            .then(response => response.json()) // Parse the response as JSON
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const airplaneInCloud = data[currentFlightKey].AirplaneInCloud;
-                console.log('Airplane In Cloud:', airplaneInCloud);
-                return airplaneInCloud;
-            })
-            .catch(error => {
-                console.error('Error fetching AirplaneInCloud status data:', error);
+    function fetchAirplaneInCloud(flightData) {
+        try {
+            // Use data already fetched from fetchAllFlights()
+            if (!flightData || !flightData.airplane_in_cloud) {
+                console.warn('No cloud status data available');
                 return null;
-            });
+            }
+
+            const airplaneInCloud = flightData.airplane_in_cloud;
+            console.log('Airplane In Cloud:', airplaneInCloud);
+            return airplaneInCloud;
+
+        } catch (error) {
+            console.error('Error processing cloud status:', error);
+            return null;
+        }
     }
 
     function fetchAmbientPrecipState() {
@@ -419,19 +422,19 @@ document.addEventListener("DOMContentLoaded", function () {
         eteBar.style.opacity = 1;
 
         // Cloud Handling (preserve original logic)
-        fetchAirplaneInCloud().then(airplaneInCloud => {
+        const airplaneInCloud = fetchAirplaneInCloud(flightData); // No await neededd 
+
             if (airplaneInCloud === 1) {
-                if (!cloudOpacityInterval) {
+                if (!cloudOpacityState.interval) {
                     startCloudOpacityCycling(cloudImage);
                     cloudImage.style.opacity = 1;
                 }
             } else {
-                //clearInterval(cloudOpacityInterval);
-                //cloudOpacityInterval = null;
+                
                 stopCloudOpacityCycling();
                 cloudImage.style.opacity = 0;
             }
-        });
+        
 
         // State-based Visuals
         switch (true) {
