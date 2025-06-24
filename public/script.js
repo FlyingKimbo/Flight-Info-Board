@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const realtimeResult = await supabase
                 .from('flights_realtime')
                 .select(`
+                id,
                 current_flight,
                 flight_status,
                 start_distance,
