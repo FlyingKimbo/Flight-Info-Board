@@ -77,15 +77,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchAllFlights() {
         try {
+            // First verify connection
+            const { data: authData, error: authError } = await supabase.auth.getSession();
+            if (authError) throw authError;
+
+            // Then make queries
             const [staticResult, realtimeResult] = await Promise.all([
                 supabase.from('flights_static')
-                    .select('*'),
-                    //.order('created_at', { ascending: false }),
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(100),  // Add limit for safety
 
-                // Realtime flights (only required fields)
-                
                 supabase.from('flights_realtime')
-                    .select(`current_flight,
+                    .select(`
+                    current_flight,
                     split_part(current_flight, ' ', 1) as aircraft_type,
                     flight_status,
                     start_distance,
@@ -99,14 +104,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     flight_state,
                     created_at
                 `)
-                
-                
-                    .in('flight_status', VALID_REALTIME_STATUSES)
+                    .in('flight_status', VALID_REALTIME_STATUSES || ['Airborne', 'Scheduled']) // Fallback
                     .order('created_at', { ascending: false })
+                    .limit(100)  // Add limit for safety
             ]);
 
-            if (staticResult.error) throw staticResult.error;
-            if (realtimeResult.error) throw realtimeResult.error;
+            // More detailed error handling
+            if (staticResult.error) {
+                console.error('Static flights error:', staticResult.error);
+                throw staticResult.error;
+            }
+            if (realtimeResult.error) {
+                console.error('Realtime flights error:', realtimeResult.error);
+                throw realtimeResult.error;
+            }
 
             return {
                 active: realtimeResult.data || [],
@@ -114,7 +125,11 @@ document.addEventListener("DOMContentLoaded", function () {
             };
 
         } catch (error) {
-            console.error('Flight data fetch error:', error);
+            console.error('Full fetch error:', {
+                message: error.message,
+                details: error.details,
+                stack: error.stack
+            });
             return { active: [], completed: [] };
         }
     }
