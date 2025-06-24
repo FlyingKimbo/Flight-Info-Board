@@ -318,19 +318,33 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
-    function fetchFlight_State() {
-        return fetch('/api/update-flight')
-            .then(response => response.json()) // Parse the response as JSON
-            .then(data => {
-                const currentFlightKey = Object.keys(data)[0];
-                const flightState = data[currentFlightKey].Flight_State;
-                console.log('Flight State:', flightState);
-                return flightState;
-            })
-            .catch(error => {
-                console.error('Error fetching Flight_State data:', error);
+    function fetchFlight_State(flightData) {
+        try {
+            // Use data already fetched from Supabase
+            if (!flightData || !flightData.flight_state) {
+                console.warn('No flight state data available');
                 return null;
-            });
+            }
+
+            const flightState = flightData.flight_state;
+            console.log('Flight State:', flightState);
+            return flightState;
+
+        } catch (error) {
+            console.error('Error processing flight state:', error);
+            return null;
+        }
+    }
+
+    // Then modify where it's called in updateETEbars():
+    const flightState = fetchFlight_State(flightData); // No await needed
+    if (flightState) {
+        if (flightState.includes('Landed')) {
+            jetStreamImage.style.opacity = 0;
+        } else if (flightState.includes('Airborne')) {
+            updatePositions();
+            jetStreamImage.style.opacity = 1;
+        }
     }
 
     function startJetStreamCycling() {
