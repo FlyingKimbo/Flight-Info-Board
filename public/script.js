@@ -63,7 +63,16 @@ document.addEventListener("DOMContentLoaded", function () {
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
 
-    
+    // Constants for maintainability
+    const VALID_REALTIME_STATUSES = [
+        'Boarding',
+        'Departed',
+        'Delayed',
+        'Enroute',
+        'Landed',
+        'Deboarding Completed'
+    ];
+
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     const VALID_REALTIME_STATUSES = ['Boarding', 'Departed', 'Delayed', 'Enroute', 'Landed', 'Deboarding Completed'];
@@ -71,40 +80,56 @@ document.addEventListener("DOMContentLoaded", function () {
     async function fetchAllFlights() {
         try {
             // First verify connection
-            const { data: authData, error: authError } = await supabase.auth.getSession();
+            const { error: authError } = await supabase.auth.getSession();
             if (authError) throw authError;
 
-            // Make queries with better error handling
-            const realtimeResult = await supabase
-                .from('flights_realtime')
-                .select(`
-                id,
-                current_flight,
-                flight_status,
-                start_distance,
-                airplane_in_cloud,
-                dist_to_destination,
-                ete_srgs,
-                ambient_precipstate,
-                ambient_visibility,
-                dep_display,
-                arr_display,
-                flight_state,
-                created_at
-            `)
-                .in('flight_status', VALID_REALTIME_STATUSES)
-                .order('created_at', { ascending: false })
-                .limit(1);  // Only get the most recent flight
+            // Parallel fetching of both data sources
+            const [staticResult, realtimeResult] = await Promise.all([
+                // Static flights (completed)
+                supabase.from('flights_static')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50),  // Reasonable limit
 
+                // Realtime flights (active)
+                supabase.from('flights_realtime')
+                    .select(`
+                    id,
+                    current_flight,
+                    flight_status,
+                    start_distance,
+                    airplane_in_cloud,
+                    dist_to_destination,
+                    ete_srgs,
+                    ambient_precipstate,
+                    ambient_visibility,
+                    dep_display,
+                    arr_display,
+                    flight_state,
+                    created_at
+                `)
+                    .in('flight_status', VALID_REALTIME_STATUSES)
+                    .order('created_at', { ascending: false })
+                    .limit(10)  // Only need recent active flights
+            ]);
+
+            // Error handling for both queries
+            if (staticResult.error) throw staticResult.error;
             if (realtimeResult.error) throw realtimeResult.error;
 
-            // Validate we have complete data
-            const flightData = realtimeResult.data?.[0];
-            if (!flightData || flightData.dist_to_destination === undefined) {
-                throw new Error('Incomplete flight data received');
-            }
+            // Process and validate data
+            const completed = staticResult.data || [];
+            const active = (realtimeResult.data || [])
+                .filter(flight => flight.dist_to_destination !== undefined)
+                .map(flight => ({
+                    ...flight,
+                    aircraft_type: flight.current_flight.split(' ')[0]
+                }));
 
-            return flightData;
+            return {
+                active,
+                completed
+            };
 
         } catch (error) {
             console.error('Flight data fetch error:', {
@@ -112,10 +137,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 details: error.details,
                 code: error.code
             });
-            return null;
+            return {
+                active: [],
+                completed: []
+            };
         }
     }
     
+
+    
+
+   
     
     
     async function updateFlightTable() {
