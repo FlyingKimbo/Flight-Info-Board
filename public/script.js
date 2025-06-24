@@ -66,7 +66,6 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    // CONSTANTS
     const VALID_REALTIME_STATUSES = [
         'Boarding',
         'Departed',
@@ -76,112 +75,31 @@ document.addEventListener("DOMContentLoaded", function () {
         'Deboarding Completed'
     ];
 
-    const CACHE_TTL_MS = 2000; // 2 second cache
-    const REALTIME_FIELDS = `
-    *,
-    start_distance,
-    airplane_in_cloud,
-    dist_to_destination,
-    ete_srgs,
-    ambient_precipstate
-`;
-
-    // CACHE STATE
-    let cachedData = null;
-    let lastFetchTime = 0;
-
     async function fetchAllFlights() {
-        const now = Date.now();
-
-        // Cache check
-        if (cachedData && now - lastFetchTime < CACHE_TTL_MS) {
-            console.debug('[Cache Hit] Using cached flight data');
-            return cachedData;
-        }
-
         try {
-            console.debug('Fetching fresh flight data...');
-            lastFetchTime = now;
-
-            // Execute parallel queries
             const [staticResult, realtimeResult] = await Promise.all([
                 supabase.from('flights_static')
                     .select('*')
                     .order('created_at', { ascending: false }),
 
                 supabase.from('flights_realtime')
-                    .select(REALTIME_FIELDS)
-                    .or(
-                        VALID_REALTIME_STATUSES
-                            .map(s => `flight_status.ilike.${s}`)
-                            .join(',')
-                    )
+                    .select('*')
+                    .in('flight_status', VALID_REALTIME_STATUSES)
                     .order('created_at', { ascending: false })
             ]);
 
-            // Error handling
-            if (staticResult.error) {
-                throw new Error(`Static data error: ${staticResult.error.message}`);
-            }
-            if (realtimeResult.error) {
-                throw new Error(`Realtime data error: ${realtimeResult.error.message}`);
-            }
-
-            // Data validation
-            const validatedActive = (realtimeResult.data || []).filter(flight => {
-                const isValid = flight.flight_status &&
-                    VALID_REALTIME_STATUSES.some(
-                        validStatus => validStatus.toLowerCase() === flight.flight_status.toLowerCase()
-                    );
-
-                if (!isValid && flight.flight_status) {
-                    console.warn(`Excluded flight with invalid status: ${flight.flight_status}`);
-                }
-                return isValid;
-            });
-
-            // Prepare result
-            const result = {
-                active: validatedActive,
-                completed: staticResult.data || [],
-                timestamp: now
-            };
-
-            // Update cache
-            cachedData = result;
-
-            console.debug('Flight data fetched:', {
-                static: result.completed.length,
-                realtime: result.active.length
-            });
-
-            return result;
-
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            console.error('Flight data fetch failed:', errorMessage, error);
-
-            // Return cached data if available
-            if (cachedData) {
-                console.warn('Returning stale cached data due to error');
-                return {
-                    ...cachedData,
-                    error: errorMessage
-                };
-            }
+            if (staticResult.error) throw staticResult.error;
+            if (realtimeResult.error) throw realtimeResult.error;
 
             return {
-                active: [],
-                completed: [],
-                error: errorMessage
+                active: realtimeResult.data || [],
+                completed: staticResult.data || []
             };
-        }
-    }
 
-    // Utility function to clear cache
-    function clearFlightCache() {
-        cachedData = null;
-        lastFetchTime = 0;
+        } catch (error) {
+            console.error('Flight data fetch error:', error);
+            return { active: [], completed: [] };
+        }
     }
     
     
