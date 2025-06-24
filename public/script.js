@@ -79,8 +79,8 @@ document.addEventListener("DOMContentLoaded", function () {
         try {
             const [staticResult, realtimeResult] = await Promise.all([
                 supabase.from('flights_static')
-                    .select('*')
-                    .order('created_at', { ascending: false }),
+                    .select('*'),
+                    //.order('created_at', { ascending: false }),
 
                 // Realtime flights (only required fields)
                 supabase.from('flights_realtime')
