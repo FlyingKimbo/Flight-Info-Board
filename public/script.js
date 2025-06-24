@@ -94,6 +94,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     ambient_precipstate,
                     dep_display,
                     arr_display,
+                    flight_state
                     created_at
                 `)
                     .in('flight_status', VALID_REALTIME_STATUSES)
