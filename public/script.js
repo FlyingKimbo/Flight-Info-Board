@@ -69,36 +69,22 @@ document.addEventListener("DOMContentLoaded", function () {
     // 1. Flight Data Functions -------------------------------------------------
     async function fetchAllFlights() {
         try {
-            // Use correct column name (flight_status instead of flightstatus)
-            //const { data: ignoreRealtime } = await supabase
-                //.from('flights_realtime')
-                //.select('flight_status')
-                //.eq('flight_status', '-')
-                //.limit(1);
-
-            // Always fetch static flights
-            const { data: staticFlights } = await supabase
+            // Fetch ONLY static flights
+            const { data: staticFlights, error } = await supabase
                 .from('flights_static')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            // Fetch realtime flights only if no "-" status exists
-            let activeFlights = [];
-            if (!ignoreRealtime || ignoreRealtime.length === 0) {
-                const { data: realtimeData } = await supabase
-                    .from('flights_realtime')
-                    .select('*')
-                    .neq('flight_status', '-')  // Correct column name
-                    .order('created_at', { ascending: false });
-                activeFlights = realtimeData || [];
-            }
+            if (error) throw error;
 
+            // Return structure matches original but with empty active array
             return {
-                active: activeFlights,
-                completed: staticFlights || []
+                active: [], // No realtime flights
+                completed: staticFlights || [] // Only static flights
             };
+
         } catch (error) {
-            console.error('Supabase fetch error:', error);
+            console.error('Failed to fetch static flights:', error);
             return { active: [], completed: [] };
         }
     }
