@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         console.log('Updating ETE bars with:', flightData);
 
-        const eteData = flightData.DistToDestination;
+        const eteData = flightData.dist_to_destination;
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
         const eteText = document.getElementById('ete-bar-text');
