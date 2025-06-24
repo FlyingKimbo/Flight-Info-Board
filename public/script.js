@@ -406,7 +406,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Modified to accept direct flight data
-    function updateETEbars(currentFlightKey, aircraftType, flightData) {
+    function updateETEbars(aircraftType, flightData) {
         if (initialETE === -1) {
             resetETEVisuals();
             return;
