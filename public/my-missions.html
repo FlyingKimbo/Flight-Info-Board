@@ -251,18 +251,7 @@
     </table>
  <!-- 2. Initialize Supabase in a separate script -->
   <script>
-    // Initialize ONCE when page loads
-    //const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-    //const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
     
-    // Official initialization method
-    //const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-    
-    // Verify connection
-    supabase.from('flights_realtime').select('*').limit(1)
-      .then(response => console.log('Connection test:', response.data))
-      .catch(error => console.error('Connection failed:', error));
-  </script>
 
     <script type="module" src="script.js"></script>
   </main>
