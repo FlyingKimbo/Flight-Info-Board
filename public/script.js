@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // 1. Fetch realtime data
             const { data: realtimeData } = await supabase
                 .from('flights_realtime')
-                .select('current_flight, flightStatus, obsArrDisplay')
+                .select('current_flight, flight_status, arr_display')
                 .maybeSingle();
 
             // 2. Define valid statuses
