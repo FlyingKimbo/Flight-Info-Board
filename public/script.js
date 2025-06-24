@@ -104,22 +104,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     .limit(1)  // Only need recent active flights
             ]);
 
-            // Validate required fields
-            const requiredFields = [
-                'ete_srgs',
-                'dist_to_destination',
-                'current_flight',
-                'flight_state',
-                'airplane_in_cloud',
-                'ambient_precipstate'
-            ];
-
-            for (const field of requiredFields) {
-                if (flightData[field] === undefined) {
-                    console.error(`Missing required field: ${field}`);
-                    return;
-                }
-            }
+            
 
             // Error handling for both queries
             if (staticResult.error) throw staticResult.error;
