@@ -426,8 +426,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     cloudImage.style.opacity = 1;
                 }
             } else {
-                clearInterval(cloudOpacityInterval);
-                cloudOpacityInterval = null;
+                //clearInterval(cloudOpacityInterval);
+                //cloudOpacityInterval = null;
+                stopCloudOpacityCycling();
                 cloudImage.style.opacity = 0;
             }
         });
@@ -592,6 +593,58 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
     */
+
+    // Cloud opacity manager (now with better state control)
+    let cloudOpacityState = {
+        interval: null,
+        currentOpacity: 0.3,
+        direction: 1,
+        baseOpacity: 0.3,
+        peakOpacity: 1.0,
+        increment: 0.01,
+        speed: 30 // ms
+    };
+
+    function startCloudOpacityCycling(cloudImage) {
+        // Clear any existing interval
+        if (cloudOpacityState.interval) {
+            clearInterval(cloudOpacityState.interval);
+        }
+
+        // Initialize state
+        cloudImage.style.opacity = cloudOpacityState.currentOpacity;
+
+        // Start new cycle
+        cloudOpacityState.interval = setInterval(() => {
+            cloudOpacityState.currentOpacity += cloudOpacityState.direction * cloudOpacityState.increment;
+
+            // Boundary checks
+            if (cloudOpacityState.currentOpacity >= cloudOpacityState.peakOpacity) {
+                cloudOpacityState.currentOpacity = cloudOpacityState.peakOpacity;
+                cloudOpacityState.direction = -1;
+            } else if (cloudOpacityState.currentOpacity <= cloudOpacityState.baseOpacity) {
+                cloudOpacityState.currentOpacity = cloudOpacityState.baseOpacity;
+                cloudOpacityState.direction = 1;
+            }
+
+            // Apply to DOM
+            cloudImage.style.opacity = cloudOpacityState.currentOpacity;
+
+        }, cloudOpacityState.speed);
+    }
+
+    // New function to safely stop cycling
+    function stopCloudOpacityCycling() {
+        if (cloudOpacityState.interval) {
+            clearInterval(cloudOpacityState.interval);
+            cloudOpacityState.interval = null;
+        }
+    }
+
+    // Modified clear call in updateETEbars would now use:
+    // stopCloudOpacityCycling() instead of clearInterval(cloudOpacityInterval)
+
+    /*
     function startCloudOpacityCycling(cloudImage) {
         let opacity = 0.3;
         let direction = 1; // 1 for increasing, -1 for decreasing
@@ -610,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
             cloudImage.style.opacity = opacity;
         }, intervalTime); // Adjust the interval as needed
     }
-
+    */
     function updatePositions() {
         let Xoffset = 0;
         let XoffsetFix = 250;
