@@ -77,58 +77,52 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchAllFlights() {
         try {
-            // First verify connection
-            const { data: authData, error: authError } = await supabase.auth.getSession();
-            if (authError) throw authError;
+            // 1. First query - static flights
+            const staticResult = await supabase
+                .from('flights_static')
+                .select('*')
+                .order('created_at', { ascending: false });
 
-            // Then make queries
-            const [staticResult, realtimeResult] = await Promise.all([
-                supabase.from('flights_static')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(100),  // Add limit for safety
+            // 2. Second query - realtime flights with proper encoding
+            const realtimeResult = await supabase
+                .from('flights_realtime')
+                .select(`
+                current_flight,
+                flight_status,
+                start_distance,
+                airplane_in_cloud,
+                dist_to_destination,
+                ete_srgs,
+                ambient_precipstate,
+                ambient_visibility,
+                dep_display,
+                arr_display,
+                flight_state,
+                created_at
+            `)
+                .in('flight_status', VALID_REALTIME_STATUSES)
+                .order('created_at', { ascending: false })
+                .limit(100);
 
-                supabase.from('flights_realtime')
-                    .select(`
-                    current_flight,
-                    split_part(current_flight, ' ', 1) as aircraft_type,
-                    flight_status,
-                    start_distance,
-                    airplane_in_cloud,
-                    dist_to_destination,
-                    ete_srgs,
-                    ambient_precipstate,
-                    ambient_visibility,
-                    dep_display,
-                    arr_display,
-                    flight_state,
-                    created_at
-                `)
-                    .in('flight_status', VALID_REALTIME_STATUSES) 
-                    .order('created_at', { ascending: false })
-                    //.limit(100)  // Add limit for safety
-            ]);
+            if (staticResult.error) throw staticResult.error;
+            if (realtimeResult.error) throw realtimeResult.error;
 
-            // More detailed error handling
-            if (staticResult.error) {
-                console.error('Static flights error:', staticResult.error);
-                throw staticResult.error;
-            }
-            if (realtimeResult.error) {
-                console.error('Realtime flights error:', realtimeResult.error);
-                throw realtimeResult.error;
-            }
+            // Process aircraft_type in JavaScript instead of SQL
+            const processedActive = (realtimeResult.data || []).map(flight => ({
+                ...flight,
+                aircraft_type: flight.current_flight.split(' ')[0]
+            }));
 
             return {
-                active: realtimeResult.data || [],
+                active: processedActive,
                 completed: staticResult.data || []
             };
 
         } catch (error) {
-            console.error('Full fetch error:', {
+            console.error('Flight data fetch error:', {
                 message: error.message,
                 details: error.details,
-                stack: error.stack
+                code: error.code
             });
             return { active: [], completed: [] };
         }
