@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 aircraft: flight.aircraft,
                 flightNumber: flight.flightnumber,
                 departure: flight.departure,
-                flightStatus: flight.flightStatus,
+                flightStatus: flight.flightstatus,
                 destination: flight.destination
             });
         });
