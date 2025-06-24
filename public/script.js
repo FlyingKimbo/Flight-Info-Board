@@ -230,32 +230,57 @@ document.addEventListener("DOMContentLoaded", function () {
     // 4. Status Checking System -----------------------------------------------
     async function checkFlightStatus() {
         try {
-            const { data } = await supabase
+            // 1. Fetch realtime data
+            const { data: realtimeData } = await supabase
                 .from('flights_realtime')
-                .select('current_flight, flightStatus, obsArrDisplay');
+                .select('current_flight, flightStatus, obsArrDisplay')
+                .maybeSingle();
 
-            // Only proceed if there's data AND flightStatus is exactly "Boarding"
-            if (data?.length > 0 && data[0].flightStatus === "Boarding") {
-                const flight = data[0];
-                const fullFlightId = `${flight.current_flight} ${flight.current_flight.split(' ').pop()}`;
+            // 2. Define valid statuses
+            const validStatuses = new Set([
+                "Boarding",
+                "Departed",
+                "Delayed",
+                "Enroute",
+                "Landed",
+                "Deboarding Completed"
+            ]);
 
-                const matchFound = updateFlightCells(
+            // 3. Check if we should update
+            const shouldUpdate =
+                realtimeData?.flightStatus &&
+                !["-", ""].includes(realtimeData.flightStatus) &&
+                validStatuses.has(realtimeData.flightStatus);
+
+            if (shouldUpdate) {
+                const fullFlightId = `${realtimeData.current_flight} ${realtimeData.current_flight.split(' ').pop()}`;
+
+                updateFlightCells(
                     fullFlightId,
-                    flight.flightStatus,
-                    flight.obsArrDisplay
+                    realtimeData.flightStatus,
+                    realtimeData.obsArrDisplay
                 );
-
-                if (!matchFound) {
-                    console.warn("No matching cells found - data may be outdated");
-                    // Removed automatic reload to prevent loops
-                }
-            } else {
-                console.log("Skipped processing - Flight not in Boarding status");
+                return;
             }
+
+            // 4. No update needed - log reason
+            console.log(
+                !realtimeData ? "No realtime data" :
+                    !realtimeData.flightStatus ? "Empty flight status" :
+                        ["-", ""].includes(realtimeData.flightStatus) ? "Status is '-' or blank" :
+                            `Status '${realtimeData.flightStatus}' not in allowed values`
+            );
+
         } catch (error) {
-            console.error('Status check failed:', error);
-            // Consider adding user notification here
+            console.error('Flight status check error:', error);
         }
+    }
+
+    // Update helper with null checks
+    function updateFlightCells(flightId, status, arrival) {
+        if (flightId) document.getElementById('flight-id').textContent = flightId;
+        if (status) document.getElementById('flight-status').textContent = status;
+        if (arrival) document.getElementById('arrival-display').textContent = arrival;
     }
     
     function fetchAirplaneInCloud() {
