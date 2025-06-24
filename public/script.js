@@ -66,24 +66,21 @@ document.addEventListener("DOMContentLoaded", function () {
     
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    const VALID_REALTIME_STATUSES = [
-        'Boarding',
-        'Departed',
-        'Delayed',
-        'Enroute',
-        'Landed',
-        'Deboarding Completed'
-    ];
+    const VALID_REALTIME_STATUSES = ['Boarding', 'Departed', 'Delayed', 'Enroute', 'Landed', 'Deboarding Completed'];
 
     async function fetchAllFlights() {
         try {
-            // 1. First query - static flights
+            // First verify connection
+            const { data: authData, error: authError } = await supabase.auth.getSession();
+            if (authError) throw authError;
+
+            // Make queries sequentially for better error handling
             const staticResult = await supabase
                 .from('flights_static')
                 .select('*')
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .limit(100);
 
-            // 2. Second query - realtime flights with proper encoding
             const realtimeResult = await supabase
                 .from('flights_realtime')
                 .select(`
@@ -107,10 +104,10 @@ document.addEventListener("DOMContentLoaded", function () {
             if (staticResult.error) throw staticResult.error;
             if (realtimeResult.error) throw realtimeResult.error;
 
-            // Process aircraft_type in JavaScript instead of SQL
+            // Process aircraft_type in JavaScript
             const processedActive = (realtimeResult.data || []).map(flight => ({
                 ...flight,
-                aircraft_type: flight.current_flight.split(' ')[0]
+                aircraft_type: flight.current_flight?.split(' ')[0] || 'unknown'
             }));
 
             return {
@@ -420,15 +417,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Modified to accept direct flight data
     function updateETEbars(flightData) {
-        // Early exit if initial ETE not set
-        if (initialETE === -1) {
+        // Validate essential parameters
+        if (!flightData || initialETE === -1) {
             resetETEVisuals();
             return;
         }
 
-        console.log('Updating ETE bars with:', flightData);
-
-        // Get DOM elements
+        // Get DOM elements with null checks
         const eteBar = document.getElementById('ete-bar');
         const aircraftImage = document.getElementById('aircraft-image');
         const eteText = document.getElementById('ete-bar-text');
@@ -436,80 +431,60 @@ document.addEventListener("DOMContentLoaded", function () {
         const cloudImage = document.getElementById('cloud-image');
         const precipImage = document.getElementById('precip-image');
 
-        // Validate required elements and data
-        if (!eteBar || !flightData?.dist_to_destination) {
-            console.error('ETE elements or data missing');
+        // Validate all required elements exist
+        if (!eteBar || !aircraftImage || !eteText || !jetStreamImage || !cloudImage || !precipImage) {
+            console.error('Required DOM elements missing');
+            return;
+        }
+
+        // Validate required flight data
+        if (flightData.dist_to_destination === undefined || flightData.ete_srgs === undefined) {
+            console.error('Required flight data missing');
             return;
         }
 
         // Calculate ETE percentage
         const etePercentage = Math.min((flightData.dist_to_destination / initialETE) * 100, 100);
         GreenbarPercentage = etePercentage;
-        console.log('ETE Percentage:', etePercentage);
 
-        // Main ETE Bar Update
-        eteBar.style.width = etePercentage + '%';
-        eteBar.style.opacity = 1;
+        // Update ETE bar
+        eteBar.style.width = `${etePercentage}%`;
+        eteBar.style.opacity = '1';
 
-        // Cloud Handling
-        const airplaneInCloud = flightData.airplane_in_cloud;
-        if (airplaneInCloud === 1) {
+        // Update aircraft image
+        const aircraftType = flightData.aircraft_type || flightData.current_flight?.split(' ')[0] || 'default';
+        aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        aircraftImage.style.opacity = '1';
+
+        // Update cloud effects
+        if (flightData.airplane_in_cloud === 1) {
+            cloudImage.style.opacity = '1';
             if (!cloudOpacityState.interval) {
                 startCloudOpacityCycling(cloudImage);
-                cloudImage.style.opacity = 1;
             }
         } else {
+            cloudImage.style.opacity = '0';
             stopCloudOpacityCycling();
-            cloudImage.style.opacity = 0;
         }
 
-        // State-based Visuals
-        switch (true) {
-            case (etePercentage > 0 && etePercentage <= 100):
-                eteText.style.opacity = 1;
-                aircraftImage.style.opacity = 1;
-                updatePositions();
-
-                if (flightData.flight_state) {
-                    if (flightData.flight_state.includes('Landed')) {
-                        jetStreamImage.style.opacity = 0;
-                    } else if (flightData.flight_state.includes('Airborne')) {
-                        updatePositions();
-                        jetStreamImage.style.opacity = 1;
-                    }
-                }
-                break;
-
-            case (etePercentage === 0):
-                eteText.style.opacity = 1;
-                aircraftImage.style.opacity = 1;
-                updatePositions();
-                jetStreamImage.style.opacity = 0;
-                break;
-
-            case (etePercentage < 0):
-                eteText.style.opacity = 0;
-                aircraftImage.style.opacity = 0;
-                updatePositions();
-                jetStreamImage.style.opacity = 0;
-                break;
-        }
-
-        // Image Updates
-        const aircraftType = flightData.current_flight?.split(' ')[0] || 'default';
-        aircraftImage.src = `/Image/Aircraft_Type/${flightData.aircraft_type}.png`;
-        cloudImage.src = '/Image/Cloud/Cloud1.png';
-
-        // Text and Precipitation
+        // Update text display
         const distanceText = `${flightData.dist_to_destination} KM`;
-        const combinedText = `${flightData.ete_srgs?.trim() || ''} | ${distanceText}`;
-        eteText.textContent = combinedText;
+        eteText.textContent = `${flightData.ete_srgs.trim()} | ${distanceText}`;
+        eteText.style.opacity = '1';
 
-        // Precipitation handling
+        // Update flight state visuals
+        updatePositions();
+        if (flightData.flight_state?.includes('Landed')) {
+            jetStreamImage.style.opacity = '0';
+        } else if (flightData.flight_state?.includes('Airborne')) {
+            jetStreamImage.style.opacity = '1';
+        }
+
+        // Update precipitation
         const precipState = flightData.ambient_precipstate;
         precipImage.src = precipState === 4 ? '/Image/Precip/rain1.gif' :
             precipState === 8 ? '/Image/Precip/snow1.gif' : '';
-        precipImage.style.opacity = [4, 8].includes(precipState) ? 1 : 0;
+        precipImage.style.opacity = [4, 8].includes(precipState) ? '1' : '0';
     }
     /*
     function updateETEbars(currentFlightKey, aircraftType) {
