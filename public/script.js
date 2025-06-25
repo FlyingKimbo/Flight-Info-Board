@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             errorContainer.style.display = 'block';
         }
     }
-});
+
 
     // Now use supabase in your code
     let initialETE = -1;
@@ -764,3 +764,4 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     initialize();
 
+});
