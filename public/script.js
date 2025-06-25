@@ -54,6 +54,82 @@ const flightStore = {
 };
 
 // ###################################################################### Sub to supabase realtime data
+
+// SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+async function fetch_flight_static() {
+    const TIMEOUT_MS = 8000; // 8-second timeout
+    let timeoutId;
+
+    try {
+        // 1. Verify authentication first (with timeout)
+        const authCheck = Promise.race([
+            supabase.auth.getSession(),
+            new Promise((_, reject) =>
+                timeoutId = setTimeout(() => reject(new Error('Authentication timeout')), TIMEOUT_MS)
+            )
+        ]);
+        const { error: authError } = await authCheck;
+        if (authError) throw authError;
+
+        // 2. Single table fetch (with timeout)
+        const fetchPromise = supabase
+            .from('flights_static')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(50);
+
+        const { data, error } = await Promise.race([
+            fetchPromise,
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Database query timeout')), TIMEOUT_MS)
+            )
+        ]);
+
+        if (error) throw error;
+        return { completed: data || [] };
+
+    } catch (error) {
+        console.error('Fetch error:', {
+            name: error.name,
+            message: error.message,
+            ...(error.details && { details: error.details }),
+            ...(error.code && { code: error.code })
+        });
+
+        // Reconnect if connection was lost
+        if (error.message.includes('WebSocket')) {
+            await supabase.reconnect();
+        }
+
+        return {
+            completed: [],
+            error: error.message
+        };
+    } finally {
+        clearTimeout(timeoutId); // Always clean up timeout
+    }
+}
+
+async function fetchFlightDataOnce() {
+    try {
+        const { completed, error } = await fetch_flight_static();
+
+        if (error) {
+            console.error('Flight data error:', error);
+            return { success: false, data: null, error };
+        }
+
+        return { success: true, data: completed, error: null };
+
+    } catch (err) {
+        console.error('Unexpected error:', err);
+        return { success: false, data: null, error: err.message };
+    }
+}
+
+
 //       ##################### ETE and Distance bar update ################################################
 function resetETEVisuals() {
     const elements = [
@@ -178,6 +254,19 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // 1. Fetch static data once
+    const result = await fetchFlightDataOnce();
+
+    if (result.success) {
+        // Process your flight data
+        console.log('Loaded flights:', result.data);
+        renderFlights(result.data); // Your rendering function
+    } else {
+        // Show error to user
+        showErrorMessage(result.error);
+    }
+
+
     const cleanupETEUpdates = Update_ETE_Dist2Arr_Bar();
 
     // Now use supabase in your code
@@ -187,56 +276,7 @@ document.addEventListener("DOMContentLoaded", function () {
     
     
 
-    // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-    const VALID_REALTIME_STATUSES = ['Boarding', 'Departed', 'Delayed', 'Enroute', 'Landed', 'Deboarding Completed'];
-
-    async function fetchAllFlights() {
-        try {
-            // First verify connection
-            const { error: authError } = await supabase.auth.getSession();
-            if (authError) throw authError;
-
-            // Parallel fetching of both data sources
-            const [staticResult, realtimeResult] = await Promise.all([
-                // Static flights (completed)
-                supabase.from('flights_static')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50),  // Reasonable limit
-
-               
-            ]);
-
-
-
-            // Error handling for both queries
-            if (staticResult.error) throw staticResult.error;
-            
-
-            // Process and validate data
-            const completed = staticResult.data || [];
-            
-                
-              
-
-            return {
-
-                
-                completed
-            };
-
-        } catch (error) {
-            console.error('Flight data fetch error:', {
-                message: error.message,
-                details: error.details,
-                code: error.code
-            });
-            return {
-               
-                completed: []
-            };
-        }
-    }
+    
 
 
 
@@ -245,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     async function updateFlightTable() {
-        const { active, completed } = await fetchAllFlights();
+        const { active, completed } = await fetch_flight_static();
         const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
 
         // Clear existing rows (preserves headers)
@@ -622,16 +662,7 @@ document.addEventListener("DOMContentLoaded", function () {
             sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
         }, 20000);
 
-        setInterval(function () {
-            // Supabase change - Updated to use current_flight from Supabase
-            supabase.from('flights_realtime')
-                .select('ete_srgs')
-                .then(({ data }) => {
-                    if (data?.length > 0) {
-                        updateETEbars(data[0]);  // Pass the entire flight object
-                    }
-                });
-        }, 2000);
+       
 
         // Start jet stream cycling
         startJetStreamCycling();
