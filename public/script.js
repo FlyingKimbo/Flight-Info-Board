@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 //Global Variable
 let GreenbarPercentage = 100
-let cloudOpacityInterval
+
 // ###################################################################### Sub to supabase realtime data
 
 
@@ -82,105 +82,10 @@ async function fetch_flight_static() {
 //    if (arrival) document.getElementById('arrival-display').textContent = arrival;
 //}
 
-function fetchAirplaneInCloud(flightData) {
-    try {
-        // Use data already fetched from fetchAllFlights()
-        if (!flightData || !flightData.airplane_in_cloud) {
-            console.warn('No cloud status data available');
-            return null;
-        }
 
-        const airplaneInCloud = flightData.airplane_in_cloud;
-        console.log('Airplane In Cloud:', airplaneInCloud);
-        return airplaneInCloud;
 
-    } catch (error) {
-        console.error('Error processing cloud status:', error);
-        return null;
-    }
-}
 
-function fetchAmbientPrecipState() {
-    return fetch('/api/update-flight')
-        .then(response => response.json()) // Parse the response as JSON
-        .then(data => {
-            const currentFlightKey = Object.keys(data)[0];
-            const precipState = data[currentFlightKey].AmbientPRECIPSTATE;
-            console.log('AmbientPRECIPSTATE:', precipState);
-            return precipState;
-        })
-        .catch(error => {
-            console.error('Error fetching AirplaneInCloud status data:', error);
-            return null;
-        });
-}
 
-async function fetchFlight_State() {
-    try {
-        // Fetch the single flight record (no ID filtering)
-        const { data, error } = await supabase
-            .from('flights_realtime')
-            .select('flight_state')
-            .single(); // Ensures only 1 record is returned
-
-        if (error) throw error;
-        if (!data) throw new Error("No flight data found");
-
-        return data.flight_state;
-
-    } catch (error) {
-        console.error("Error fetching flight state:", error.message);
-        return null; // Fallback if error
-    }
-}
-
-function startJetStreamCycling(flightState) {
-    let imageIndex = 1;
-    let intervalId = null;
-
-    // Function to update the jet stream image
-    const updateJetStream = () => {
-        const jetStreamImage = document.getElementById('jetstream-image');
-        if (jetStreamImage && flightState === "Airborne") {
-            jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
-            imageIndex = (imageIndex % 5) + 1; // Cycle through 1 to 5
-        } else if (jetStreamImage) {
-            jetStreamImage.style.opacity = '0'; // Hide when not airborne
-        }
-    };
-
-    // Clear any existing interval
-    if (intervalId) {
-        clearInterval(intervalId);
-    }
-
-    // Start new interval if airborne
-    if (flightState === "Airborne") {
-        intervalId = setInterval(updateJetStream, 20);
-        const jetStreamImage = document.getElementById('jetstream-image');
-        if (jetStreamImage) {
-            jetStreamImage.style.opacity = '1'; // Make sure it's visible
-        }
-    }
-
-    return intervalId; // Return the interval ID for cleanup
-}
-
-// Usage example:
-let jetStreamInterval = null;
-
-// When flight state changes:
-function handleFlightStateChange(newState) {
-    if (jetStreamInterval) {
-        clearInterval(jetStreamInterval);
-    }
-    jetStreamInterval = startJetStreamCycling(newState);
-}
-
-// Initialize:
-handleFlightStateChange("Airborne"); // Starts animation
-// Later...
-handleFlightStateChange("Landed"); // Stops animation and hides
 
 /*
 function startJetStreamCycling() {
@@ -570,9 +475,85 @@ async function checkFlightStatus() {
     }
 }
 
+// Animation Controller
+const AnimationManager = {
+    jetStreamInterval: null,
+    cloudInterval: null,
+
+    startJetStreamCycling(flightState) {
+        let imageIndex = 1;
+
+        // Clear existing interval
+        if (this.jetStreamInterval) {
+            clearInterval(this.jetStreamInterval);
+        }
+
+        // Only animate if airborne
+        if (flightState === "Airborne") {
+            this.jetStreamInterval = setInterval(() => {
+                const jetStreamImage = document.getElementById('jetstream-image');
+                if (jetStreamImage) {
+                    jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+                    jetStreamImage.style.opacity = '1';
+                    imageIndex = (imageIndex % 5) + 1;
+                }
+            }, 20);
+        } else {
+            const jetStreamImage = document.getElementById('jetstream-image');
+            if (jetStreamImage) jetStreamImage.style.opacity = '0';
+        }
+    },
+
+    startCloudOpacityCycle(flightState) {
+        let increasing = true;
+        let currentOpacity = 0.2;
+
+        // Clear existing interval
+        if (this.cloudInterval) {
+            clearInterval(this.cloudInterval);
+        }
+
+        // Only animate if airborne
+        if (flightState === "Airborne") {
+            this.cloudInterval = setInterval(() => {
+                const cloudImage = document.getElementById('cloud-image');
+                if (cloudImage) {
+                    // Oscillate opacity
+                    currentOpacity += increasing ? 0.01 : -0.01;
+                    if (currentOpacity >= 0.7) increasing = false;
+                    if (currentOpacity <= 0.2) increasing = true;
+
+                    cloudImage.style.opacity = currentOpacity.toString();
+                }
+            }, 50);
+        } else {
+            const cloudImage = document.getElementById('cloud-image');
+            if (cloudImage) cloudImage.style.opacity = '0';
+        }
+    },
+
+    updateAllAnimations(flightState) {
+        this.startJetStreamCycling(flightState);
+        this.startCloudOpacityCycle(flightState);
+    },
+
+    cleanup() {
+        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
+        this.jetStreamInterval = null;
+        this.cloudInterval = null;
+    }
+};
+
+
+
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
-    
+    if (!flightData || !flightData.flight_state) {
+        AnimationManager.cleanup();
+        return;
+    }
+
     
 
         try {
@@ -617,12 +598,8 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
                 }
             }
 
-            // Jetstream anumation cycle
-            if (flightData.flight_state === "Airborne") {
-                jetStreamInterval = startJetStreamCycling("Airborne");
-            } else if (flightData.flight_state === "Landed") {
-                jetStreamInterval = startJetStreamCycling("Landed");
-            }
+            // Update animations based on flight state
+            AnimationManager.updateAllAnimations(flightData.flight_state);
 
             for (const field of requiredFields) {
                 if (flightData[field] === undefined) {
@@ -630,8 +607,6 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
                     return;
                 }
             }
-
-
 
             // Update ETE bar width
             const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
@@ -643,28 +618,12 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
             elements.aircraftImage.style.opacity = '1';
 
-            // Update cloud effects
-            if (flightData.airplane_in_cloud === "1") {
-                elements.cloudImage.style.opacity = '1';
-                if (!cloudOpacityInterval) {
-                    cloudOpacityInterval = startCloudOpacityCycling(elements.cloudImage);
-                }
-            } else {
-                elements.cloudImage.style.opacity = '0';
-                if (cloudOpacityInterval) {
-                    stopCloudOpacityCycling();
-                    cloudOpacityInterval = null;
-                }
-            }
 
             // Update ETE text
             elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
             elements.eteText.style.opacity = '1';
 
-            // Update jetstream visibility
-            updatePositions();
-            elements.jetStreamImage.style.opacity =
-                flightData.flight_state.includes('Airborne') ? '1' : '0';
+           
 
             // Update precipitation
             elements.precipImage.src =
