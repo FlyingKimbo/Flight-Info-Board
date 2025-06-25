@@ -18,7 +18,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 
 
-
+/*
 const flightStore = {
     currentFlight: null, // Holds the latest flight data
     subscribers: new Set(), // Functions to notify on updates
@@ -69,7 +69,7 @@ const flightStore = {
         this.subscribers.forEach(callback => callback(this.currentFlight));
     }
 };
-
+*/
 // Realtime service initialization
 async function initializeRealtime() {
     // 1. Verify auth
