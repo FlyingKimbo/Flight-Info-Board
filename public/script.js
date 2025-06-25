@@ -7,6 +7,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 let GreenbarPercentage = 100
+let cloudOpacityInterval
 // ###################################################################### Sub to supabase realtime data
 
 
@@ -523,7 +524,7 @@ async function checkFlightStatus() {
 
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
-    let cloudOpacityInterval
+    
 
 
         try {
