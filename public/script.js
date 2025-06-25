@@ -19,74 +19,53 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
+async function updateFlightTable(staticData) {
+    const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
+
+    // Clear existing rows (preserves headers)
+    tbody.innerHTML = '';
+
+    // Process static flights
+    staticData.forEach(flight => {
+        // Ensure the field names match your Supabase table structure
+        CreateNewRow({
+            image: flight.image,        // Must match flights_static column
+            aircraft: flight.aircraft,  // Must match flights_static column
+            flightNumber: flight.flightnumber,
+            departure: flight.departure,
+            flightStatus: flight.flightstatus,
+            destination: flight.destination
+        });
+    });
+}
 
 async function fetch_flight_static() {
-    // Default configuration (can be extended later)
-    const config = {
-        maxRetries: 3,
-        retryDelay: 1000,
-        timeout: 8000
-    };
-
-    let retryCount = 0;
-    let timeoutId;
-
     try {
-        // 1. Verify authentication (with timeout)
-        const authCheck = Promise.race([
-            supabase.auth.getSession(),
-            new Promise((_, reject) =>
-                timeoutId = setTimeout(() => reject(new Error('Auth timeout')), config.timeout)
-            )
-        ]);
-        const { error: authError } = await authCheck;
-        if (authError) throw authError;
+        // Fetch all fields from flights_static table
+        const { data, error } = await supabase
+            .from('flights_static')
+            .select('*')  // Selects all columns
+            .order('created_at', { ascending: false })  // Get most recent record
+            .limit(1)
+            .single();  // Returns as single object
 
-        // 2. Execute the query (with retry logic)
-        const fetchData = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('flights_static')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
+        if (error) throw error;
 
-                if (error) throw error;
-                return data || [];
-            } catch (err) {
-                if (retryCount++ < config.maxRetries) {
-                    await new Promise(resolve =>
-                        setTimeout(resolve, config.retryDelay * retryCount)
-                    );
-                    return fetchData();
-                }
-                throw err;
-            }
-        };
-
-        // 3. Return final result
-        return {
-            success: true,
-            data: await fetchData(),
-            error: null
-        };
+        if (data) {
+            // Pass the data to your existing update function
+            updateFlightTable(data);
+            return data;  // Optional: return data if needed elsewhere
+        } else {
+            console.log('No data found in flights_static table');
+            return null;
+        }
 
     } catch (error) {
-        console.error('Fetch failed:', {
-            name: error.name,
-            message: error.message,
-            ...(error.details && { details: error.details })
-        });
-
-        return {
-            success: false,
-            data: null,
-            error: error.message
-        };
-    } finally {
-        clearTimeout(timeoutId);
+        console.error('Error fetching flight data:', error.message);
+        return null;
     }
 }
+let pollingInterval = setInterval(fetch_flight_static, 5000);
 
 // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& WIP WIP WIP WIP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -517,25 +496,6 @@ function Update_ETE_Dist2Arr_Bar() {
 ////  #################### INITIAISE flightStore the realtime sub to supabase $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 
-async function updateFlightTable(flightsData) {
-    const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
-
-    // Clear existing rows (preserves headers)
-    tbody.innerHTML = '';
-
-    // Process static flights
-    flightsData.forEach(flight => {
-        // Ensure the field names match your Supabase table structure
-        CreateNewRow({
-            image: flight.image,        // Must match flights_static column
-            aircraft: flight.aircraft,  // Must match flights_static column
-            flightNumber: flight.flightnumber ,
-            departure: flight.departure,
-            flightStatus: flight.flightstatus,
-            destination: flight.destination
-        });
-    });
-}
 
 
 function CreateNewRow(flightData, isStatic = false) {
@@ -713,11 +673,13 @@ const stopPolling = await getFlightDataWithPolling();
 document.addEventListener("DOMContentLoaded", async () => {
 
     getFlightDataWithPolling();
+
     // Start ETE updates
     Update_ETE_Dist2Arr_Bar();
 
+    
     fetch_flight_static();
-    updateFlightTable(data);
+    
 
         
 
