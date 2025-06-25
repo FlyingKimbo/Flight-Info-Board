@@ -716,18 +716,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Start ETE updates
     Update_ETE_Dist2Arr_Bar();
 
-    try {
-        // Load static flights
-        const { data } = await fetch_flight_static();
-        updateFlightTable(data);
+    fetch_flight_static();
+    updateFlightTable(data);
 
         
 
+    
        
-    } catch (error) {
-        console.error("Initialization failed:", error);
-       
-    }
+    
 });
 
 
