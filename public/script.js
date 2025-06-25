@@ -16,43 +16,32 @@ function createFlightStore() {
     let pollingInterval = null;
     let channel = null;
 
-    // Function to start realtime connection
     const startRealtime = () => {
+        console.log("Attempting WebSocket connection...");
         channel = supabase.channel('flight-updates')
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'flights_realtime'
-            }, (payload) => {
+            .on('postgres_changes', (payload) => {
+                console.log("Realtime update received:", payload);
                 currentFlight = payload.new;
                 notifySubscribers();
             })
             .subscribe((status, err) => {
                 if (status === 'SUBSCRIBED') {
-                    console.log("Realtime connected!");
-                    // Clear any existing polling if we successfully connect
-                    if (pollingInterval) {
-                        clearInterval(pollingInterval);
-                        pollingInterval = null;
-                    }
-                    document.dispatchEvent(new Event('realtime-connected'));
+                    console.log("WebSocket connected successfully!");
+                    clearPolling();
                 }
                 if (err) {
-                    console.error("Realtime error:", err);
-                    // If realtime fails, start polling
-                    if (!pollingInterval) {
-                        startPolling();
-                    }
+                    console.error("WebSocket error:", err);
+                    startPolling();
                 }
             });
     };
 
-    // Function to start polling fallback
     const startPolling = () => {
-        console.log("Starting polling fallback...");
-        if (pollingInterval) clearInterval(pollingInterval);
+        if (pollingInterval) return;
 
+        console.log("Starting polling fallback...");
         pollingInterval = setInterval(async () => {
+            console.log("Polling for updates...");
             const { data, error } = await supabase
                 .from('flights_realtime')
                 .select('*')
@@ -61,18 +50,28 @@ function createFlightStore() {
                 .single();
 
             if (!error && data) {
+                console.log("Polling update received:", data);
                 currentFlight = data;
                 notifySubscribers();
+            } else if (error) {
+                console.error("Polling error:", error);
             }
         }, 5000);
     };
 
-    // Helper to notify all subscribers
+    const clearPolling = () => {
+        if (pollingInterval) {
+            console.log("Stopping polling (WebSocket connected)");
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+    };
+
     const notifySubscribers = () => {
         subscribers.forEach(cb => cb(currentFlight));
     };
 
-    // Start with realtime connection
+    // Start with realtime first
     startRealtime();
 
     return {
@@ -83,7 +82,7 @@ function createFlightStore() {
         },
         unsubscribe() {
             if (channel) channel.unsubscribe();
-            if (pollingInterval) clearInterval(pollingInterval);
+            clearPolling();
         }
     };
 }
