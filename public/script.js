@@ -681,7 +681,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     Update_ETE_Dist2Arr_Bar();
 
     
-    fetch_flight_static();
+    //fetch_flight_static();
     
 
         
