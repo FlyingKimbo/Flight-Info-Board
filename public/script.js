@@ -524,8 +524,8 @@ const AnimationManager = {
 
             this.cloudInterval = setInterval(() => {
                 currentOpacity += increasing ? 0.01 : -0.01;
-                if (currentOpacity >= 1.0) increasing = false;
-                if (currentOpacity <= 0.9) increasing = true;
+                if (currentOpacity >= 0.8) increasing = false;
+                if (currentOpacity <= 0.3) increasing = true;
 
                 cloud.style.opacity = currentOpacity;
                 console.log('[DEBUG] Current cloud opacity:', currentOpacity); // Live logging
