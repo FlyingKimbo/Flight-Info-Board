@@ -690,6 +690,8 @@ const stopPolling = await getFlightDataWithPolling();
 
 
 fetch_flight_static();
+// Start ETE updates
+Update_ETE_Dist2Arr_Bar();
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
@@ -698,8 +700,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     getFlightDataWithPolling();
 
     
-    // Start ETE updates
-    Update_ETE_Dist2Arr_Bar();
+  
    
 
     
