@@ -521,13 +521,9 @@ async function checkFlightStatus() {
 
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
-    let pollingInterval;
-    let cloudOpacityInterval;
-
-    // Fetch and update function
-    const updateETEDisplay = async () => {
+ 
         try {
-            const { getLatestData } = await getFlightDataWithPolling();
+            
 
 
             if (!flightData) {
@@ -614,7 +610,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
         } catch (error) {
             console.error('Error updating ETE display:', error);
         }
-    };
+    
 
 
 
