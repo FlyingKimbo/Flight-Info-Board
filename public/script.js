@@ -20,51 +20,54 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 async function updateFlightTable(staticData) {
-    const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
+    const tbody = document.getElementById("flight-rows");
 
-    // Clear existing rows (preserves headers)
+    // Clear existing rows
     tbody.innerHTML = '';
 
-    // Process static flights
-    staticData.forEach(flight => {
-        // Ensure the field names match your Supabase table structure
+    // Check if staticData is an array (forEach won't work on single object)
+    const flightsArray = Array.isArray(staticData) ? staticData : [staticData];
+
+    flightsArray.forEach(flight => {
+        // Ensure field names match exactly with your Supabase columns
         CreateNewRow({
-            image: flight.image,        // Must match flights_static column
-            aircraft: flight.aircraft,  // Must match flights_static column
-            flightNumber: flight.flightnumber,
-            departure: flight.departure,
-            flightStatus: flight.flightstatus,
-            destination: flight.destination
+            image: flight.image || '',              // Add fallback empty string
+            aircraft: flight.aircraft || 'Unknown',
+            flightNumber: flight.flightnumber || '',
+            departure: flight.departure || '',
+            flightStatus: flight.flightstatus || '',
+            destination: flight.destination || ''
         });
     });
 }
 
 async function fetch_flight_static() {
     try {
-        // Fetch all fields from flights_static table
-        const { staticData, error } = await supabase
+        // Corrected: the destructured property should be 'data' not 'staticData'
+        const { data, error } = await supabase
             .from('flights_static')
-            .select('*')  // Selects all columns
-            .order('created_at', { ascending: false })  // Get most recent record
-            .limit(1)
-            .single();  // Returns as single object
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10)  // Changed to get multiple records (more typical for a table)
+        // Removed .single() since we want multiple rows
 
         if (error) throw error;
 
-        if (staticData) {
-            // Pass the data to your existing update function
-            updateFlightTable(staticData);
-            return staticData;  // Optional: return data if needed elsewhere
+        if (data && data.length > 0) {
+            updateFlightTable(data);
+            return data;
         } else {
-            console.log('No data found in flights_static table');
+            console.log('No data found');
             return null;
         }
 
     } catch (error) {
-        console.error('Error fetching flight data:', error.message);
+        console.error('Error:', error.message);
         return null;
     }
 }
+
+// Start polling
 let pollingInterval = setInterval(fetch_flight_static, 5000);
 
 // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& WIP WIP WIP WIP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
