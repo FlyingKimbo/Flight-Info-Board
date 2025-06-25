@@ -54,7 +54,7 @@ async function fetch_flight_static() {
         if (staticData) {
             // Pass the data to your existing update function
             updateFlightTable(staticData);
-            return data;  // Optional: return data if needed elsewhere
+            return staticData;  // Optional: return data if needed elsewhere
         } else {
             console.log('No data found in flights_static table');
             return null;
