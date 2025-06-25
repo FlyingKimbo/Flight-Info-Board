@@ -8,6 +8,45 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 
 // ###################################################################### Sub to supabase realtime data
+
+const flightStore = {
+    currentFlight: null, // Holds the latest flight data
+    subscribers: new Set(), // Functions to notify on updates
+
+    // Initialize realtime subscription
+    init() {
+        const subscription = supabase
+            .channel('flight-updates')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'flights_realtime'
+                },
+                (payload) => {
+                    this.currentFlight = payload.new; // Update stored data
+                    this.notifySubscribers(); // Alert all listeners
+                }
+            )
+            .subscribe();
+
+        return () => supabase.removeChannel(subscription); // Cleanup function
+    },
+
+    // Register functions to be called on updates
+    subscribe(callback) {
+        this.subscribers.add(callback);
+        return () => this.subscribers.delete(callback); // Unsubscribe function
+    },
+
+    // Notify all subscribed functions
+    notifySubscribers() {
+        this.subscribers.forEach(callback => callback(this.currentFlight));
+    }
+};
+
+/*
 const flightStore = {
     currentFlight: null, // Holds the latest flight data
     subscribers: new Set(), // Functions to notify on updates
@@ -53,7 +92,7 @@ const flightStore = {
         this.subscribers.forEach(callback => callback(this.currentFlight));
     }
 };
-
+*/
 // ###################################################################### Sub to supabase realtime data
 
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
