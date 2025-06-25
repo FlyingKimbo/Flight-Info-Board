@@ -642,52 +642,77 @@ async function checkFlightStatus() {
 }
 
 
-async function getFlightData() {
-    try {
-        const { data, error } = await supabase
-            .from('flights_realtime')
-            .select(`
-                ete_srgs,
-                dist_to_destination,
-                start_distance,
-                current_flight,
-                flight_state,
-                airplane_in_cloud,
-                ambient_precipstate
-            `)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();  // Returns a single object instead of array
+async function getFlightDataWithPolling() {
+    // Store interval ID so we can clear it later if needed
+    let pollingInterval;
 
-        if (error) throw error;
+    // Define the fetch and print logic
+    const fetchAndPrint = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('flights_realtime')
+                .select(`
+          ete_srgs,
+          dist_to_destination,
+          start_distance,
+          current_flight,
+          flight_state,
+          airplane_in_cloud,
+          ambient_precipstate
+        `)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
 
-        if (data) {
-            console.log('--- Flight Data Received ---');
-            console.log(`ETE SRGS: ${data.ete_srgs}`);
-            console.log(`Distance to Destination: ${data.dist_to_destination}`);
-            console.log(`Start Distance: ${data.start_distance}`);
-            console.log(`Current Flight: ${data.current_flight}`);
-            console.log(`Flight State: ${data.flight_state}`);
-            console.log(`Airplane in Cloud: ${data.airplane_in_cloud}`);
-            console.log(`Ambient Precip State: ${data.ambient_precipstate}`);
-            console.log('---------------------------');
-        } else {
-            console.log('No flight data available');
+            if (error) throw error;
+
+            if (data) {
+                console.log('\n--- Flight Data ---');
+                console.log(`Timestamp: ${new Date().toISOString()}`);
+                console.log(`ETE SRGS: ${data.ete_srgs}`);
+                console.log(`Distance to Destination: ${data.dist_to_destination}`);
+                console.log(`Start Distance: ${data.start_distance}`);
+                console.log(`Current Flight: ${data.current_flight}`);
+                console.log(`Flight State: ${data.flight_state}`);
+                console.log(`Airplane in Cloud: ${data.airplane_in_cloud}`);
+                console.log(`Ambient Precip State: ${data.ambient_precipstate}`);
+                console.log('-------------------');
+                return data;
+            } else {
+                console.log('No flight data available');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error fetching flight data:', error.message);
+            return null;
         }
+    };
 
-        return data || null;
+    // Initial immediate fetch
+    await fetchAndPrint();
 
-    } catch (error) {
-        console.error('Error fetching flight data:', error.message);
-        return null;
-    }
+    // Set up 5-second polling
+    pollingInterval = setInterval(fetchAndPrint, 5000);
+
+    // Return a cleanup function to stop polling
+    return () => {
+        clearInterval(pollingInterval);
+        console.log('Polling stopped');
+    };
 }
+
+// Usage:
+// Start polling
+const stopPolling = await getFlightDataWithPolling();
+
+// When you want to stop polling:
+// stopPolling();
 
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
 
-    getFlightData();
+    getFlightDataWithPolling();
     // Start ETE updates
     Update_ETE_Dist2Arr_Bar();
 
