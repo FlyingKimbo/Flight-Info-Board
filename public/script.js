@@ -617,7 +617,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             const aircraftType = flightData.current_flight.split(' ')[0];
             elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
             elements.aircraftImage.style.opacity = '1';
-
+            updatePositions();
 
             // Update ETE text
             elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
