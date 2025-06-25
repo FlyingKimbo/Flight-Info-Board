@@ -1,58 +1,58 @@
 ﻿// Import Supabase at the top of your file
-//import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.7';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+//import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.7';
 // Initialize Supabase
 const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
-//const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 
 // ###################################################################### Sub to supabase realtime data
 
-// 1. Initialize Supabase with proper realtime config
-const supabase = createClient(supabaseUrl, supabaseKey, {
-    realtime: {
-        params: { vsn: '1.0.0' } // or try removing this
-    }
-});
 
 
 
 
 
 
-// Realtime service initialization
-async function flightStore() {
-    // 1. Verify auth
-    const { error: authError } = await supabase.auth.getSession();
-    if (authError) throw authError;
+function createFlightStore() {
+    let currentFlight = null;
+    const subscribers = new Set();
 
-    // 2. Create robust channel
-    return supabase.channel('flight-updates', {
-        config: {
-            broadcast: { ack: false },
-            presence: { key: '' }
-        }
-    })
+    // Create the channel
+    const channel = supabase.channel('flight-updates')
         .on('postgres_changes', {
             event: 'UPDATE',
             schema: 'public',
             table: 'flights_realtime'
         }, (payload) => {
-            console.log("Update received:", payload);
-            flightStore.currentFlight = payload.new;
+            currentFlight = payload.new;
+            subscribers.forEach(cb => cb(currentFlight));
         })
         .subscribe((status, err) => {
             if (status === 'SUBSCRIBED') {
-                console.log("Realtime connected!");
                 document.dispatchEvent(new Event('realtime-connected'));
             }
             if (err) {
                 console.error("Realtime error:", err);
-                setTimeout(initializeRealtime, 5000); // Reconnect
+                setTimeout(createFlightStore, 5000);
             }
         });
+
+    return {
+        subscribe(callback) {
+            subscribers.add(callback);
+            if (currentFlight) callback(currentFlight);
+            return () => subscribers.delete(callback);
+        },
+        unsubscribe() {
+            channel.unsubscribe();
+        }
+    };
 }
+
+// 3. Create the flight store instance
+const flightStore = createFlightStore();
 
 
 function setupPollingFallback() {
@@ -486,13 +486,10 @@ function resetETEVisuals() {
 
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar() {
-    // Subscribe to flightStore updates
+    // Subscribe to flight updates
     const unsubscribe = flightStore.subscribe((flightData) => {
-        // Reset visuals if no data
-        resetETEVisuals();
-
         if (!flightData) {
-            console.warn('No flight data received from flightStore');
+            resetETEVisuals();
             return;
         }
 
@@ -710,9 +707,16 @@ async function checkFlightStatus() {
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        await flightStore();
+        // Load static flights
         const { data } = await fetch_flight_static();
         updateFlightTable(data);
+
+        // Start ETE updates
+        Update_ETE_Dist2Arr_Bar();
+
+        // Initialize other components
+        startJetStreamCycling();
+        setupSorting();
     } catch (error) {
         console.error("Initialization failed:", error);
         setupPollingFallback();
