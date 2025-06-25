@@ -686,42 +686,29 @@ async function checkFlightStatus() {
 
 
 
-/*
 
-document.addEventListener("DOMContentLoaded", async function () {
 
-    try {
-        // 1. Verify Supabase
-        if (typeof supabase === 'undefined') {
-            throw new Error('Supabase not initialized');
-        }
+document.addEventListener("DOMContentLoaded", function () {
+    // 1. Load static flight data (one-time)
+    fetch_flight_static()
+        .then(function (staticResult) {
+            if (staticResult.success) {
+                renderFlights(staticResult.data); // Display historical data
+            } else {
+                showError(staticResult.error);
+            }
 
-        // 2. Load static flights
-        const { success, data, error } = await fetch_flight_static();
-        if (!success) throw new Error(error);
+            // 2. INITIALIZE REALTIME UPDATES (separate from static data)
+            const cleanupRealtime = Update_ETE_Dist2Arr_Bar();
 
-        if (data && data.length > 0) {
-            // 3. Initialize realtime updates
-            const cleanupETEUpdates = Update_ETE_Dist2Arr_Bar();
-
-            // 4. Set up cleanup
-            window.addEventListener('beforeunload', () => {
-                cleanupETEUpdates();
-                if (cloudOpacityState.interval) {
-                    clearInterval(cloudOpacityState.interval);
-                }
+            // 3. Cleanup on page exit
+            window.addEventListener('beforeunload', function () {
+                cleanupRealtime();
             });
-        }
-
-    } catch (error) {
-        console.error('Initialization failed:', error);
-        // Show user-friendly error message
-        const errorContainer = document.getElementById('error-container');
-        if (errorContainer) {
-            errorContainer.textContent = `Error: ${error.message}`;
-            errorContainer.style.display = 'block';
-        }
-    }
+        })
+        .catch(function (error) {
+            console.error("Initialization failed:", error);
+        });
 });
 
 
