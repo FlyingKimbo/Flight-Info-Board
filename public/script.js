@@ -628,9 +628,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     // Return cleanup function
     return () => {
         
-        if (cloudOpacityInterval) {
-            stopCloudOpacityCycling();
-        }
+      
         console.log('ETE updates stopped');
     };
 } 
