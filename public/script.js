@@ -4,43 +4,71 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 // Initialize Supabase
 const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
-const supabase = createClient(supabaseUrl, supabaseKey)
+//const supabase = createClient(supabaseUrl, supabaseKey)
 
 
 // ###################################################################### Sub to supabase realtime data
 
-const flightStore = {
-    currentFlight: null, // Holds the latest flight data
-    subscribers: new Set(), // Functions to notify on updates
+// 1. Initialize Supabase with proper realtime config
+const supabase = createClient(supabaseUrl, supabaseKey, {
+    realtime: {
+        params: {
+            eventsPerSecond: 10,
+        }
+    }
+});
 
-    // Initialize realtime subscription
+// 2. Enhanced flightStore with error handling
+const flightStore = {
+    currentFlight: null,
+    subscribers: new Set(),
+    isConnected: false,
+
     init() {
         const subscription = supabase
-            .channel('flight-updates')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'flights_realtime'
-                },
-                (payload) => {
-                    this.currentFlight = payload.new; // Update stored data
-                    this.notifySubscribers(); // Alert all listeners
+            .channel('flight-updates', {
+                config: {
+                    broadcast: { ack: true },
+                    presence: { key: 'flight-data' }
                 }
-            )
-            .subscribe();
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'flights_realtime',
+                fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
+            }, (payload) => {
+                this.currentFlight = payload.new;
+                this.notifySubscribers();
+            })
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                    this.isConnected = true;
+                    console.log('Realtime connected!');
+                }
+                if (err) {
+                    console.error('Subscription error:', err);
+                    this.retryConnection();
+                }
+            });
 
-        return () => supabase.removeChannel(subscription); // Cleanup function
+        this.subscription = subscription;
     },
 
-    // Register functions to be called on updates
+    retryConnection() {
+        setTimeout(() => {
+            if (!this.isConnected) {
+                console.log('Attempting reconnect...');
+                this.init();
+            }
+        }, 5000);
+    },
+
     subscribe(callback) {
         this.subscribers.add(callback);
-        return () => this.subscribers.delete(callback); // Unsubscribe function
+        return () => this.subscribers.delete(callback);
     },
 
-    // Notify all subscribed functions
     notifySubscribers() {
         this.subscribers.forEach(callback => callback(this.currentFlight));
     }
@@ -726,34 +754,27 @@ async function checkFlightStatus() {
 
 
 
+// 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", function () {
-    // 1. Load static flight data (one-time)
-    fetch_flight_static()
-        .then(function (staticResult) {
-            if (staticResult.success) {
-                // Process the static data through updateFlightTable
-                updateFlightTable(staticResult.data)
-                    .catch(function (error) {
-                        console.error("Failed to update flight table:", error);
-                        showError("Failed to display flight data");
-                    });
-            } else {
-                showError(staticResult.error);
-            }
+    // First verify authentication
+    supabase.auth.getSession()
+        .then(({ error }) => {
+            if (error) throw error;
 
-            // 2. INITIALIZE REALTIME UPDATES (separate from static data)
-            const cleanupRealtime = Update_ETE_Dist2Arr_Bar();
+            // Then initialize realtime
+            flightStore.init();
 
-            // 3. Cleanup on page exit
-            window.addEventListener('beforeunload', function () {
-                cleanupRealtime();
-            });
+            // Then load static data
+            return fetch_flight_static();
         })
-        .catch(function (error) {
-            console.error("Initialization failed:", error);
-            showError("Failed to load flight data");
+        .then((staticResult) => {
+            if (staticResult.success) {
+                updateFlightTable(staticResult.data);
+            }
+        })
+        .catch((error) => {
+            console.error("Initialization error:", error);
         });
 });
-
 
 
