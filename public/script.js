@@ -686,7 +686,7 @@ async function checkFlightStatus() {
 
 
 
-
+/*
 
 document.addEventListener("DOMContentLoaded", async function () {
 
