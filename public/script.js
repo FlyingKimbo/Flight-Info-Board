@@ -527,7 +527,7 @@ async function checkFlightStatus() {
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
     
-
+    startJetStreamCycling();
 
         try {
             
