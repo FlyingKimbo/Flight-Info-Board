@@ -192,11 +192,12 @@
 
         .cloud-image {
             position: absolute;
-            top: -20px; /* Adjust as needed to align with the green bar */
-            height: 50px; /* Adjust as needed */
-            opacity: 0;
-            z-index: 6;
-            animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely */
+            top: 20px; /* Changed from negative to positive */
+            height: 50px;
+            /* REMOVE opacity: 0 - let JavaScript control this */
+            z-index: 7;
+            /* REMOVE CSS animation - we'll control via JavaScript */
+            will-change: opacity; /* Improves animation performance */
         }
 
         .precip-image {
