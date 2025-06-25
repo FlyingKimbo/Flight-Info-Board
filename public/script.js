@@ -196,7 +196,7 @@ function Update_ETE_Dist2Arr_Bar() {
         }
 
         // Update ETE bar width
-        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_destination) * 100, 100);
+        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
         elements.eteBar.style.width = `${etePercentage}%`;
         elements.eteBar.style.opacity = '1';
 
@@ -244,24 +244,41 @@ flightStore.init();
 
 
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
 
-    // Check if Supabase is loaded
-    if (typeof createClient === 'undefined') {
-        console.error('Supabase library not loaded! Check script loading order.');
-        return;
+    try {
+        // 1. Verify Supabase
+        if (typeof supabase === 'undefined') {
+            throw new Error('Supabase not initialized');
+        }
+
+        // 2. Load static flights
+        const { success, data, error } = await fetch_flight_static();
+        if (!success) throw new Error(error);
+
+        if (data && data.length > 0) {
+            // 3. Initialize realtime updates
+            const cleanupETEUpdates = Update_ETE_Dist2Arr_Bar();
+
+            // 4. Set up cleanup
+            window.addEventListener('beforeunload', () => {
+                cleanupETEUpdates();
+                if (cloudOpacityState.interval) {
+                    clearInterval(cloudOpacityState.interval);
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error('Initialization failed:', error);
+        // Show user-friendly error message
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+            errorContainer.textContent = `Error: ${error.message}`;
+            errorContainer.style.display = 'block';
+        }
     }
-
-    const result = await fetch_flight_static();
-
-    if (result.success) {
-        renderFlights(result.data);
-    } else {
-        showError(result.error);
-    }
-
-
-    const cleanupETEUpdates = Update_ETE_Dist2Arr_Bar();
+});
 
     // Now use supabase in your code
     let initialETE = -1;
@@ -746,4 +763,4 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     initialize();
-});
+
