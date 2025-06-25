@@ -626,7 +626,7 @@ function Update_ETE_Dist2Arr_Bar() {
 //       ##################### END      OF      ETE and Distance bar update ################################################
 
 ////  #################### INITIAISE flightStore the realtime sub to supabase $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-flightStore.init();
+//flightStore.init();
 
 async function updateFlightTable(flightsData) {
     const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
