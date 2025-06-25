@@ -36,7 +36,7 @@ const flightStore = {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'flights_realtime',
-                fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
+                //fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
             }, (payload) => {
                 this.currentFlight = payload.new;
                 this.notifySubscribers();
