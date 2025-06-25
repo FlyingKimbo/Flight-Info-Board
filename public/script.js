@@ -10,34 +10,70 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 // ###################################################################### Sub to supabase realtime data
 
 
-
-
-
-
-
 function createFlightStore() {
     let currentFlight = null;
     const subscribers = new Set();
+    let pollingInterval = null;
+    let channel = null;
 
-    // Create the channel
-    const channel = supabase.channel('flight-updates')
-        .on('postgres_changes', {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'flights_realtime'
-        }, (payload) => {
-            currentFlight = payload.new;
-            subscribers.forEach(cb => cb(currentFlight));
-        })
-        .subscribe((status, err) => {
-            if (status === 'SUBSCRIBED') {
-                document.dispatchEvent(new Event('realtime-connected'));
+    // Function to start realtime connection
+    const startRealtime = () => {
+        channel = supabase.channel('flight-updates')
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'flights_realtime'
+            }, (payload) => {
+                currentFlight = payload.new;
+                notifySubscribers();
+            })
+            .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                    console.log("Realtime connected!");
+                    // Clear any existing polling if we successfully connect
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        pollingInterval = null;
+                    }
+                    document.dispatchEvent(new Event('realtime-connected'));
+                }
+                if (err) {
+                    console.error("Realtime error:", err);
+                    // If realtime fails, start polling
+                    if (!pollingInterval) {
+                        startPolling();
+                    }
+                }
+            });
+    };
+
+    // Function to start polling fallback
+    const startPolling = () => {
+        console.log("Starting polling fallback...");
+        if (pollingInterval) clearInterval(pollingInterval);
+
+        pollingInterval = setInterval(async () => {
+            const { data, error } = await supabase
+                .from('flights_realtime')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+
+            if (!error && data) {
+                currentFlight = data;
+                notifySubscribers();
             }
-            if (err) {
-                console.error("Realtime error:", err);
-                setTimeout(createFlightStore, 5000);
-            }
-        });
+        }, 5000);
+    };
+
+    // Helper to notify all subscribers
+    const notifySubscribers = () => {
+        subscribers.forEach(cb => cb(currentFlight));
+    };
+
+    // Start with realtime connection
+    startRealtime();
 
     return {
         subscribe(callback) {
@@ -46,10 +82,12 @@ function createFlightStore() {
             return () => subscribers.delete(callback);
         },
         unsubscribe() {
-            channel.unsubscribe();
+            if (channel) channel.unsubscribe();
+            if (pollingInterval) clearInterval(pollingInterval);
         }
     };
 }
+
 
 // 3. Create the flight store instance
 const flightStore = createFlightStore();
