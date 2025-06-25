@@ -714,9 +714,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Start ETE updates
         Update_ETE_Dist2Arr_Bar();
 
-        // Initialize other components
-        startJetStreamCycling();
-        setupSorting();
+       
     } catch (error) {
         console.error("Initialization failed:", error);
         setupPollingFallback();
