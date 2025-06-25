@@ -415,8 +415,8 @@ function Update_ETE_Dist2Arr_Bar() {
     // Fetch and update function
     const updateETEDisplay = async () => {
         try {
-            const polling = await getFlightDataWithPolling();
-            const flightData = polling.getLatestData();
+            const { getLatestData } = await getFlightDataWithPolling();
+            
 
             if (!flightData) {
                 resetETEVisuals();
@@ -504,11 +504,7 @@ function Update_ETE_Dist2Arr_Bar() {
         }
     };
 
-    // Initial update
-    updateETEDisplay();
-
-    // Set up polling (matches getFlightDataWithPolling interval)
-    pollingInterval = setInterval(updateETEDisplay, 5000);
+    
 
     // Return cleanup function
     return () => {
