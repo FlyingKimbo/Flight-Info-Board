@@ -672,15 +672,15 @@ fetch_flight_static();
 
 getFlightDataWithPolling();
 
-// Start ETE updates
-Update_ETE_Dist2Arr_Bar();
+
 
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
 
     
-
+    // Start ETE updates
+    Update_ETE_Dist2Arr_Bar();
    
 
     
