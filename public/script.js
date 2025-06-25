@@ -368,11 +368,11 @@ async function checkFlightStatus() {
 }
 
 // Update helper with null checks
-function updateFlightCells(flightId, status, arrival) {
-    if (flightId) document.getElementById('flight-id').textContent = flightId;
-    if (status) document.getElementById('flight-status').textContent = status;
-    if (arrival) document.getElementById('arrival-display').textContent = arrival;
-}
+//function updateFlightCells(flightId, status, arrival) {
+//    if (flightId) document.getElementById('flight-id').textContent = flightId;
+//    if (status) document.getElementById('flight-status').textContent = status;
+//    if (arrival) document.getElementById('arrival-display').textContent = arrival;
+//}
 
 function fetchAirplaneInCloud(flightData) {
     try {
