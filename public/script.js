@@ -42,7 +42,7 @@ async function updateFlightTable(staticData) {
 async function fetch_flight_static() {
     try {
         // Fetch all fields from flights_static table
-        const { data, error } = await supabase
+        const { staticData, error } = await supabase
             .from('flights_static')
             .select('*')  // Selects all columns
             .order('created_at', { ascending: false })  // Get most recent record
@@ -51,9 +51,9 @@ async function fetch_flight_static() {
 
         if (error) throw error;
 
-        if (data) {
+        if (staticData) {
             // Pass the data to your existing update function
-            updateFlightTable(data);
+            updateFlightTable(staticData);
             return data;  // Optional: return data if needed elsewhere
         } else {
             console.log('No data found in flights_static table');
