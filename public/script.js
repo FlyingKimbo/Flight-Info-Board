@@ -510,20 +510,25 @@ const AnimationManager = {
         }
         console.log('[DEBUG] Cloud element found:', cloud);
 
+        // DEBUG: Force visible with red border - ADD THESE LINES
+        cloud.style.cssText = `
+        opacity: 0.5 !important;
+        z-index: 9999 !important;
+        border: 2px solid red !important;
+        position: absolute !important;
+        width: 100px !important;
+        height: 100px !important;
+        top: 50px !important;
+        left: 50px !important;
+    `;
+        // END DEBUG
+
+
+
         // Verify image source
         if (!cloud.src.includes('Cloud1.png')) {
             cloud.src = '/Image/Cloud/Cloud1.png';
-            const cloud = document.getElementById('cloud-image');
-            cloud.style.cssText = `
-    opacity: 0.5 !important;
-    z-index: 9999 !important;
-    border: 2px solid red !important;
-    position: absolute !important;
-    width: 100px !important;
-    height: 100px !important;
-    top: 50px !important;
-    left: 50px !important;
-`;
+            
             console.log('[DEBUG] Set cloud src to:', cloud.src);
         }
 
