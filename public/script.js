@@ -475,73 +475,61 @@ async function checkFlightStatus() {
     }
 }
 
-// Animation Controller
 const AnimationManager = {
     jetStreamInterval: null,
     cloudInterval: null,
 
+    // Jet stream animation (still uses flight_state)
     startJetStreamCycling(flightState) {
-        let imageIndex = 1;
+        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
 
-        // Clear existing interval
-        if (this.jetStreamInterval) {
-            clearInterval(this.jetStreamInterval);
-        }
-
-        // Only animate if airborne
         if (flightState === "Airborne") {
+            let imageIndex = 1;
             this.jetStreamInterval = setInterval(() => {
-                const jetStreamImage = document.getElementById('jetstream-image');
-                if (jetStreamImage) {
-                    jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
-                    jetStreamImage.style.opacity = '1';
+                const img = document.getElementById('jetstream-image');
+                if (img) {
+                    img.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+                    img.style.opacity = '1';
                     imageIndex = (imageIndex % 5) + 1;
                 }
             }, 20);
         } else {
-            const jetStreamImage = document.getElementById('jetstream-image');
-            if (jetStreamImage) jetStreamImage.style.opacity = '0';
+            const img = document.getElementById('jetstream-image');
+            if (img) img.style.opacity = '0';
         }
     },
 
-    startCloudOpacityCycle(flightState) {
-        let increasing = true;
-        let currentOpacity = 0.2;
+    // Cloud animation (uses airplane_in_cloud)
+    startCloudOpacityCycle(inCloud) {
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
 
-        // Clear existing interval
-        if (this.cloudInterval) {
-            clearInterval(this.cloudInterval);
-        }
-
-        // Only animate if airborne
-        if (flightState === "Airborne") {
+        if (inCloud === 1) {
+            let increasing = true;
+            let currentOpacity = 0.2;
             this.cloudInterval = setInterval(() => {
-                const cloudImage = document.getElementById('cloud-image');
-                if (cloudImage) {
-                    // Oscillate opacity
+                const cloud = document.getElementById('cloud-image');
+                if (cloud) {
                     currentOpacity += increasing ? 0.01 : -0.01;
                     if (currentOpacity >= 0.7) increasing = false;
                     if (currentOpacity <= 0.2) increasing = true;
-
-                    cloudImage.style.opacity = currentOpacity.toString();
+                    cloud.style.opacity = currentOpacity;
                 }
             }, 50);
         } else {
-            const cloudImage = document.getElementById('cloud-image');
-            if (cloudImage) cloudImage.style.opacity = '0';
+            const cloud = document.getElementById('cloud-image');
+            if (cloud) cloud.style.opacity = '0';
         }
     },
 
-    updateAllAnimations(flightState) {
+    // Update both animations
+    updateAnimations(flightState, inCloud) {
         this.startJetStreamCycling(flightState);
-        this.startCloudOpacityCycle(flightState);
+        this.startCloudOpacityCycle(inCloud);
     },
 
     cleanup() {
         if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
         if (this.cloudInterval) clearInterval(this.cloudInterval);
-        this.jetStreamInterval = null;
-        this.cloudInterval = null;
     }
 };
 
@@ -598,8 +586,11 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
                 }
             }
 
-            // Update animations based on flight state
-            AnimationManager.updateAllAnimations(flightData.flight_state);
+            // Single call handles both animations
+            AnimationManager.updateAnimations(
+                flightData.flight_state,      // For jet stream
+                flightData.airplane_in_cloud  // For cloud (1 or 0)
+            );
 
             for (const field of requiredFields) {
                 if (flightData[field] === undefined) {
