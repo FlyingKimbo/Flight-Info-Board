@@ -415,8 +415,8 @@ function Update_ETE_Dist2Arr_Bar() {
     // Fetch and update function
     const updateETEDisplay = async () => {
         try {
-            const { getLatestData } = await getFlightDataWithPolling();
-            const flightData = getLatestData();
+            const polling = await getFlightDataWithPolling();
+            const flightData = polling.getLatestData();
 
             if (!flightData) {
                 resetETEVisuals();
@@ -691,15 +691,15 @@ async function getFlightDataWithPolling() {
 // Start polling
 const stopPolling = await getFlightDataWithPolling();
 
-fetch_flight_static();
-
-getFlightDataWithPolling();
 
 
 
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
+    fetch_flight_static();
+
+    getFlightDataWithPolling();
 
     
     // Start ETE updates
