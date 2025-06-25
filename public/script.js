@@ -20,7 +20,16 @@ const flightStore = {
                 {
                     event: 'UPDATE',
                     schema: 'public',
-                    table: 'flights_realtime'
+                    table: 'flights_realtime',
+                    fields: [
+                        'start_distance',
+                        'dist_to_destination',
+                        'ete_srgs',
+                        'current_flight',
+                        'flight_state',
+                        'airplane_in_cloud',
+                        'ambient_precipstate'
+                    ]
                 },
                 (payload) => {
                     this.currentFlight = payload.new; // Update stored data
