@@ -701,7 +701,7 @@ async function checkFlightStatus() {
 
 
 
-
+flightStore.init();
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", function () {
