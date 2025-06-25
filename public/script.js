@@ -12,69 +12,13 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 // 1. Initialize Supabase with proper realtime config
 const supabase = createClient(supabaseUrl, supabaseKey, {
     realtime: {
-        params: {
-            eventsPerSecond: 10,
-        }
+        params: { vsn: '1.0.0' } // or try removing this
     }
 });
 
-// 2. Enhanced flightStore with error handling
-const flightStore = {
-    currentFlight: null,
-    subscribers: new Set(),
-    isConnected: false,
 
-    init() {
-        const subscription = supabase
-            .channel('flight-updates', {
-                config: {
-                    broadcast: { ack: true },
-                    presence: { key: 'flight-data' }
-                }
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'flights_realtime',
-                fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
-            }, (payload) => {
-                this.currentFlight = payload.new;
-                this.notifySubscribers();
-            })
-            .subscribe((status, err) => {
-                if (status === 'SUBSCRIBED') {
-                    this.isConnected = true;
-                    console.log('Realtime connected!');
-                }
-                if (err) {
-                    console.error('Subscription error:', err);
-                    this.retryConnection();
-                }
-            });
 
-        this.subscription = subscription;
-    },
 
-    retryConnection() {
-        setTimeout(() => {
-            if (!this.isConnected) {
-                console.log('Attempting reconnect...');
-                this.init();
-            }
-        }, 5000);
-    },
-
-    subscribe(callback) {
-        this.subscribers.add(callback);
-        return () => this.subscribers.delete(callback);
-    },
-
-    notifySubscribers() {
-        this.subscribers.forEach(callback => callback(this.currentFlight));
-    }
-};
-
-/*
 const flightStore = {
     currentFlight: null, // Holds the latest flight data
     subscribers: new Set(), // Functions to notify on updates
@@ -90,13 +34,18 @@ const flightStore = {
                     schema: 'public',
                     table: 'flights_realtime',
                     fields: [
+                        'create_at',
                         'start_distance',
                         'dist_to_destination',
                         'ete_srgs',
                         'current_flight',
                         'flight_state',
+                        'flight_status',
                         'airplane_in_cloud',
-                        'ambient_precipstate'
+                        'ambient_visibility',
+                        'ambient_precipstate',
+                        'dep_display',
+                        'arr_display'
                     ]
                 },
                 (payload) => {
@@ -120,7 +69,7 @@ const flightStore = {
         this.subscribers.forEach(callback => callback(this.currentFlight));
     }
 };
-*/
+
 // ###################################################################### Sub to supabase realtime data
 
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
