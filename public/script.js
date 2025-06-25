@@ -19,61 +19,10 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
 
 
 
-const flightStore = {
-    currentFlight: null, // Holds the latest flight data
-    subscribers: new Set(), // Functions to notify on updates
 
-    // Initialize realtime subscription
-    init() {
-        const subscription = supabase
-            .channel('flight-updates')
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'flights_realtime',
-                    fields: [
-                        'create_at',
-                        'start_distance',
-                        'dist_to_destination',
-                        'ete_srgs',
-                        'current_flight',
-                        'flight_state',
-                        'flight_status',
-                        'airplane_in_cloud',
-                        'ambient_visibility',
-                        'ambient_precipstate',
-                        'dep_display',
-                        'arr_display'
-                    ]
-                },
-                (payload) => {
-                    this.currentFlight = payload.new; // Update stored data
-                    this.notifySubscribers(); // Alert all listeners
-                }
-            )
-            .subscribe();
-
-        return () => supabase.removeChannel(subscription); // Cleanup function
-    },
-
-    // Register functions to be called on updates
-    subscribe(callback) {
-        this.subscribers.add(callback);
-        return () => this.subscribers.delete(callback); // Unsubscribe function
-    },
-
-    // Notify all subscribed functions
-    notifySubscribers() {
-        this.subscribers.forEach(callback => callback(this.currentFlight));
-    }
-};
-
-flightStore.init();
 
 // Realtime service initialization
-async function initializeRealtime() {
+async function flightStore() {
     // 1. Verify auth
     const { error: authError } = await supabase.auth.getSession();
     if (authError) throw authError;
@@ -761,7 +710,7 @@ async function checkFlightStatus() {
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        await initializeRealtime();
+        await flightStore();
         const { data } = await fetch_flight_static();
         updateFlightTable(data);
     } catch (error) {
