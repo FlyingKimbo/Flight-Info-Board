@@ -16,7 +16,11 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
 });
 
-
+supabase.channel('test')
+    .on('broadcast', { event: 'test' }, () => { })
+    .subscribe((status) => {
+        console.log("WS status:", status);
+    });
 
 
 const flightStore = {
