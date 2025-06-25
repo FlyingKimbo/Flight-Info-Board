@@ -204,46 +204,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     .order('created_at', { ascending: false })
                     .limit(50),  // Reasonable limit
 
-                // Realtime flights (active)
-                supabase.from('flights_realtime')
-                    .select(`
-                    id,
-                    current_flight,
-                    flight_status,
-                    start_distance,
-                    airplane_in_cloud,
-                    dist_to_destination,
-                    ete_srgs,
-                    ambient_precipstate,
-                    ambient_visibility,
-                    dep_display,
-                    arr_display,
-                    flight_state,
-                    created_at
-                `)
-                    .in('flight_status', VALID_REALTIME_STATUSES)
-                    .order('created_at', { ascending: false })
-                    .limit(1)  // Only need recent active flights
+               
             ]);
 
 
 
             // Error handling for both queries
             if (staticResult.error) throw staticResult.error;
-            if (realtimeResult.error) throw realtimeResult.error;
+            
 
             // Process and validate data
             const completed = staticResult.data || [];
-            const active = (realtimeResult.data || [])
-                .filter(flight => flight.dist_to_destination !== undefined)
-                .map(flight => ({
-                    ...flight,
-                    aircraft_type: flight.current_flight.split(' ')[0]
-                }));
+            
+                
+              
 
             return {
 
-                active,
+                
                 completed
             };
 
@@ -254,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 code: error.code
             });
             return {
-                active: [],
+               
                 completed: []
             };
         }
@@ -637,7 +615,7 @@ document.addEventListener("DOMContentLoaded", function () {
      
 
         // Fetch initial ETE value
-        fetchInitialETE();
+        //fetchInitialETE();
 
         // Automatically sort by Flight Status every 20000 milliseconds
         setInterval(function () {
