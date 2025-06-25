@@ -692,7 +692,7 @@ async function checkFlightStatus() {
 
 
 
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
 
     try {
         // 1. Verify Supabase
