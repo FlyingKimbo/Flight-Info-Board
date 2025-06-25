@@ -16,15 +16,7 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
     }
 });
 
-supabase.channel('test')
-    .on('broadcast', { event: 'test' }, () => { })
-    .subscribe((status) => {
-        console.log("WS status:", status);
-    });
 
-// Verify your anon key has Realtime permissions
-const { data: { user } } = await supabase.auth.getUser();
-console.log("Current user:", user); // Should not be null
 
 
 const flightStore = {
