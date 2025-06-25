@@ -68,7 +68,7 @@ async function fetch_flight_static() {
 }
 
 // Start polling
-let pollingInterval = setInterval(fetch_flight_static, 5000);
+//let pollingInterval = setInterval(fetch_flight_static, 5000);
 
 // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& WIP WIP WIP WIP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
