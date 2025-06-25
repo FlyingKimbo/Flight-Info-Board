@@ -118,13 +118,7 @@ let cloudOpacityState = {
 
 
 
-// New function to safely stop cycling
-function stopCloudOpacityCycling() {
-    if (cloudOpacityState.interval) {
-        clearInterval(cloudOpacityState.interval);
-        cloudOpacityState.interval = null;
-    }
-}
+
 
 
 function updatePositions() {
@@ -358,8 +352,7 @@ function resetETEVisuals() {
             }
         }
     });
-    clearInterval(cloudOpacityInterval);
-    cloudOpacityInterval = null;
+
 }
 
 
@@ -501,11 +494,7 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        const cloud = document.getElementById('cloud-image');
-        if (cloud) {
-            cloud.src = "/Image/Cloud/cloud1.png";  // Set this once when initializing
-            cloud.style.opacity = "0";  // Start hidden
-        }
+    
 
         if (this.cloudInterval) clearInterval(this.cloudInterval);
 
