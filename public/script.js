@@ -134,9 +134,55 @@ async function fetchFlight_State() {
     }
 }
 
+function startJetStreamCycling(flightState) {
+    let imageIndex = 1;
+    let intervalId = null;
 
+    // Function to update the jet stream image
+    const updateJetStream = () => {
+        const jetStreamImage = document.getElementById('jetstream-image');
+        if (jetStreamImage && flightState === "Airborne") {
+            jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+            imageIndex = (imageIndex % 5) + 1; // Cycle through 1 to 5
+        } else if (jetStreamImage) {
+            jetStreamImage.style.opacity = '0'; // Hide when not airborne
+        }
+    };
 
+    // Clear any existing interval
+    if (intervalId) {
+        clearInterval(intervalId);
+    }
 
+    // Start new interval if airborne
+    if (flightState === "Airborne") {
+        intervalId = setInterval(updateJetStream, 20);
+        const jetStreamImage = document.getElementById('jetstream-image');
+        if (jetStreamImage) {
+            jetStreamImage.style.opacity = '1'; // Make sure it's visible
+        }
+    }
+
+    return intervalId; // Return the interval ID for cleanup
+}
+
+// Usage example:
+let jetStreamInterval = null;
+
+// When flight state changes:
+function handleFlightStateChange(newState) {
+    if (jetStreamInterval) {
+        clearInterval(jetStreamInterval);
+    }
+    jetStreamInterval = startJetStreamCycling(newState);
+}
+
+// Initialize:
+handleFlightStateChange("Airborne"); // Starts animation
+// Later...
+handleFlightStateChange("Landed"); // Stops animation and hides
+
+/*
 function startJetStreamCycling() {
     let imageIndex = 1;
     setInterval(() => {
@@ -148,9 +194,9 @@ function startJetStreamCycling() {
     }, 20); // Change image every 20ms
 }
 
+*/
 
 
-// Helper to clear UI elements
 
 
 
@@ -552,24 +598,9 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
 
             if (flightData.flight_state === "Airborne") {
-                // Start cycling only if not already running
-                if (!jetStreamInterval) {
-                    jetStreamInterval = startJetStreamCycling();
-                }
-            }
-            else if (flightData.flight_state === "Landed") {
-                // Stop cycling if running
-                if (jetStreamInterval) {
-                    stopJetStreamCycling(jetStreamInterval);
-                    jetStreamInterval = null;
-
-                    // Additional: Hide/Reset the jet stream visual
-                    const jetStreamElement = document.getElementById('jetstream-image');
-                    if (jetStreamElement) {
-                        jetStreamElement.style.opacity = '0';
-                        // Add any other reset logic here (e.g., reset animation position)
-                    }
-                }
+                jetStreamInterval = startJetStreamCycling("Airborne");
+            } else if (flightData.flight_state === "Landed") {
+                jetStreamInterval = startJetStreamCycling("Landed");
             }
 
             for (const field of requiredFields) {
