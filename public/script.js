@@ -494,25 +494,18 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        console.log('[DEBUG] Cloud animation triggered with airplane_in_cloud:', inCloud);
-
         // Clear existing interval
-        if (this.cloudInterval) {
-            clearInterval(this.cloudInterval);
-            this.cloudInterval = null;
-        }
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
 
-        // Get cloud element with debug
+        // Get and verify cloud element
         const cloud = document.getElementById('cloud-image');
         if (!cloud) {
-            console.error('[ERROR] Missing cloud-image element');
+            console.error("Cloud element missing!");
             return;
         }
-        console.log('[DEBUG] Cloud element found:', cloud);
 
-        // DEBUG: Force visible with red border - ADD THESE LINES
+        // DEBUG: Keep these styles but remove opacity
         cloud.style.cssText = `
-        opacity: 0.5 !important;
         z-index: 9999 !important;
         border: 2px solid red !important;
         position: absolute !important;
@@ -521,34 +514,25 @@ const AnimationManager = {
         top: 50px !important;
         left: 50px !important;
     `;
-        // END DEBUG
 
-
-
-        // Verify image source
-        if (!cloud.src.includes('Cloud1.png')) {
-            cloud.src = '/Image/Cloud/Cloud1.png';
-            
-            console.log('[DEBUG] Set cloud src to:', cloud.src);
-        }
-
+        // Only control opacity through animation logic
         if (inCloud === 1) {
-            console.log('[DEBUG] Starting cloud opacity animation');
+            console.log('[DEBUG] Starting cloud animation');
             let increasing = true;
             let currentOpacity = 0.2;
-            cloud.style.opacity = currentOpacity;
 
             this.cloudInterval = setInterval(() => {
                 currentOpacity += increasing ? 0.01 : -0.01;
-                if (currentOpacity >= 0.8) increasing = false;
-                if (currentOpacity <= 0.3) increasing = true;
+                if (currentOpacity >= 0.7) increasing = false;
+                if (currentOpacity <= 0.2) increasing = true;
 
                 cloud.style.opacity = currentOpacity;
-                console.log('[DEBUG] Current cloud opacity:', currentOpacity); // Live logging
+                console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
             }, 50);
         } else {
-            console.log('[DEBUG] Hiding cloud');
-            cloud.style.opacity = '0';
+            console.log('[DEBUG] Cloud hidden (normal state)');
+            // Don't force hide if we're debugging
+            // cloud.style.opacity = '0'; // Comment this out temporarily
         }
     },
 
