@@ -36,7 +36,7 @@ const flightStore = {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'flights_realtime',
-                //fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
+                fields: ['start_distance', 'dist_to_destination', 'ete_srgs', 'current_flight']
             }, (payload) => {
                 this.currentFlight = payload.new;
                 this.notifySubscribers();
@@ -756,6 +756,12 @@ async function checkFlightStatus() {
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", function () {
+
+    const wsTest = new WebSocket('wss://echo.websocket.org');
+    wsTest.onopen = () => console.log("Basic WS works");
+    wsTest.onerror = (e) => console.error("Basic WS failed", e);
+
+
     // First verify authentication
     supabase.auth.getSession()
         .then(({ error }) => {
