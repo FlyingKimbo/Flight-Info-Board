@@ -511,8 +511,8 @@ const AnimationManager = {
         console.log('[DEBUG] Cloud element found:', cloud);
 
         // Verify image source
-        if (!cloud.src.includes('cloud1.png')) {
-            cloud.src = '/Image/Cloud/cloud1.png';
+        if (!cloud.src.includes('Cloud1.png')) {
+            cloud.src = '/Image/Cloud/Cloud1.png';
             console.log('[DEBUG] Set cloud src to:', cloud.src);
         }
 
