@@ -22,6 +22,10 @@ supabase.channel('test')
         console.log("WS status:", status);
     });
 
+// Verify your anon key has Realtime permissions
+const { data: { user } } = await supabase.auth.getUser();
+console.log("Current user:", user); // Should not be null
+
 
 const flightStore = {
     currentFlight: null, // Holds the latest flight data
