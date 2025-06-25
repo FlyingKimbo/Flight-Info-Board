@@ -66,7 +66,7 @@ async function fetch_flight_static() {
         return null;
     }
 }
-fetch_flight_static();
+//fetch_flight_static();
 // Start polling
 //let pollingInterval = setInterval(fetch_flight_static, 5000);
 
@@ -675,13 +675,15 @@ const stopPolling = await getFlightDataWithPolling();
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
 
+    await fetch_flight_static();
+
     getFlightDataWithPolling();
 
     // Start ETE updates
     Update_ETE_Dist2Arr_Bar();
 
     
-    //fetch_flight_static();
+    
     
 
         
