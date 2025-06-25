@@ -738,11 +738,54 @@ async function checkFlightStatus() {
 }
 
 
+async function getFlightData() {
+    try {
+        const { data, error } = await supabase
+            .from('flights_realtime')
+            .select(`
+                ete_srgs,
+                dist_to_destination,
+                start_distance,
+                current_flight,
+                flight_state,
+                airplane_in_cloud,
+                ambient_precipstate
+            `)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();  // Returns a single object instead of array
 
+        if (error) throw error;
+
+        if (data) {
+            console.log('--- Flight Data Received ---');
+            console.log(`ETE SRGS: ${data.ete_srgs}`);
+            console.log(`Distance to Destination: ${data.dist_to_destination}`);
+            console.log(`Start Distance: ${data.start_distance}`);
+            console.log(`Current Flight: ${data.current_flight}`);
+            console.log(`Flight State: ${data.flight_state}`);
+            console.log(`Airplane in Cloud: ${data.airplane_in_cloud}`);
+            console.log(`Ambient Precip State: ${data.ambient_precipstate}`);
+            console.log('---------------------------');
+        } else {
+            console.log('No flight data available');
+        }
+
+        return data || null;
+
+    } catch (error) {
+        console.error('Error fetching flight data:', error.message);
+        return null;
+    }
+}
 
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
+
+    getFlightData();
+
+
     try {
         // Load static flights
         const { data } = await fetch_flight_static();
