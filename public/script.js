@@ -521,7 +521,9 @@ async function checkFlightStatus() {
 
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
- 
+    let cloudOpacityInterval
+
+
         try {
             
 
@@ -616,7 +618,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 
     // Return cleanup function
     return () => {
-        clearInterval(pollingInterval);
+        
         if (cloudOpacityInterval) {
             stopCloudOpacityCycling();
         }
