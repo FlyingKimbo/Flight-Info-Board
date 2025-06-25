@@ -251,8 +251,7 @@ function initialize() {
 
 
 
-    // Start jet stream cycling
-    startJetStreamCycling();
+
 }
 
 function setBlinking(currentFlight, flightStatus) {
