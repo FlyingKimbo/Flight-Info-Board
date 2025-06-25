@@ -504,11 +504,7 @@ function Update_ETE_Dist2Arr_Bar() {
         }
     };
 
-    // Initial update
-    updateETEDisplay();
-
-    // Set up polling (matches getFlightDataWithPolling interval)
-    pollingInterval = setInterval(updateETEDisplay, 5000);
+    
 
     // Return cleanup function
     return () => {
