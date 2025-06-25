@@ -126,20 +126,6 @@ async function fetch_flight_static() {
     }
 }
 
-// Usage in listener (exactly as you wanted)
-document.addEventListener('DOMContentLoaded', async () => {
-    const result = await fetch_flight_static();
-
-    if (result.success) {
-        renderFlights(result.data);
-    } else {
-        showError(result.error);
-    }
-
-    // Initialize realtime separately
-    const cleanup = Update_ETE_Dist2Arr_Bar();
-    window.addEventListener('beforeunload', cleanup);
-});
 
 
 //       ##################### ETE and Distance bar update ################################################
