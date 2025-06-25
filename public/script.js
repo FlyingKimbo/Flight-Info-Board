@@ -59,75 +59,87 @@ const flightStore = {
 
 
 async function fetch_flight_static() {
-    const TIMEOUT_MS = 8000; // 8-second timeout
+    // Default configuration (can be extended later)
+    const config = {
+        maxRetries: 3,
+        retryDelay: 1000,
+        timeout: 8000
+    };
+
+    let retryCount = 0;
     let timeoutId;
 
     try {
-        // 1. Verify authentication first (with timeout)
+        // 1. Verify authentication (with timeout)
         const authCheck = Promise.race([
             supabase.auth.getSession(),
             new Promise((_, reject) =>
-                timeoutId = setTimeout(() => reject(new Error('Authentication timeout')), TIMEOUT_MS)
+                timeoutId = setTimeout(() => reject(new Error('Auth timeout')), config.timeout)
             )
         ]);
         const { error: authError } = await authCheck;
         if (authError) throw authError;
 
-        // 2. Single table fetch (with timeout)
-        const fetchPromise = supabase
-            .from('flights_static')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(50);
+        // 2. Execute the query (with retry logic)
+        const fetchData = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('flights_static')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
 
-        const { data, error } = await Promise.race([
-            fetchPromise,
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Database query timeout')), TIMEOUT_MS)
-            )
-        ]);
+                if (error) throw error;
+                return data || [];
+            } catch (err) {
+                if (retryCount++ < config.maxRetries) {
+                    await new Promise(resolve =>
+                        setTimeout(resolve, config.retryDelay * retryCount)
+                    );
+                    return fetchData();
+                }
+                throw err;
+            }
+        };
 
-        if (error) throw error;
-        return { completed: data || [] };
+        // 3. Return final result
+        return {
+            success: true,
+            data: await fetchData(),
+            error: null
+        };
 
     } catch (error) {
-        console.error('Fetch error:', {
+        console.error('Fetch failed:', {
             name: error.name,
             message: error.message,
-            ...(error.details && { details: error.details }),
-            ...(error.code && { code: error.code })
+            ...(error.details && { details: error.details })
         });
 
-        // Reconnect if connection was lost
-        if (error.message.includes('WebSocket')) {
-            await supabase.reconnect();
-        }
-
         return {
-            completed: [],
+            success: false,
+            data: null,
             error: error.message
         };
     } finally {
-        clearTimeout(timeoutId); // Always clean up timeout
+        clearTimeout(timeoutId);
     }
 }
 
-async function fetchFlightDataOnce() {
-    try {
-        const { completed, error } = await fetch_flight_static();
+// Usage in listener (exactly as you wanted)
+document.addEventListener('DOMContentLoaded', async () => {
+    const result = await fetch_flight_static();
 
-        if (error) {
-            console.error('Flight data error:', error);
-            return { success: false, data: null, error };
-        }
-
-        return { success: true, data: completed, error: null };
-
-    } catch (err) {
-        console.error('Unexpected error:', err);
-        return { success: false, data: null, error: err.message };
+    if (result.success) {
+        renderFlights(result.data);
+    } else {
+        showError(result.error);
     }
-}
+
+    // Initialize realtime separately
+    const cleanup = Update_ETE_Dist2Arr_Bar();
+    window.addEventListener('beforeunload', cleanup);
+});
 
 
 //       ##################### ETE and Distance bar update ################################################
@@ -254,16 +266,12 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // 1. Fetch static data once
-    const result = await fetchFlightDataOnce();
+    const result = await fetch_flight_static();
 
     if (result.success) {
-        // Process your flight data
-        console.log('Loaded flights:', result.data);
-        renderFlights(result.data); // Your rendering function
+        renderFlights(result.data);
     } else {
-        // Show error to user
-        showErrorMessage(result.error);
+        showError(result.error);
     }
 
 
