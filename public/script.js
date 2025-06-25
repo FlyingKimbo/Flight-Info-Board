@@ -527,7 +527,7 @@ async function checkFlightStatus() {
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
     
-    startJetStreamCycling();
+    
 
         try {
             
@@ -549,6 +549,29 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
                 'ambient_precipstate'
             ];
             console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
+            console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
+
+            if (flightData.flight_state === "Airborne") {
+                // Start cycling only if not already running
+                if (!jetStreamInterval) {
+                    jetStreamInterval = startJetStreamCycling();
+                }
+            }
+            else if (flightData.flight_state === "Landed") {
+                // Stop cycling if running
+                if (jetStreamInterval) {
+                    stopJetStreamCycling(jetStreamInterval);
+                    jetStreamInterval = null;
+
+                    // Additional: Hide/Reset the jet stream visual
+                    const jetStreamElement = document.getElementById('jetstream-image');
+                    if (jetStreamElement) {
+                        jetStreamElement.style.opacity = '0';
+                        // Add any other reset logic here (e.g., reset animation position)
+                    }
+                }
+            }
+
             for (const field of requiredFields) {
                 if (flightData[field] === undefined) {
                     console.error(`Missing required field: ${field}`);
