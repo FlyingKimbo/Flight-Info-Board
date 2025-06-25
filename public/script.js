@@ -175,7 +175,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let initialETE = -1;
     let cloudOpacityInterval;
     let GreenbarPercentage = 0;
-    let cleanupETEUpdates;
+    
     
 
     // SUPABASE INTEGRATION - Fetching from flights_static & flights_realtime $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
