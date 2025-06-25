@@ -501,6 +501,12 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
+        const cloud = document.getElementById('cloud-image');
+        if (cloud) {
+            cloud.src = "/Image/Cloud/cloud1.png";  // Set this once when initializing
+            cloud.style.opacity = "0";  // Start hidden
+        }
+
         if (this.cloudInterval) clearInterval(this.cloudInterval);
 
         if (inCloud === 1) {
@@ -565,7 +571,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             ];
             console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
             console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
-            console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
+            console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
             
 
             // Get DOM elements
