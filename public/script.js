@@ -66,7 +66,7 @@ async function fetch_flight_static() {
         return null;
     }
 }
-
+fetch_flight_static();
 // Start polling
 //let pollingInterval = setInterval(fetch_flight_static, 5000);
 
