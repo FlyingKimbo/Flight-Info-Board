@@ -1,6 +1,6 @@
 ﻿// Import Supabase at the top of your file
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
+//import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.7';
 // Initialize Supabase
 const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
@@ -69,6 +69,59 @@ const flightStore = {
         this.subscribers.forEach(callback => callback(this.currentFlight));
     }
 };
+
+// Realtime service initialization
+async function initializeRealtime() {
+    // 1. Verify auth
+    const { error: authError } = await supabase.auth.getSession();
+    if (authError) throw authError;
+
+    // 2. Create robust channel
+    return supabase.channel('flight-updates', {
+        config: {
+            broadcast: { ack: false },
+            presence: { key: '' }
+        }
+    })
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'flights_realtime'
+        }, (payload) => {
+            console.log("Update received:", payload);
+            flightStore.currentFlight = payload.new;
+        })
+        .subscribe((status, err) => {
+            if (status === 'SUBSCRIBED') {
+                console.log("Realtime connected!");
+                document.dispatchEvent(new Event('realtime-connected'));
+            }
+            if (err) {
+                console.error("Realtime error:", err);
+                setTimeout(initializeRealtime, 5000); // Reconnect
+            }
+        });
+}
+
+
+function setupPollingFallback() {
+    let currentFlight = null;
+
+    // Poll every 5 seconds
+    setInterval(async () => {
+        const { data, error } = await supabase
+            .from('flights_realtime')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (!error && data) {
+            currentFlight = data;
+            Update_ETE_Dist2Arr_Bar(); // Update UI manually
+        }
+    }, 5000);
+}
 
 // ###################################################################### Sub to supabase realtime data
 
@@ -704,32 +757,15 @@ async function checkFlightStatus() {
 flightStore.init();
 
 // 3. Initialize with proper sequence
-document.addEventListener("DOMContentLoaded", function () {
-
-    const wsTest = new WebSocket('wss://echo.websocket.org');
-    wsTest.onopen = () => console.log("Basic WS works");
-    wsTest.onerror = (e) => console.error("Basic WS failed", e);
-
-
-    // First verify authentication
-    supabase.auth.getSession()
-        .then(({ error }) => {
-            if (error) throw error;
-
-            // Then initialize realtime
-            flightStore.init();
-
-            // Then load static data
-            return fetch_flight_static();
-        })
-        .then((staticResult) => {
-            if (staticResult.success) {
-                updateFlightTable(staticResult.data);
-            }
-        })
-        .catch((error) => {
-            console.error("Initialization error:", error);
-        });
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        await initializeRealtime();
+        const { data } = await fetch_flight_static();
+        updateFlightTable(data);
+    } catch (error) {
+        console.error("Initialization failed:", error);
+        setupPollingFallback();
+    }
 });
 
 
