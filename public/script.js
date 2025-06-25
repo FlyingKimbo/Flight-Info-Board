@@ -689,11 +689,11 @@ const stopPolling = await getFlightDataWithPolling();
 
 
 
-
+fetch_flight_static();
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
-    fetch_flight_static();
+    
 
     getFlightDataWithPolling();
 
