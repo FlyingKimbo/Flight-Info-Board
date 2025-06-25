@@ -495,10 +495,12 @@ const AnimationManager = {
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
     
-
+        console.log(`Cloud animation called with: ${inCloud}`); // Debug 1
         if (this.cloudInterval) clearInterval(this.cloudInterval);
+        console.log('Cloud element:', cloud); // Debug 2
 
         if (inCloud === 1) {
+            console.log('Starting cloud animation'); // Debug 3
             let increasing = true;
             let currentOpacity = 0.2;
             this.cloudInterval = setInterval(() => {
@@ -508,9 +510,11 @@ const AnimationManager = {
                     if (currentOpacity >= 0.7) increasing = false;
                     if (currentOpacity <= 0.2) increasing = true;
                     cloud.style.opacity = currentOpacity;
+                    console.log('Current cloud opacity:', currentOpacity); // Debug 4
                 }
             }, 50);
-        } else {
+        } else if (cloud) {
+            console.log('Hiding cloud'); // Debug 5
             const cloud = document.getElementById('cloud-image');
             if (cloud) cloud.style.opacity = '0';
         }
