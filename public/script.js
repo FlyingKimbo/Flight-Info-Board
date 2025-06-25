@@ -1,5 +1,5 @@
 ﻿// Import Supabase at the top of your file
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+//import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // Initialize Supabase
 const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
