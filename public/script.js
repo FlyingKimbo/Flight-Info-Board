@@ -494,33 +494,44 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        console.log(`Cloud animation called with: ${inCloud}`);
+        console.log('[DEBUG] Cloud animation triggered with airplane_in_cloud:', inCloud);
 
         // Clear existing interval
         if (this.cloudInterval) {
             clearInterval(this.cloudInterval);
+            this.cloudInterval = null;
         }
 
-        // PROPERLY get the cloud element
+        // Get cloud element with debug
         const cloud = document.getElementById('cloud-image');
         if (!cloud) {
-            console.error("Cloud image element not found!");
+            console.error('[ERROR] Missing cloud-image element');
             return;
+        }
+        console.log('[DEBUG] Cloud element found:', cloud);
+
+        // Verify image source
+        if (!cloud.src.includes('cloud1.png')) {
+            cloud.src = '/Image/Cloud/cloud1.png';
+            console.log('[DEBUG] Set cloud src to:', cloud.src);
         }
 
         if (inCloud === 1) {
-            console.log('Starting cloud animation');
+            console.log('[DEBUG] Starting cloud opacity animation');
             let increasing = true;
             let currentOpacity = 0.2;
+            cloud.style.opacity = currentOpacity;
 
             this.cloudInterval = setInterval(() => {
                 currentOpacity += increasing ? 0.01 : -0.01;
                 if (currentOpacity >= 0.7) increasing = false;
                 if (currentOpacity <= 0.2) increasing = true;
+
                 cloud.style.opacity = currentOpacity;
+                console.log('[DEBUG] Current cloud opacity:', currentOpacity); // Live logging
             }, 50);
         } else {
-            console.log('Hiding cloud');
+            console.log('[DEBUG] Hiding cloud');
             cloud.style.opacity = '0';
         }
     },
@@ -541,6 +552,8 @@ const AnimationManager = {
 
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
+    console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
+
     if (!flightData || !flightData.flight_state) {
         AnimationManager.cleanup();
         return;
