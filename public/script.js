@@ -597,18 +597,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
             console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
 
-            if (flightData.flight_state === "Airborne") {
-                jetStreamInterval = startJetStreamCycling("Airborne");
-            } else if (flightData.flight_state === "Landed") {
-                jetStreamInterval = startJetStreamCycling("Landed");
-            }
-
-            for (const field of requiredFields) {
-                if (flightData[field] === undefined) {
-                    console.error(`Missing required field: ${field}`);
-                    return;
-                }
-            }
+            
 
             // Get DOM elements
             const elements = {
@@ -628,6 +617,22 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
                 }
             }
 
+            // Jetstream anumation cycle
+            if (flightData.flight_state === "Airborne") {
+                jetStreamInterval = startJetStreamCycling("Airborne");
+            } else if (flightData.flight_state === "Landed") {
+                jetStreamInterval = startJetStreamCycling("Landed");
+            }
+
+            for (const field of requiredFields) {
+                if (flightData[field] === undefined) {
+                    console.error(`Missing required field: ${field}`);
+                    return;
+                }
+            }
+
+
+
             // Update ETE bar width
             const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
             elements.eteBar.style.width = `${etePercentage}%`;
@@ -639,7 +644,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
             elements.aircraftImage.style.opacity = '1';
 
             // Update cloud effects
-            if (flightData.airplane_in_cloud === 1) {
+            if (flightData.airplane_in_cloud === "1") {
                 elements.cloudImage.style.opacity = '1';
                 if (!cloudOpacityInterval) {
                     cloudOpacityInterval = startCloudOpacityCycling(elements.cloudImage);
