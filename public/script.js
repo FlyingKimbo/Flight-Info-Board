@@ -693,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch_flight_static()
         .then(function (staticResult) {
             if (staticResult.success) {
-                renderFlights(staticResult.data); // Display historical data
+                updateFlightTable(); // Display historical data
             } else {
                 showError(staticResult.error);
             }
