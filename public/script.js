@@ -559,20 +559,19 @@ function Update_ETE_Dist2Arr_Bar() {
 ////  #################### INITIAISE flightStore the realtime sub to supabase $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 flightStore.init();
 
-async function updateFlightTable() {
-    const { active, completed } = await fetch_flight_static();
+async function updateFlightTable(flightsData) {
     const tbody = document.getElementById("flight-rows"); // Target ONLY the tbody
 
     // Clear existing rows (preserves headers)
     tbody.innerHTML = '';
 
-
     // Process static flights
-    completed.forEach(flight => {
+    flightsData.forEach(flight => {
+        // Ensure the field names match your Supabase table structure
         CreateNewRow({
-            image: flight.image, // the "image"" must match exactly in flights_static
-            aircraft: flight.aircraft,
-            flightNumber: flight.flightnumber,
+            image: flight.image,        // Must match flights_static column
+            aircraft: flight.aircraft,  // Must match flights_static column
+            flightNumber: flight.flightnumber ,
             departure: flight.departure,
             flightStatus: flight.flightstatus,
             destination: flight.destination
@@ -693,7 +692,12 @@ document.addEventListener("DOMContentLoaded", function () {
     fetch_flight_static()
         .then(function (staticResult) {
             if (staticResult.success) {
-                updateFlightTable(); // Display historical data
+                // Process the static data through updateFlightTable
+                updateFlightTable(staticResult.data)
+                    .catch(function (error) {
+                        console.error("Failed to update flight table:", error);
+                        showError("Failed to display flight data");
+                    });
             } else {
                 showError(staticResult.error);
             }
@@ -708,7 +712,9 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .catch(function (error) {
             console.error("Initialization failed:", error);
+            showError("Failed to load flight data");
         });
 });
+
 
 
