@@ -494,29 +494,34 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-    
-        console.log(`Cloud animation called with: ${inCloud}`); // Debug 1
-        if (this.cloudInterval) clearInterval(this.cloudInterval);
-        console.log('Cloud element:', cloud); // Debug 2
+        console.log(`Cloud animation called with: ${inCloud}`);
+
+        // Clear existing interval
+        if (this.cloudInterval) {
+            clearInterval(this.cloudInterval);
+        }
+
+        // PROPERLY get the cloud element
+        const cloud = document.getElementById('cloud-image');
+        if (!cloud) {
+            console.error("Cloud image element not found!");
+            return;
+        }
 
         if (inCloud === 1) {
-            console.log('Starting cloud animation'); // Debug 3
+            console.log('Starting cloud animation');
             let increasing = true;
             let currentOpacity = 0.2;
+
             this.cloudInterval = setInterval(() => {
-                const cloud = document.getElementById('cloud-image');
-                if (cloud) {
-                    currentOpacity += increasing ? 0.01 : -0.01;
-                    if (currentOpacity >= 0.7) increasing = false;
-                    if (currentOpacity <= 0.2) increasing = true;
-                    cloud.style.opacity = currentOpacity;
-                    console.log('Current cloud opacity:', currentOpacity); // Debug 4
-                }
+                currentOpacity += increasing ? 0.01 : -0.01;
+                if (currentOpacity >= 0.7) increasing = false;
+                if (currentOpacity <= 0.2) increasing = true;
+                cloud.style.opacity = currentOpacity;
             }, 50);
-        } else if (cloud) {
-            console.log('Hiding cloud'); // Debug 5
-            const cloud = document.getElementById('cloud-image');
-            if (cloud) cloud.style.opacity = '0';
+        } else {
+            console.log('Hiding cloud');
+            cloud.style.opacity = '0';
         }
     },
 
