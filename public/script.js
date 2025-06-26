@@ -705,6 +705,8 @@ function handleFlightDataError(error) {
     }
 }
 
+// Load static data
+fetch_flight_static();
 
 // 5. INITIALIZATION & CLEANUP
 async function initializeApp(event) {
@@ -719,8 +721,7 @@ async function initializeApp(event) {
         pollingInterval = setInterval(getFlightDataWithPolling, POLLING_INTERVAL);
         isPollingActive = true;
 
-        // Load static data
-        fetch_flight_static();
+        
 
         console.log('Polling started');
     } catch (error) {
