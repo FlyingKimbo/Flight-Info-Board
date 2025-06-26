@@ -669,8 +669,8 @@ async function getFlightDataWithPolling() {
         if (error) throw error;
 
         if (data) {
-            hasRefreshed = false; // Reset refresh flag when data exists
-            console.log('Flight data received:', data.current_flight);
+            // Data exists - clear refresh flag
+            sessionStorage.removeItem('didRefresh');
 
             Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
@@ -682,18 +682,12 @@ async function getFlightDataWithPolling() {
                 ambient_precipstate: data.ambient_precipstate
             });
         } else {
-            if (!hasRefreshed) {
-                console.log('No data - triggering refresh');
-                hasRefreshed = true;
-                setTimeout(() => window.location.reload(), 2000);
-            }
+            // No data - trigger controlled refresh
+            handleNoDataRefresh();
         }
     } catch (error) {
         console.error('Polling error:', error);
-        if (!hasRefreshed) {
-            hasRefreshed = true;
-            setTimeout(() => window.location.reload(), 2000);
-        }
+        handleNoDataRefresh();
     }
 }
 
@@ -703,6 +697,20 @@ function handleFlightDataError(error) {
         hasRefreshed = true;
         setTimeout(() => window.location.reload(), 2000);
     }
+}
+
+// 1. Add this helper function (put it with your other utility functions)
+function handleNoDataRefresh() {
+    // Skip if already refreshed during this session
+    if (sessionStorage.getItem('didRefresh')) return;
+
+    // Mark refresh as done
+    sessionStorage.setItem('didRefresh', 'true');
+
+    // Refresh after delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
 }
 
 // Load static data
