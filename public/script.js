@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 //Global Variable
 let GreenbarPercentage = 100
-
+let hasRefreshed = false; // Track if we've refreshed
 // ###################################################################### Sub to supabase realtime data
 
 
@@ -656,7 +656,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 async function getFlightDataWithPolling() {
     let pollingInterval;
     let latestFlightData = null;
-    let hasRefreshed = false; // Track if we've refreshed
+    
 
     const fetchAndProcess = async () => {
         try {
@@ -721,21 +721,23 @@ async function getFlightDataWithPolling() {
     };
 }
 
-// Usage:
-// Start polling
-const stopPolling = await getFlightDataWithPolling();
 
 
 
 fetch_flight_static();
-// Start ETE updates
+
+
+// Start polling
+const stopPolling = await getFlightDataWithPolling();
+
+
 Update_ETE_Dist2Arr_Bar();
 
 // 3. Initialize with proper sequence
 document.addEventListener("DOMContentLoaded", async () => {
     
 
-    getFlightDataWithPolling();
+    
        
 });
 
