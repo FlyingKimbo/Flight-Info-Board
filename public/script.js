@@ -656,6 +656,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 async function getFlightDataWithPolling() {
     let pollingInterval;
     let latestFlightData = null;
+    let hasRefreshed = false; // Track if we've refreshed
 
     const fetchAndProcess = async () => {
         try {
@@ -689,8 +690,16 @@ async function getFlightDataWithPolling() {
                 });
 
                 return data;
+            } else {
+                // No data found - trigger refresh once
+                if (!hasRefreshed) {
+                    hasRefreshed = true;
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000); // Refresh after 2 seconds
+                }
+                return null;
             }
-            return null;
         } catch (error) {
             console.error('Fetch error:', error);
             return null;
@@ -709,7 +718,7 @@ async function getFlightDataWithPolling() {
     };
 }
 
-// Usage:
+// @@@Usage:
 // Start polling
 const stopPolling = await getFlightDataWithPolling();
 
