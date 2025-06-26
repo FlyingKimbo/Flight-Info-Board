@@ -670,6 +670,9 @@ async function getFlightDataWithPolling() {
             if (error) throw error;
 
             if (data) {
+                // Data found - reset refresh flag
+                hasRefreshed = false;
+
                 latestFlightData = data;
 
                 // Original console logging
@@ -718,7 +721,7 @@ async function getFlightDataWithPolling() {
     };
 }
 
-// @@@Usage:
+// Usage:
 // Start polling
 const stopPolling = await getFlightDataWithPolling();
 
@@ -733,20 +736,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     
 
     getFlightDataWithPolling();
-
-    
-  
-   
-
-    
-    
-    
-
-        
-
-    
        
-    
 });
 
 
