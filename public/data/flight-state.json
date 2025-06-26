@@ -86,5 +86,13 @@
         "flightNumber": "BAW706",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Concorde-BAW.png"
+    },
+    {
+        "aircraft": "Boeing773ER-SIA",
+        "departure": "KBOS Logan Intl",
+        "destination": "KORD Chicago O&#039;hare Intl",
+        "flightNumber": "SIA12",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
     }
 ]
