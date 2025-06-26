@@ -6,10 +6,14 @@ const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// 1. CONSTANTS
+const POLLING_INTERVAL = 1000; // 1 second
 
 //Global Variable
 let GreenbarPercentage = 100
 let hasRefreshed = false; // Track if we've refreshed
+let pollingInterval;
+let isPollingActive = false;
 // ###################################################################### Sub to supabase realtime data
 
 
@@ -654,91 +658,94 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 } 
 async function getFlightDataWithPolling() {
-    let pollingInterval;
-    let latestFlightData = null;
-    
+    try {
+        const { data, error } = await supabase
+            .from('flights_realtime')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
 
-    const fetchAndProcess = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('flights_realtime')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1)
-                .single();
+        if (error) throw error;
 
-            if (error) throw error;
+        if (data) {
+            hasRefreshed = false; // Reset refresh flag when data exists
+            console.log('Flight data received:', data.current_flight);
 
-            if (data) {
-                // Data found - reset refresh flag
-                hasRefreshed = false;
-
-                latestFlightData = data;
-
-                // Original console logging
-                console.log('\n--- Flight Data ---');
-                console.log(`ETE SRGS: ${data.ete_srgs}`);
-                console.log(`Distance to Destination: ${data.dist_to_destination}`);
-                // ... (keep other logs) ...
-
-                // NEW: Directly call Update_ETE_Dist2Arr_Bar with required fields
-                Update_ETE_Dist2Arr_Bar({
-                    ete_srgs: data.ete_srgs,
-                    dist_to_destination: data.dist_to_destination,
-                    start_distance: data.start_distance,
-                    current_flight: data.current_flight,
-                    flight_state: data.flight_state,
-                    airplane_in_cloud: data.airplane_in_cloud,
-                    ambient_precipstate: data.ambient_precipstate
-                });
-
-                return data;
-            } else {
-                // No data found - trigger refresh once
-                if (!hasRefreshed) {
-                    hasRefreshed = true;
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000); // Refresh after 2 seconds
-                }
-                return null;
+            Update_ETE_Dist2Arr_Bar({
+                ete_srgs: data.ete_srgs,
+                dist_to_destination: data.dist_to_destination,
+                start_distance: data.start_distance,
+                current_flight: data.current_flight,
+                flight_state: data.flight_state,
+                airplane_in_cloud: data.airplane_in_cloud,
+                ambient_precipstate: data.ambient_precipstate
+            });
+        } else {
+            if (!hasRefreshed) {
+                console.log('No data - triggering refresh');
+                hasRefreshed = true;
+                setTimeout(() => window.location.reload(), 2000);
             }
-        } catch (error) {
-            console.error('Fetch error:', error);
-            return null;
         }
-    };
+    } catch (error) {
+        console.error('Polling error:', error);
+        if (!hasRefreshed) {
+            hasRefreshed = true;
+            setTimeout(() => window.location.reload(), 2000);
+        }
+    }
+}
 
-    // Initial fetch
-    await fetchAndProcess();
-
-    // Start polling
-    pollingInterval = setInterval(fetchAndProcess, 1000);
-
-    return () => {
-        clearInterval(pollingInterval);
-        console.log('Polling stopped');
-    };
+function handleFlightDataError(error) {
+    console.error('Flight data error:', error);
+    if (!hasRefreshed) {
+        hasRefreshed = true;
+        setTimeout(() => window.location.reload(), 2000);
+    }
 }
 
 
+// 5. INITIALIZATION & CLEANUP
+async function initializeApp(event) {
+    // Skip if already polling
+    if (isPollingActive) return;
 
+    try {
+        // Initial data fetch
+        await getFlightDataWithPolling();
 
-fetch_flight_static();
+        // Start polling
+        pollingInterval = setInterval(getFlightDataWithPolling, POLLING_INTERVAL);
+        isPollingActive = true;
 
+        // Load static data
+        fetch_flight_static();
 
-// Start polling
-const stopPolling = await getFlightDataWithPolling();
+        console.log('Polling started');
+    } catch (error) {
+        handleFlightDataError(error);
+    }
+}
 
+function stopPolling() {
+    if (!isPollingActive) return;
 
-Update_ETE_Dist2Arr_Bar();
+    clearInterval(pollingInterval);
+    isPollingActive = false;
+    console.log('Polling stopped');
+}
 
-// 3. Initialize with proper sequence
-document.addEventListener("DOMContentLoaded", async () => {
-    
+// 6. EVENT LISTENERS
+window.addEventListener('pageshow', initializeApp);
+window.addEventListener('pagehide', stopPolling);
 
-    
-       
-});
-
-
+// 7. INITIAL LOAD
+// For pages loaded from cache (back/forward navigation)
+if (document.readyState === 'complete') {
+    initializeApp({ persisted: true });
+}
+// Normal page load
+else {
+    window.addEventListener('load', initializeApp);
+}
