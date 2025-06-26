@@ -7,7 +7,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 // 1. CONSTANTS
-const POLLING_INTERVAL = 1000; // 1 second
+const POLLING_INTERVAL = 5000; // 1 second
 
 //Global Variable
 let GreenbarPercentage = 100
