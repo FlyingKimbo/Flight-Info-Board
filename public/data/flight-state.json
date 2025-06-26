@@ -89,7 +89,7 @@
     },
     {
         "aircraft": "Boeing773ER-SIA",
-        "departure": "KORD Chicago O'hare Intl",
+        "departure": "KORD Chicago O&#039;hare Intl",
         "destination": "-",
         "flightNumber": "SIA12",
         "flightStatus": "-",
