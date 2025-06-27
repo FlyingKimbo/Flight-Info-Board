@@ -666,28 +666,42 @@ async function getFlightDataWithPolling() {
             .limit(1)
             .single();
 
-        if (error) throw error;
-
-        if (data) {
-            // Data exists - clear refresh flag
-            sessionStorage.removeItem('didRefresh');
-
-            Update_ETE_Dist2Arr_Bar({
-                ete_srgs: data.ete_srgs,
-                dist_to_destination: data.dist_to_destination,
-                start_distance: data.start_distance,
-                current_flight: data.current_flight,
-                flight_state: data.flight_state,
-                airplane_in_cloud: data.airplane_in_cloud,
-                ambient_precipstate: data.ambient_precipstate
-            });
-        } else if (dist_to_destination = 0) {
-            // No data - trigger controlled refresh
-            handleNoDataRefresh();
+        if (error) {
+            handleFlightDataError(error); // Maintain error handling
+            throw error;
         }
+
+        // Get last recorded state
+        const lastDist = parseFloat(sessionStorage.getItem('lastDist')) || -1;
+        const currentDist = data.dist_to_destination;
+
+        // Refresh conditions (only trigger on state change)
+        const shouldRefresh =
+            (lastDist > 0 && currentDist === 0) ||  // Transition to 0
+            (lastDist <= 0 && currentDist > 0);     // Transition to >0
+
+        // Update stored state
+        sessionStorage.setItem('lastDist', currentDist);
+
+        if (shouldRefresh) {
+            handleNoDataRefresh();  // Your refresh function
+            return;  // Skip normal processing after refresh
+        }
+
+        // Normal data flow
+        Update_ETE_Dist2Arr_Bar({
+            ete_srgs: data.ete_srgs,
+            dist_to_destination: currentDist,
+            start_distance: data.start_distance,
+            current_flight: data.current_flight,
+            flight_state: data.flight_state,
+            airplane_in_cloud: data.airplane_in_cloud,
+            ambient_precipstate: data.ambient_precipstate
+        });
+
     } catch (error) {
         console.error('Polling error:', error);
-        handleNoDataRefresh();
+        handleFlightDataError(error); // Critical - maintain error handling
     }
 }
 
