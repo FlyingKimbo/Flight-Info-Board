@@ -102,5 +102,13 @@
         "flightNumber": "SIA120",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"
+    },
+    {
+        "aircraft": "Airbus330-MAS",
+        "departure": "BBBBBBB",
+        "destination": "AAA",
+        "flightNumber": "MAS12000",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
     }
 ]
