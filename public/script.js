@@ -671,32 +671,30 @@ async function getFlightDataWithPolling() {
             throw error;
         }
 
-        // Get last recorded state
+        // Get last recorded state (default to -1 for initial load)
         const lastDist = parseFloat(sessionStorage.getItem('lastDist') || -1);
         const currentDist = data.dist_to_destination;
 
-        // Refresh when crossing the zero threshold in EITHER direction
-        const crossedZeroThreshold =
-            (lastDist <= 0 && currentDist > 0) ||  // 0 → >0
-            (lastDist > 0 && currentDist === 0);   // >0 → 0
+        // Debug logging (verify values)
+        console.log(`Distance Transition: ${lastDist} → ${currentDist}`);
 
-        // Update stored state
+        // Refresh when crossing zero in EITHER direction
+        const shouldRefresh =
+            (lastDist > 0 && currentDist === 0) ||  // >0 → 0
+            (lastDist <= 0 && currentDist > 0);     // 0 → >0
+
+        // Store current state for next comparison
         sessionStorage.setItem('lastDist', currentDist);
 
-        if (crossedZeroThreshold) {
-            handleNoDataRefresh();  // Trigger refresh
+        if (shouldRefresh) {
+            console.log(`Triggering refresh for transition: ${lastDist} → ${currentDist}`);
+            handleNoDataRefresh();  // Your refresh handler
             return;  // Skip normal processing
         }
 
         // Normal data flow
         Update_ETE_Dist2Arr_Bar({
-            ete_srgs: data.ete_srgs,
-            dist_to_destination: currentDist,
-            start_distance: data.start_distance,
-            current_flight: data.current_flight,
-            flight_state: data.flight_state,
-            airplane_in_cloud: data.airplane_in_cloud,
-            ambient_precipstate: data.ambient_precipstate
+            // ... your existing fields ...
         });
 
     } catch (error) {
@@ -704,6 +702,10 @@ async function getFlightDataWithPolling() {
         handleFlightDataError(error);
     }
 }
+
+// Start polling (adjust interval as needed)
+const POLL_INTERVAL = 3000; // 3 seconds
+setInterval(getFlightDataWithPolling, POLL_INTERVAL);
 
 function handleFlightDataError(error) {
     console.error('Flight data error:', error);
