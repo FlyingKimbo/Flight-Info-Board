@@ -105,8 +105,8 @@
     },
     {
         "aircraft": "Airbus330-MAS",
-        "departure": "BBBBBBB",
-        "destination": "AAA",
+        "departure": "AAA",
+        "destination": "-",
         "flightNumber": "MAS12000",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
