@@ -134,5 +134,13 @@
         "flightNumber": "MAS5445678",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
+    },
+    {
+        "aircraft": "Boeing787-MAS",
+        "departure": "WMKK Kuala Lumpur Intl - Sepang",
+        "destination": "WSSS Changi",
+        "flightNumber": "MAS12",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Boeing787-MAS.png"
     }
 ]
