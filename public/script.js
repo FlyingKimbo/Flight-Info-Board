@@ -681,7 +681,7 @@ async function getFlightDataWithPolling() {
                 airplane_in_cloud: data.airplane_in_cloud,
                 ambient_precipstate: data.ambient_precipstate
             });
-        } else if (Data.dist_to_destination === 0) {
+        } else if (Data.dist_to_destination = 0) {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
         }
