@@ -672,7 +672,7 @@ async function getFlightDataWithPolling() {
             handleNoDataRefresh();
             // Data exists - clear refresh flag
 
-            sessionStorage.removeItem('didRefresh');
+            //sessionStorage.removeItem('didRefresh');
 
             Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
