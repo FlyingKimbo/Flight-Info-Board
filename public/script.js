@@ -7,15 +7,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 
-// When receiving 'Deboarding Completed':
-supabase
-    .channel('realtime')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'flights_static' }, payload => {
-        if (payload.new.flightstatus === '-') {
-            document.getElementById('realtime-display').classList.add('empty-state');
-        }
-    })
-    .subscribe();
+
 
 
 
