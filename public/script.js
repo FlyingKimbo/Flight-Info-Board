@@ -669,7 +669,7 @@ async function getFlightDataWithPolling() {
         if (error) throw error;
 
         if (data.dist_to_destination > 0) {
-            
+            handleNoDataRefresh();
             // Data exists - clear refresh flag
 
             sessionStorage.removeItem('didRefresh');
@@ -686,6 +686,7 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
+            sessionStorage.removeItem('didRefresh');
         }
     } catch (error) {
         console.error('Polling error:', error);
