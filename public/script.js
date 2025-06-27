@@ -669,7 +669,9 @@ async function getFlightDataWithPolling() {
         if (error) throw error;
 
         if (data.dist_to_destination > 0) {
+            handleNoDataRefresh();
             // Data exists - clear refresh flag
+
             sessionStorage.removeItem('didRefresh');
 
             Update_ETE_Dist2Arr_Bar({
