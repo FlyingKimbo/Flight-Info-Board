@@ -668,7 +668,7 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        if (data) {
+        if (data.dist_to_destination > 0) {
             // Data exists - clear refresh flag
             sessionStorage.removeItem('didRefresh');
 
