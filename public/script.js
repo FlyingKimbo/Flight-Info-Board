@@ -669,7 +669,7 @@ async function getFlightDataWithPolling() {
         if (error) throw error;
 
         if (data.dist_to_destination > 0) {
-            
+            handleGotDataRefresh();
             // Data exists - clear refresh flag
 
             sessionStorage.removeItem('didRefresh');
@@ -686,6 +686,7 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
+            sessionStorage.removeItem('didRefresh1');
             
         }
     } catch (error) {
@@ -705,7 +706,18 @@ function handleFlightDataError(error) {
 // 1. Add this helper function (put it with your other utility functions)
 
 
+function handleGotDataRefresh() {
+    // Skip if already refreshed during this session
+    if (sessionStorage.getItem('didRefresh1')) return;
 
+    // Mark refresh as done
+    sessionStorage.setItem('didRefresh1', 'true');
+
+    // Refresh after delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+}
 function handleNoDataRefresh() {
     // Skip if already refreshed during this session
     if (sessionStorage.getItem('didRefresh')) return;
