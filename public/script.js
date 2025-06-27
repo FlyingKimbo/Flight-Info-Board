@@ -686,7 +686,7 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
-            
+            sessionStorage.removeItem('didRefresh')
         }
     } catch (error) {
         console.error('Polling error:', error);
