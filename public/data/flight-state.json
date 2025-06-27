@@ -121,8 +121,8 @@
     },
     {
         "aircraft": "Airbus330-MAS",
-        "departure": "KBOS Logan Intl",
-        "destination": "KORD Chicago O&#039;hare Intl",
+        "departure": "KORD Chicago O&#039;hare Intl",
+        "destination": "-",
         "flightNumber": "MAS1544",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
