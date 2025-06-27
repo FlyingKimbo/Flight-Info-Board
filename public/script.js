@@ -667,25 +667,25 @@ async function getFlightDataWithPolling() {
             .single();
 
         if (error) {
-            handleFlightDataError(error); // Maintain error handling
+            handleFlightDataError(error);
             throw error;
         }
 
         // Get last recorded state
-        const lastDist = parseFloat(sessionStorage.getItem('lastDist')) || -1;
+        const lastDist = parseFloat(sessionStorage.getItem('lastDist') || -1);
         const currentDist = data.dist_to_destination;
 
-        // Refresh conditions (only trigger on state change)
-        const shouldRefresh =
-            (lastDist > 0 && currentDist === 0) ||  // Transition to 0
-            (lastDist <= 0 && currentDist > 0);     // Transition to >0
+        // Refresh when crossing the zero threshold in EITHER direction
+        const crossedZeroThreshold =
+            (lastDist <= 0 && currentDist > 0) ||  // 0 → >0
+            (lastDist > 0 && currentDist === 0);   // >0 → 0
 
         // Update stored state
         sessionStorage.setItem('lastDist', currentDist);
 
-        if (shouldRefresh) {
-            handleNoDataRefresh();  // Your refresh function
-            return;  // Skip normal processing after refresh
+        if (crossedZeroThreshold) {
+            handleNoDataRefresh();  // Trigger refresh
+            return;  // Skip normal processing
         }
 
         // Normal data flow
@@ -701,7 +701,7 @@ async function getFlightDataWithPolling() {
 
     } catch (error) {
         console.error('Polling error:', error);
-        handleFlightDataError(error); // Critical - maintain error handling
+        handleFlightDataError(error);
     }
 }
 
