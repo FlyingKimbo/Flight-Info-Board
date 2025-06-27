@@ -110,5 +110,13 @@
         "flightNumber": "MAS12000",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
+    },
+    {
+        "aircraft": "Airbus330-MAS",
+        "departure": "bbb",
+        "destination": "vvv",
+        "flightNumber": "MAS15",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Airbus330-MAS.png"
     }
 ]
