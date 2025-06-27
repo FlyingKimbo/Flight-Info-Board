@@ -1,1 +1,1 @@
-Airbus330-MAS MAS5490
+Boeing787-MAS MAS12
