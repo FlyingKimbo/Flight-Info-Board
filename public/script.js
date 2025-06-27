@@ -128,7 +128,7 @@ let cloudOpacityState = {
 function updatePositions() {
     let Xoffset = 0;
     let XoffsetFix = 250;
-    
+
 
     if (GreenbarPercentage >= 50) {
         Xoffset = 1;
@@ -562,101 +562,101 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
         return;
     }
 
-    
-
-        try {
-            
 
 
-            if (!flightData) {
-                resetETEVisuals();
+    try {
+
+
+
+        if (!flightData) {
+            resetETEVisuals();
+            return;
+        }
+
+        // Validate required fields
+        const requiredFields = [
+            'ete_srgs',
+            'dist_to_destination',
+            'start_distance',
+            'current_flight',
+            'flight_state',
+            'airplane_in_cloud',
+            'ambient_precipstate'
+        ];
+        console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
+        console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
+        console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
+
+
+        // Get DOM elements
+        const elements = {
+            eteBar: document.getElementById('ete-bar'),
+            aircraftImage: document.getElementById('aircraft-image'),
+            eteText: document.getElementById('ete-bar-text'),
+            jetStreamImage: document.getElementById('jetstream-image'),
+            cloudImage: document.getElementById('cloud-image'),
+            precipImage: document.getElementById('precip-image')
+        };
+
+        // Validate elements exist
+        for (const [name, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Missing DOM element: ${name}`);
                 return;
             }
-
-            // Validate required fields
-            const requiredFields = [
-                'ete_srgs',
-                'dist_to_destination',
-                'start_distance',
-                'current_flight',
-                'flight_state',
-                'airplane_in_cloud',
-                'ambient_precipstate'
-            ];
-            console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
-            console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
-            console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
-            
-
-            // Get DOM elements
-            const elements = {
-                eteBar: document.getElementById('ete-bar'),
-                aircraftImage: document.getElementById('aircraft-image'),
-                eteText: document.getElementById('ete-bar-text'),
-                jetStreamImage: document.getElementById('jetstream-image'),
-                cloudImage: document.getElementById('cloud-image'),
-                precipImage: document.getElementById('precip-image')
-            };
-
-            // Validate elements exist
-            for (const [name, element] of Object.entries(elements)) {
-                if (!element) {
-                    console.error(`Missing DOM element: ${name}`);
-                    return;
-                }
-            }
-
-            // Single call handles both animations
-            AnimationManager.updateAnimations(
-                flightData.flight_state,      // For jet stream
-                flightData.airplane_in_cloud  // For cloud (1 or 0)
-            );
-
-            for (const field of requiredFields) {
-                if (flightData[field] === undefined) {
-                    console.error(`Missing required field: ${field}`);
-                    return;
-                }
-            }
-
-            // Update ETE bar width
-            const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
-            elements.eteBar.style.width = `${etePercentage}%`;
-            elements.eteBar.style.opacity = '1';
-
-            // Update aircraft image
-            const aircraftType = flightData.current_flight.split(' ')[0];
-            elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-            elements.aircraftImage.style.opacity = '1';
-            
-
-            // Update ETE text
-            elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
-            elements.eteText.style.opacity = '1';
-
-           
-
-            // Update precipitation
-            elements.precipImage.src =
-                flightData.ambient_precipstate === 4 ? '/Image/Precip/rain1.gif' :
-                    flightData.ambient_precipstate === 8 ? '/Image/Precip/snow1.gif' : '';
-            elements.precipImage.style.opacity =
-                [4, 8].includes(flightData.ambient_precipstate) ? '1' : '0';
-
-        } catch (error) {
-            console.error('Error updating ETE display:', error);
         }
-    
+
+        // Single call handles both animations
+        AnimationManager.updateAnimations(
+            flightData.flight_state,      // For jet stream
+            flightData.airplane_in_cloud  // For cloud (1 or 0)
+        );
+
+        for (const field of requiredFields) {
+            if (flightData[field] === undefined) {
+                console.error(`Missing required field: ${field}`);
+                return;
+            }
+        }
+
+        // Update ETE bar width
+        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
+        elements.eteBar.style.width = `${etePercentage}%`;
+        elements.eteBar.style.opacity = '1';
+
+        // Update aircraft image
+        const aircraftType = flightData.current_flight.split(' ')[0];
+        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        elements.aircraftImage.style.opacity = '1';
+
+
+        // Update ETE text
+        elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
+        elements.eteText.style.opacity = '1';
+
+
+
+        // Update precipitation
+        elements.precipImage.src =
+            flightData.ambient_precipstate === 4 ? '/Image/Precip/rain1.gif' :
+                flightData.ambient_precipstate === 8 ? '/Image/Precip/snow1.gif' : '';
+        elements.precipImage.style.opacity =
+            [4, 8].includes(flightData.ambient_precipstate) ? '1' : '0';
+
+    } catch (error) {
+        console.error('Error updating ETE display:', error);
+    }
+
 
     updatePositions();
 
     // Return cleanup function
     return () => {
-        
-      
+
+
         console.log('ETE updates stopped');
     };
-} 
+}
 async function getFlightDataWithPolling() {
     try {
         const { data, error } = await supabase
@@ -729,7 +729,7 @@ async function initializeApp(event) {
         pollingInterval = setInterval(getFlightDataWithPolling, POLLING_INTERVAL);
         isPollingActive = true;
 
-        
+
 
         console.log('Polling started');
     } catch (error) {
