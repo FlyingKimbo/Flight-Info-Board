@@ -357,10 +357,10 @@ const updateFlightUI = (data) => {
     //updateStatusCell(data.flight_status);
 
     // Update progress bar
-    updateProgressBar(data);
+    //updateProgressBar(data);
 
     // Update weather effects
-    updateWeatherEffects(data);
+    //updateWeatherEffects(data);
 };
 
 // Set up realtime subscription
