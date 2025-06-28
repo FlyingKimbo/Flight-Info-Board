@@ -230,10 +230,10 @@ const updateFlightUI = (data) => {
     //elements.destination.textContent = data.destination || 'N/A';
 
     // Update aircraft images
-    updateAircraftImages(data);
+    //updateAircraftImages(data);
 
     // Update status with animation class
-    updateStatusCell(data.flight_status);
+    //updateStatusCell(data.flight_status);
 
     // Update progress bar
     updateProgressBar(data);
