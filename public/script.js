@@ -102,7 +102,7 @@ async function updateFlightTable(staticData) {
 }
 
 
-async function fetch_flight_static() {
+async function offfetch_flight_static() {
     try {
         // Corrected: the destructured property should be 'data' not 'staticData'
         const { data, error } = await supabase
@@ -254,6 +254,20 @@ const setupRealtimeUpdates = () => {
             table: 'flights_realtime'
         }, (payload) => {
             updateFlightUI(payload.new);
+        })
+        .subscribe();
+};
+
+// Set up realtime subscription
+const fetch_flight_static = () => {
+    return supabase
+        .channel('flight-updates-static')
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'flights_static'
+        }, (payload) => {
+            updateFlightTable(payload.new);
         })
         .subscribe();
 };
