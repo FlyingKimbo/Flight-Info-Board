@@ -623,11 +623,10 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 }
 
 
-
-
+let LastStatus = null;
+let StatusRefreshCount = 0;
 async function getFlightDataWithPolling() {
-    let StatusRefreshCount = 0;
-    let LastStatus = "";
+ 
     try {
         const { data, error } = await supabase
             .from('flights_realtime')
@@ -662,15 +661,14 @@ async function getFlightDataWithPolling() {
 
         if (LastStatus !== data.flight_status && StatusRefreshCount === 0) {
             LastStatus = data.flight_status;
-            // Refresh after delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
+            handleGotDataRefresh();
+            sessionStorage.removeItem('didRefresh2');
 
             StatusRefreshCount = StatusRefreshCount + 1;
         } else {
             LastStatus = data.flight_status;
             StatusRefreshCount = 0;
+            handleNoDataRefresh();
         }
 
     } catch (error) {
