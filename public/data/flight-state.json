@@ -142,5 +142,13 @@
         "flightNumber": "MAS12",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing787-MAS.png"
+    },
+    {
+        "aircraft": "Longitude",
+        "departure": "WMKK Kuala Lumpur Intl - Sepang",
+        "destination": "WSSS Changi",
+        "flightNumber": "NC890",
+        "flightStatus": "-",
+        "image": "/Image/Aircraft_Type/Longitude.png"
     }
 ]
