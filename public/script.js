@@ -669,7 +669,13 @@ async function getFlightDataWithPolling() {
         if (error) throw error;
 
         if (data.dist_to_destination > 0) {
+            handleGotDataRefresh();
+            // Data exists - clear refresh flag
+
+            sessionStorage.removeItem('didRefresh1');
+
             
+
             Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
                 dist_to_destination: data.dist_to_destination,
@@ -682,9 +688,10 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
+            sessionStorage.removeItem('didRefresh2');
             
         }
-        last_flightstatus = data.flight_status;
+        
     
 
 
