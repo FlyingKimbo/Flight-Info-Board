@@ -8,6 +8,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 
 
+
+
 // DOM elements from your HTML
 const elements = {
     aircraftImage: document.querySelector('.flight-image'),
@@ -24,41 +26,43 @@ const elements = {
     precipImage: document.getElementById('precip-image')
 };
 
-// Set up realtime subscription
-const setupRealtimeUpdates = () => {
-    return supabase
-        .channel('flight-updates')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'flights_realtime'
-        }, (payload) => {
-            updateFlightUI(payload.new);
-        })
-        .subscribe();
+// Helper function to extract aircraft type and flight number
+const parseFlightData = (currentFlight) => {
+    if (!currentFlight) return { aircraftType: '', flightNumber: '' };
+
+    const parts = currentFlight.split(' ');
+    return {
+        aircraftType: parts[0] || '',
+        flightNumber: parts.slice(1).join(' ') || '' // Handles cases with spaces in flight number
+    };
 };
 
-// Update all UI elements
-const updateFlightUI = (data) => {
-    // Update basic flight info
-    elements.aircraftName.textContent = data.current_flight || 'N/A';
-    elements.flightNumber.textContent = data.flight_number || 'N/A';
-    elements.departure.textContent = data.departure_location || 'N/A';
-    elements.destination.textContent = data.destination || 'N/A';
+// Update aircraft images
+const updateAircraftImages = (data) => {
+    const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
 
-    // Update status with animation class
-    updateStatusCell(data.flight_status);
-
-    // Update progress bar
-    updateProgressBar(data);
-
-    // Update aircraft image if available
-    if (data.aircraft_image_url) {
-        elements.aircraftImage.src = data.aircraft_image_url;
+    // Update main aircraft image
+    if (aircraftType) {
+        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        elements.aircraftImage.alt = aircraftType;
     }
 
-    // Update weather effects
-    updateWeatherEffects(data);
+    // Update small aircraft icon in progress bar
+    elements.aircraftIcon.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+    elements.aircraftIcon.alt = aircraftType;
+};
+
+// Update progress bar
+const updateProgressBar = (data) => {
+    if (!data.dist_to_destination || !data.start_distance) return;
+
+    const percentage = Math.min(100,
+        ((data.start_distance - data.dist_to_destination) / data.start_distance) * 100
+    );
+
+    elements.eteBar.style.width = `${percentage}%`;
+    elements.eteBarText.textContent = `${data.ete_srgs} | ${data.dist_to_destination}nm`;
+    elements.aircraftIcon.style.left = `${percentage}%`;
 };
 
 // Handle status cell updates with animation
@@ -66,16 +70,8 @@ const updateStatusCell = (status) => {
     const statusCell = elements.status;
 
     // Remove all blinking classes
-    statusCell.classList.remove(
-        'blinking-boarding',
-        'blinking-departed',
-        'blinking-enroute',
-        'blinking-delayed',
-        'blinking-landed',
-        'blinking-deboarding'
-    );
+    statusCell.className = 'flight-status';
 
-    // Add appropriate blinking class based on status
     if (status) {
         statusCell.textContent = status;
         const statusClass = getStatusClass(status);
@@ -96,22 +92,6 @@ const getStatusClass = (status) => {
     return statusMap[status] || '';
 };
 
-// Update progress bar and aircraft position
-const updateProgressBar = (data) => {
-    if (!data.dist_to_destination || !data.start_distance) return;
-
-    const percentage = Math.min(100,
-        ((data.start_distance - data.dist_to_destination) / data.start_distance) * 100
-    );
-
-    elements.eteBar.style.width = `${percentage}%`;
-    elements.eteBarText.textContent = `${data.ete_srgs} | ${data.dist_to_destination}nm`;
-
-    // Position aircraft icon along the progress bar
-    elements.aircraftIcon.style.left = `${percentage}%`;
-    elements.aircraftIcon.src = 'aircraft-icon.png'; // Set your aircraft icon path
-};
-
 // Update weather effects
 const updateWeatherEffects = (data) => {
     // Cloud visibility
@@ -124,19 +104,53 @@ const updateWeatherEffects = (data) => {
     } else {
         elements.precipImage.style.display = 'none';
     }
-
-    // Jetstream effect (example implementation)
-    elements.jetstreamImage.style.display = data.has_jetstream ? 'block' : 'none';
 };
 
 // Helper function for precipitation images
 const getPrecipImage = (precipState) => {
     const precipImages = {
-        'Rain': 'rain.gif',
-        'Snow': 'snow.gif',
-        'Thunderstorm': 'lightning.gif'
+        'Rain': '/Image/Weather/rain.gif',
+        'Snow': '/Image/Weather/snow.gif',
+        'Thunderstorm': '/Image/Weather/lightning.gif'
     };
     return precipImages[precipState] || '';
+};
+
+// Update all UI elements
+const updateFlightUI = (data) => {
+    const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
+
+    // Update basic flight info
+    elements.aircraftName.textContent = data.current_flight || 'N/A';
+    elements.flightNumber.textContent = flightNumber || 'N/A';
+    elements.departure.textContent = data.departure_location || 'N/A';
+    elements.destination.textContent = data.destination || 'N/A';
+
+    // Update aircraft images
+    updateAircraftImages(data);
+
+    // Update status with animation class
+    updateStatusCell(data.flight_status);
+
+    // Update progress bar
+    updateProgressBar(data);
+
+    // Update weather effects
+    updateWeatherEffects(data);
+};
+
+// Set up realtime subscription
+const setupRealtimeUpdates = () => {
+    return supabase
+        .channel('flight-updates')
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'flights_realtime'
+        }, (payload) => {
+            updateFlightUI(payload.new);
+        })
+        .subscribe();
 };
 
 // Initialize when DOM is loaded
