@@ -637,9 +637,14 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        laststatus = data.flight_state;
+        
 
-        if (data.flight_state !== laststatus && !StatusRefresh) {
+        if (data.flight_status !== laststatus && !StatusRefresh) {
+
+            // Update laststatus before refreshing
+            laststatus = data.flight_status;
+
+
             // Refresh after delay
             setTimeout(() => {
                 window.location.reload();
@@ -647,6 +652,8 @@ async function getFlightDataWithPolling() {
 
             StatusRefresh = true;
         } else {
+            // Update laststatus for next comparison
+            laststatus = data.flight_status;
             StatusRefresh = false;
             
         }
