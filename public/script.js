@@ -621,7 +621,11 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
         console.log('ETE updates stopped');
     };
 }
+
+
+
 async function getFlightDataWithPolling() {
+    let StatusRefresh = False;
     try {
         const { data, error } = await supabase
             .from('flights_realtime')
@@ -632,8 +636,19 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
+        if (data.flight_state !== laststatus && !StatusRefresh) {
+            // Refresh after delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
 
-        // Original distance-based logic
+            StatusRefresh = true;
+        } else {
+            StatusRefresh = false;
+            
+        }
+
+        
         if (data.dist_to_destination > 0) {
             handleGotDataRefresh();
             sessionStorage.removeItem('didRefresh2');
@@ -657,6 +672,7 @@ async function getFlightDataWithPolling() {
         console.error('Polling error:', error);
         handleNoDataRefresh();
     }
+    laststatus = data.flight_state;
 }
 
 
