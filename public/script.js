@@ -637,6 +637,8 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
+        laststatus = data.flight_state;
+
         if (data.flight_state !== laststatus && !StatusRefresh) {
             // Refresh after delay
             setTimeout(() => {
@@ -673,7 +675,7 @@ async function getFlightDataWithPolling() {
         console.error('Polling error:', error);
         handleNoDataRefresh();
     }
-    laststatus = data.flight_state;
+    
 }
 
 
