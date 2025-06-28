@@ -672,7 +672,7 @@ async function getFlightDataWithPolling() {
             handleGotDataRefresh();
             // Data exists - clear refresh flag
 
-            sessionStorage.removeItem('didRefresh');
+            sessionStorage.removeItem('didRefresh1');
 
             
 
@@ -688,7 +688,7 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
-            sessionStorage.removeItem('didRefresh1');
+            sessionStorage.removeItem('didRefresh2');
             
         }
         last_flightstatus = data.flight_status;
@@ -725,25 +725,14 @@ function handleGotDataRefresh() {
     }, 2000);
 }
 
-function handleUpdatedDataRefresh() {
+
+
+function handleNoDataRefresh() {
     // Skip if already refreshed during this session
     if (sessionStorage.getItem('didRefresh2')) return;
 
     // Mark refresh as done
     sessionStorage.setItem('didRefresh2', 'true');
-
-    // Refresh after delay
-    setTimeout(() => {
-        window.location.reload();
-    }, 2000);
-}
-
-function handleNoDataRefresh() {
-    // Skip if already refreshed during this session
-    if (sessionStorage.getItem('didRefresh')) return;
-
-    // Mark refresh as done
-    sessionStorage.setItem('didRefresh', 'true');
 
     // Refresh after delay
     setTimeout(() => {
