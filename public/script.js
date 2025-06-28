@@ -639,7 +639,7 @@ async function getFlightDataWithPolling() {
 
         
 
-        if (data.flight_status !== laststatus && !StatusRefresh) {
+        if (data.flight_status !== laststatus && !StatusRefresh && data.dist_to_destination !== 0) {
 
             // Update laststatus before refreshing
             laststatus = data.flight_status;
