@@ -672,7 +672,7 @@ async function getFlightDataWithPolling() {
             handleGotDataRefresh();
             // Data exists - clear refresh flag
 
-            sessionStorage.removeItem('didRefresh1');
+            sessionStorage.removeItem('didRefresh2');
 
             
 
@@ -688,7 +688,7 @@ async function getFlightDataWithPolling() {
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
-            sessionStorage.removeItem('didRefresh2');
+            sessionStorage.removeItem('didRefresh1');
             
         }
         
