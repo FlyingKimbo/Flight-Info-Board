@@ -622,9 +622,25 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 }
 
+// Initialize Supabase realtime
+const subscription = supabase
+    .channel('flight-updates')
+    .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'flights_realtime'
+    }, (payload) => {
+        // Update specific cells when data changes
+        if (payload.new.flight_status !== payload.old?.flight_status) {
+            document.getElementById('flight-status').textContent = payload.new.flight_status;
+        }
 
-let LastStatus = null;
-let HasRefresh = false;
+        if (payload.new.dist_to_destination !== payload.old?.dist_to_destination) {
+            document.getElementById('distance').textContent = payload.new.dist_to_destination;
+        }
+    })
+    .subscribe();
+
 async function getFlightDataWithPolling() {
  
     try {
@@ -659,18 +675,7 @@ async function getFlightDataWithPolling() {
             sessionStorage.removeItem('didRefresh1');
         }
 
-        if (LastStatus !== data.flight_status) {
-            LastStatus = data.flight_status;
-            handleNoDataRefresh();
-            sessionStorage.removeItem('didRefresh1');
-            //HasRefresh = true;
-            
-        } else {
-            LastStatus = data.flight_status;
-            
-            handleGotDataRefresh();
-            sessionStorage.removeItem('didRefresh2');
-        }
+        
 
     } catch (error) {
         console.error('Polling error:', error);
