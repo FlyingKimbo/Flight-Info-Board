@@ -392,7 +392,7 @@ const fetch_flight_static = () => {
         .subscribe();
 };
 
-fetch_flight_static();
+//fetch_flight_static();
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
