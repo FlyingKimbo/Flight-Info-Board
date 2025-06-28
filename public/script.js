@@ -624,7 +624,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 
 
 let LastStatus = "";
-
+let HasRefresh = false;
 async function getFlightDataWithPolling() {
  
     try {
@@ -662,14 +662,14 @@ async function getFlightDataWithPolling() {
         if (LastStatus !== data.flight_status) {
             LastStatus = data.flight_status;
             handleGotDataRefresh();
-            sessionStorage.removeItem('didRefresh2');
-
-            StatusRefreshCount = StatusRefreshCount + 1;
+            sessionStorage.removeItem('didRefresh1');
+            //HasRefresh = true;
+            
         } else {
             LastStatus = data.flight_status;
             
             handleNoDataRefresh();
-            sessionStorage.removeItem('didRefresh1');
+            sessionStorage.removeItem('didRefresh2');
         }
 
     } catch (error) {
