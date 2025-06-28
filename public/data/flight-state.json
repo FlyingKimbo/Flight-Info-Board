@@ -145,8 +145,8 @@
     },
     {
         "aircraft": "Longitude",
-        "departure": "WMKK Kuala Lumpur Intl - Sepang",
-        "destination": "WSSS Changi",
+        "departure": "WSSS Changi",
+        "destination": "-",
         "flightNumber": "NC890",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Longitude.png"
@@ -154,7 +154,7 @@
     {
         "aircraft": "Boeing773ER-SIA",
         "departure": "WSSS Changi",
-        "destination": "FLKJ",
+        "destination": "-",
         "flightNumber": "SIA135",
         "flightStatus": "-",
         "image": "/Image/Aircraft_Type/Boeing773ER-SIA.png"

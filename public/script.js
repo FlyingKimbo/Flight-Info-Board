@@ -674,6 +674,8 @@ async function getFlightDataWithPolling() {
 
             sessionStorage.removeItem('didRefresh');
 
+            last_flightstatus = data.flight_status;
+
             Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
                 dist_to_destination: data.dist_to_destination,
@@ -689,6 +691,12 @@ async function getFlightDataWithPolling() {
             sessionStorage.removeItem('didRefresh1');
             
         }
+        if (last_flightstatus === data.flight_status) {
+            handleUpdatedDataRefresh()
+            sessionStorage.removeItem('didRefresh2');
+        }
+
+
     } catch (error) {
         console.error('Polling error:', error);
         handleNoDataRefresh();
@@ -718,6 +726,20 @@ function handleGotDataRefresh() {
         window.location.reload();
     }, 2000);
 }
+
+function handleUpdatedDataRefresh() {
+    // Skip if already refreshed during this session
+    if (sessionStorage.getItem('didRefresh2')) return;
+
+    // Mark refresh as done
+    sessionStorage.setItem('didRefresh2', 'true');
+
+    // Refresh after delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+}
+
 function handleNoDataRefresh() {
     // Skip if already refreshed during this session
     if (sessionStorage.getItem('didRefresh')) return;
