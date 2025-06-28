@@ -622,24 +622,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 }
 
-// Initialize Supabase realtime
-const subscription = supabase
-    .channel('flight-updates')
-    .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'flights_realtime'
-    }, (payload) => {
-        // Update specific cells when data changes
-        if (payload.new.flight_status !== payload.old?.flight_status) {
-            document.getElementById('flight-status').textContent = payload.new.flight_status;
-        }
 
-        if (payload.new.dist_to_destination !== payload.old?.dist_to_destination) {
-            document.getElementById('distance').textContent = payload.new.dist_to_destination;
-        }
-    })
-    .subscribe();
 
 async function getFlightDataWithPolling() {
  
@@ -772,3 +755,111 @@ if (document.readyState === 'complete') {
 else {
     window.addEventListener('load', initializeApp);
 }
+
+// Initialize Supabase Realtime Subscription
+const setupRealtimeUpdates = () => {
+    const subscription = supabase
+        .channel('flight-updates')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'flights_realtime'
+            },
+            (payload) => {
+                updateFlightTable(payload.new);
+            }
+        )
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(subscription);
+    };
+};
+
+// Update specific table elements
+const updateFlightTable = (flightData) => {
+    // Update main status bar
+    const eteBar = document.getElementById('ete-bar');
+    const eteBarText = document.getElementById('ete-bar-text');
+
+    if (flightData.dist_to_destination) {
+        const percentage = calculatePercentage(flightData);
+        eteBar.style.width = `${percentage}%`;
+        eteBarText.textContent = `${flightData.ete_srgs} | ${flightData.dist_to_destination}nm`;
+    }
+
+    // Update aircraft image
+    const aircraftImage = document.querySelector('.flight-image');
+    if (flightData.aircraft_image_url) {
+        aircraftImage.src = flightData.aircraft_image_url;
+        aircraftImage.alt = flightData.current_flight;
+    }
+
+    // Update status cells
+    const statusCell = document.querySelector('.flight-status');
+    if (statusCell.textContent !== flightData.flight_status) {
+        statusCell.textContent = flightData.flight_status;
+        statusCell.classList.add('updated');
+        setTimeout(() => statusCell.classList.remove('updated'), 1000);
+    }
+
+    // Update other cells
+    document.querySelector('.flight-aircraft span').textContent = flightData.current_flight || 'N/A';
+    document.querySelector('.flight-number').textContent = flightData.flight_number || 'N/A';
+    document.querySelector('.flight-departure').textContent = flightData.departure_location || 'N/A';
+    document.querySelector('.flight-destination').textContent = flightData.destination || 'N/A';
+
+    // Update weather images
+    updateWeatherImages(flightData);
+};
+
+const updateWeatherImages = (flightData) => {
+    const cloudImage = document.getElementById('cloud-image');
+    const precipImage = document.getElementById('precip-image');
+
+    // Cloud visibility
+    if (flightData.airplane_in_cloud) {
+        cloudImage.style.display = 'block';
+        cloudImage.src = 'path/to/cloud-image.png';
+    } else {
+        cloudImage.style.display = 'none';
+    }
+
+    // Precipitation
+    if (flightData.ambient_precipstate) {
+        precipImage.style.display = 'block';
+        precipImage.src = getPrecipImage(flightData.ambient_precipstate);
+    } else {
+        precipImage.style.display = 'none';
+    }
+};
+
+// Helper function to calculate ETE percentage
+const calculatePercentage = (flightData) => {
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            ((flightData.start_distance - flightData.dist_to_destination) /
+                flightData.start_distance) * 100
+        )
+    );
+};
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupRealtimeUpdates();
+
+    // Initial data fetch
+    supabase
+        .from('flights_realtime')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data }) => {
+            if (data) updateFlightTable(data);
+        });
+});
