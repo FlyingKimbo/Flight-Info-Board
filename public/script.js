@@ -516,7 +516,7 @@ const AnimationManager = {
 };
 
 
-
+/*
 // Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
     console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
@@ -709,7 +709,7 @@ function handleNoDataRefresh() {
         window.location.reload();
     }, 2000);
 }
-
+*/
 // Load static data
 fetch_flight_static();
 
