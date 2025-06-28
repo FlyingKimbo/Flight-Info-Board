@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    fetch_flight_static();
+    //fetch_flight_static();
 
     // First load initial data
     supabase
