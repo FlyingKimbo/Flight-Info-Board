@@ -182,8 +182,10 @@ const updateStatusCell = (status) => {
     }
 };
 
+
+
 // Map status to CSS class
-const getStatusClass = (status) => {
+const getBlinkingClass = (status) => {
     const statusMap = {
         'Boarding': 'blinking-boarding',
         'Departed': 'blinking-departed',
