@@ -661,14 +661,14 @@ async function getFlightDataWithPolling() {
 
         if (LastStatus !== data.flight_status) {
             LastStatus = data.flight_status;
-            handleGotDataRefresh();
+            handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
             //HasRefresh = true;
             
         } else {
             LastStatus = data.flight_status;
             
-            handleNoDataRefresh();
+            handleGotDataRefresh();
             sessionStorage.removeItem('didRefresh2');
         }
 
