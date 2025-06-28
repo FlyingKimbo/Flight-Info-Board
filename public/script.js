@@ -621,6 +621,20 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
         console.log('ETE updates stopped');
     };
 }
+
+let lastFlightStatus = null;
+
+// Function to force a table refresh without modifying its content
+function refreshTableElement() {
+    const table = document.getElementById('flightTable');
+    if (!table) return;
+
+    // This technique forces a re-render of the table without changing it
+    table.style.display = 'none';
+    table.offsetHeight; // Trigger reflow
+    table.style.display = 'table';
+}
+
 async function getFlightDataWithPolling() {
     try {
         const { data, error } = await supabase
@@ -632,20 +646,18 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        // Track flight status changes
-        const prevStatus = sessionStorage.getItem('lastFlightStatus');
-        const currentStatus = data.flight_status;
-
-        // In your polling function, replace the status change detection with:
-        if (prevStatus && prevStatus !== currentStatus) {
-            console.log(`Flight status changed: ${prevStatus} → ${currentStatus}`);
-            sessionStorage.setItem('lastFlightStatus', currentStatus);
-            updateFlightStatusDisplay(currentStatus); // This now updates just the TD element
-        }
+        // Check if flight status changed
+        const statusChanged = lastFlightStatus !== data.flight_status;
+        lastFlightStatus = data.flight_status;
 
         // Original distance-based logic
         if (data.dist_to_destination > 0) {
-            handleGotDataRefresh();
+            // Only refresh table visually if status changed
+            if (statusChanged) {
+                refreshTableElement();
+            } else {
+                handleGotDataRefresh();
+            }
             sessionStorage.removeItem('didRefresh2');
 
             Update_ETE_Dist2Arr_Bar({
@@ -656,7 +668,7 @@ async function getFlightDataWithPolling() {
                 flight_state: data.flight_state,
                 airplane_in_cloud: data.airplane_in_cloud,
                 ambient_precipstate: data.ambient_precipstate,
-                flight_status: currentStatus // Include current status in update
+                flight_status: currentStatus
             });
         } else {
             handleNoDataRefresh();
@@ -669,26 +681,8 @@ async function getFlightDataWithPolling() {
     }
 }
 
-// New function to update just the status display
-// Replace your existing update function with this:
-function updateFlightStatusDisplay(newStatus) {
-    const statusElements = document.querySelectorAll('.flight-status');
 
-    statusElements.forEach(element => {
-        // Only update if status actually changed
-        if (element.textContent.trim() !== newStatus) {
-            element.textContent = newStatus;
 
-            // Visual feedback
-            element.classList.add('status-updated');
-            setTimeout(() => element.classList.remove('status-updated'), 1000);
-
-            // Optional: Status-specific styling
-            element.className = 'flight-status'; // Reset classes
-            element.classList.add(`status-${newStatus.toLowerCase().replace(' ', '-')}`);
-        }
-    });
-}
 
 
 function handleFlightDataError(error) {
