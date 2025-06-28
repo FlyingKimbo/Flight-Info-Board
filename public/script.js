@@ -632,19 +632,28 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        // Track flight_status changes (without refreshing)
-        const previousFlightStatus = sessionStorage.getItem('lastFlightStatus');
-        const currentFlightStatus = data.flight_status;
+        // Flight status change detection
+        const prevStatus = sessionStorage.getItem('lastFlightStatus');
+        const currentStatus = data.flight_status;
 
-        if (previousFlightStatus !== currentFlightStatus) {
-            console.log('Flight status changed from', previousFlightStatus, 'to', currentFlightStatus);
-            // Just update the stored status - no refresh triggered
-            sessionStorage.setItem('lastFlightStatus', currentFlightStatus);
+        if (prevStatus && prevStatus !== currentStatus) {
+            console.log('Flight status changed:', prevStatus, '→', currentStatus);
+
+            // Only refresh if we haven't already for this status change
+            if (!sessionStorage.getItem('didRefreshForStatusChange')) {
+                sessionStorage.setItem('didRefreshForStatusChange', 'true');
+                sessionStorage.setItem('lastFlightStatus', currentStatus);
+                setTimeout(() => window.location.reload(), 2000);
+                return; // Exit early to prevent other refresh logic
+            }
+        } else if (!prevStatus) {
+            // Initialize if first run
+            sessionStorage.setItem('lastFlightStatus', currentStatus);
         }
 
+        // Original distance-based refresh logic
         if (data.dist_to_destination > 0) {
             handleGotDataRefresh();
-            // Data exists - clear refresh flag
             sessionStorage.removeItem('didRefresh2');
 
             Update_ETE_Dist2Arr_Bar({
@@ -654,11 +663,9 @@ async function getFlightDataWithPolling() {
                 current_flight: data.current_flight,
                 flight_state: data.flight_state,
                 airplane_in_cloud: data.airplane_in_cloud,
-                ambient_precipstate: data.ambient_precipstate,
-                flight_status: currentFlightStatus // Include flight_status in your update if needed
+                ambient_precipstate: data.ambient_precipstate
             });
         } else {
-            // No data - trigger controlled refresh
             handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
         }
@@ -668,6 +675,11 @@ async function getFlightDataWithPolling() {
         handleNoDataRefresh();
     }
 }
+
+// Add this to reset the status change refresh flag when needed
+//function resetStatusChangeRefresh() {
+    //sessionStorage.removeItem('didRefreshForStatusChange');
+//}
 
 function handleFlightDataError(error) {
     console.error('Flight data error:', error);
