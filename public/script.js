@@ -154,19 +154,138 @@ const updateAircraftImages = (data) => {
     elements.aircraftIcon.src = `/Image/Aircraft_Type/${aircraftType}.png`;
     elements.aircraftIcon.alt = aircraftType;
 };
+function updatePositions() {
+    let Xoffset = 0;
+    let XoffsetFix = 250;
 
-// Update progress bar
-const updateProgressBar = (data) => {
-    if (!data.dist_to_destination || !data.start_distance) return;
 
-    const percentage = Math.min(100,
-        ((data.start_distance - data.dist_to_destination) / data.start_distance) * 100
-    );
+    if (GreenbarPercentage >= 50) {
+        Xoffset = 1;
+    }
+    const eteBar = document.getElementById('ete-bar');
+    const aircraftImage = document.getElementById('aircraft-image');
+    const eteText = document.getElementById('ete-bar-text'); // ETE text element
+    const jetstream = document.getElementById('jetstream-image');
+    const cloud = document.getElementById('cloud-image');
+    const precipImage = document.getElementById('precip-image'); // New precipitation image element
 
-    elements.eteBar.style.width = `${percentage}%`;
-    elements.eteBarText.textContent = `${data.ete_srgs} | ${data.dist_to_destination}nm`;
-    elements.aircraftIcon.style.left = `${percentage}%`;
-};
+    const barWidth = eteBar.getBoundingClientRect().width;
+    const containerRight = eteBar.parentElement.getBoundingClientRect().right;
+    const barRight = containerRight - barWidth;
+    const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105 + (Xoffset * XoffsetFix);
+    const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+    const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+    const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
+    const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
+
+    aircraftImage.style.left = `${imagePosition}px`;
+    eteText.style.left = `${textPosition}px`;
+    jetstream.style.left = `${jetstream_imagePosition}px`;
+    cloud.style.left = `${cloud_imagePosition}px`;
+    precipImage.style.left = `${precip_imagePosition}px`;
+
+    //aircraftImage.style.opacity = 1; // Make sure the image is visible %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+}
+function Update_ETE_Dist2Arr_Bar(flightData) {
+    console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
+
+    if (!flightData || !flightData.flight_state) {
+        AnimationManager.cleanup();
+        return;
+    }
+
+
+
+    try {
+
+
+
+        if (!flightData) {
+            resetETEVisuals();
+            return;
+        }
+
+        // Validate required fields
+        const requiredFields = [
+            'ete_srgs',
+            'dist_to_destination',
+            'start_distance',
+            'current_flight',
+            'flight_state',
+            'airplane_in_cloud',
+            'ambient_precipstate'
+        ];
+        console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
+        console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
+        console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
+
+
+        // Get DOM elements
+        const elements = {
+            eteBar: document.getElementById('ete-bar'),
+            aircraftImage: document.getElementById('aircraft-image'),
+            eteText: document.getElementById('ete-bar-text'),
+            jetStreamImage: document.getElementById('jetstream-image'),
+            cloudImage: document.getElementById('cloud-image'),
+            precipImage: document.getElementById('precip-image')
+        };
+
+        // Validate elements exist
+        for (const [name, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Missing DOM element: ${name}`);
+                return;
+            }
+        }
+
+        // Single call handles both animations
+        AnimationManager.updateAnimations(
+            flightData.flight_state,      // For jet stream
+            flightData.airplane_in_cloud  // For cloud (1 or 0)
+        );
+
+        for (const field of requiredFields) {
+            if (flightData[field] === undefined) {
+                console.error(`Missing required field: ${field}`);
+                return;
+            }
+        }
+
+        // Update ETE bar width
+        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
+        elements.eteBar.style.width = `${etePercentage}%`;
+        elements.eteBar.style.opacity = '1';
+
+        // Update aircraft image
+        const aircraftType = flightData.current_flight.split(' ')[0];
+        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        elements.aircraftImage.style.opacity = '1';
+
+
+        // Update ETE text
+        elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
+        elements.eteText.style.opacity = '1';
+
+
+
+        // Update precipitation
+        elements.precipImage.src =
+            flightData.ambient_precipstate === 4 ? '/Image/Precip/rain1.gif' :
+                flightData.ambient_precipstate === 8 ? '/Image/Precip/snow1.gif' : '';
+        elements.precipImage.style.opacity =
+            [4, 8].includes(flightData.ambient_precipstate) ? '1' : '0';
+
+    } catch (error) {
+        console.error('Error updating ETE display:', error);
+    }
+
+
+    updatePositions();
+
+  
+}
+
+
 
 // Handle status cell updates with animation
 const updateStatusCell = (status) => {
@@ -253,7 +372,8 @@ const setupRealtimeUpdates = () => {
             schema: 'public',
             table: 'flights_realtime'
         }, (payload) => {
-            updateFlightUI(payload.new);
+            // This will call your function with realtime data
+            Update_ETE_Dist2Arr_Bar(payload.new);
         })
         .subscribe();
 };
@@ -276,17 +396,6 @@ const fetch_flight_static = () => {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    /*
-    supabase
-        .from('flights_static')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-        .then(({ data }) => {
-            if (data) updateFlightTable(data);
-        });
-*/
 
 
     fetch_flight_static();
