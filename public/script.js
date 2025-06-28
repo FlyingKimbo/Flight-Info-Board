@@ -622,7 +622,8 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 }
 
-
+let StatusRefreshDoneOnce = false;
+let LastStatus  = null
 
 async function getFlightDataWithPolling() {
     
@@ -651,6 +652,22 @@ async function getFlightDataWithPolling() {
                 ambient_precipstate: data.ambient_precipstate,
                 
             });
+            
+
+            if (LastStatus !== data.flight_status && !StatusRefreshDoneOnce) {
+                LastStatus = data.flight_status;
+                // Refresh after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+
+                StatusRefreshDoneOnce = true;
+            } else {
+                LastStatus = data.flight_status;
+                StatusRefreshDoneOnce = false;
+            }
+
+
         } else {
             handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
