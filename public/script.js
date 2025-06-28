@@ -221,13 +221,13 @@ const getPrecipImage = (precipState) => {
 
 // Update all UI elements
 const updateFlightUI = (data) => {
-    const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
+    //const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
 
     // Update basic flight info
-    elements.aircraftName.textContent = parseFlightData(data.current_flight).aircraftType || 'N/A';
-    elements.flightNumber.textContent = flightNumber || 'N/A';
-    elements.departure.textContent = data.departure_location || 'N/A';
-    elements.destination.textContent = data.destination || 'N/A';
+    //elements.aircraftName.textContent = parseFlightData(data.current_flight).aircraftType || 'N/A';
+   // elements.flightNumber.textContent = flightNumber || 'N/A';
+    //elements.departure.textContent = data.departure_location || 'N/A';
+    //elements.destination.textContent = data.destination || 'N/A';
 
     // Update aircraft images
     updateAircraftImages(data);
