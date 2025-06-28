@@ -17,13 +17,6 @@ let isPollingActive = false;
 // ###################################################################### Sub to supabase realtime data
 
 
-
-
-
-
-
-// ###################################################################### Sub to supabase realtime data
-
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 async function updateFlightTable(staticData) {
@@ -74,36 +67,7 @@ async function fetch_flight_static() {
     }
 }
 
-// Start polling
-//let pollingInterval = setInterval(fetch_flight_static, 5000);
 
-// &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& WIP WIP WIP WIP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-// Update helper with null checks
-//function updateFlightCells(flightId, status, arrival) {
-//    if (flightId) document.getElementById('flight-id').textContent = flightId;
-//    if (status) document.getElementById('flight-status').textContent = status;
-//    if (arrival) document.getElementById('arrival-display').textContent = arrival;
-//}
-
-
-
-
-
-
-/*
-function startJetStreamCycling() {
-    let imageIndex = 1;
-    setInterval(() => {
-        const jetStreamImage = document.getElementById('jetstream-image');
-        if (jetStreamImage) {
-            jetStreamImage.src = `/Image/JetStream/JetStream${imageIndex}.png`;
-            imageIndex = (imageIndex % 5) + 1; // Cycle through 1 to 5
-        }
-    }, 20); // Change image every 20ms
-}
-
-*/
 
 
 
@@ -667,6 +631,23 @@ async function getFlightDataWithPolling() {
             .single();
 
         if (error) throw error;
+
+        // Check if flight_status has changed
+        const previousFlightStatus = sessionStorage.getItem('lastFlightStatus');
+        const currentFlightStatus = data.flight_status;
+
+        if (previousFlightStatus && previousFlightStatus !== currentFlightStatus) {
+            // Flight status changed - handle refresh
+            if (!sessionStorage.getItem('didRefreshStatus')) {
+                sessionStorage.setItem('didRefreshStatus', 'true');
+                sessionStorage.setItem('lastFlightStatus', currentFlightStatus);
+                setTimeout(() => window.location.reload(), 2000);
+                return; // Exit early to prevent other refresh logic
+            }
+        } else {
+            // Store the current status if not set or no change
+            sessionStorage.setItem('lastFlightStatus', currentFlightStatus);
+        }
 
         if (data.dist_to_destination > 0) {
             handleGotDataRefresh();
