@@ -625,7 +625,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 
 
 async function getFlightDataWithPolling() {
-    let StatusRefresh = False;
+    let StatusRefresh = false;
     try {
         const { data, error } = await supabase
             .from('flights_realtime')
