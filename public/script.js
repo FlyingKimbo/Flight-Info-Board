@@ -7,7 +7,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 
-
+let GreenbarPercentage = 100
 
 
 // DOM elements from your HTML
@@ -186,6 +186,87 @@ function updatePositions() {
 
     //aircraftImage.style.opacity = 1; // Make sure the image is visible %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
+
+const AnimationManager = {
+    jetStreamInterval: null,
+    cloudInterval: null,
+
+    // Jet stream animation (still uses flight_state)
+    startJetStreamCycling(flightState) {
+        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
+
+        if (flightState === "Airborne") {
+            let imageIndex = 1;
+            this.jetStreamInterval = setInterval(() => {
+                const img = document.getElementById('jetstream-image');
+                if (img) {
+                    img.src = `/Image/JetStream/JetStream${imageIndex}.png`;
+                    img.style.opacity = '1';
+                    imageIndex = (imageIndex % 5) + 1;
+                }
+            }, 20);
+        } else {
+            const img = document.getElementById('jetstream-image');
+            if (img) img.style.opacity = '0';
+        }
+    },
+
+    // Cloud animation (uses airplane_in_cloud)
+    startCloudOpacityCycle(inCloud) {
+        // Clear existing interval
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
+
+        // Get and verify cloud element
+        const cloud = document.getElementById('cloud-image');
+        if (!cloud) {
+            console.error("Cloud element missing!");
+            return;
+        }
+
+        // DEBUG: Keep these styles but remove opacity
+        cloud.style.cssText = `
+        z-index: 9999 !important;
+        border: 2px solid red !important;
+        position: absolute !important;
+        width: 100px !important;
+        height: 100px !important;
+        top: 50px !important;
+        left: 50px !important;
+    `;
+
+        // Only control opacity through animation logic
+        if (inCloud === 1) {
+            console.log('[DEBUG] Starting cloud animation');
+            let increasing = true;
+            let currentOpacity = 0.2;
+
+            this.cloudInterval = setInterval(() => {
+                currentOpacity += increasing ? 0.01 : -0.01;
+                if (currentOpacity >= 0.7) increasing = false;
+                if (currentOpacity <= 0.2) increasing = true;
+
+                cloud.style.opacity = currentOpacity;
+                console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
+            }, 50);
+        } else {
+            console.log('[DEBUG] Cloud hidden (normal state)');
+            // Don't force hide if we're debugging
+            // cloud.style.opacity = '0'; // Comment this out temporarily
+        }
+    },
+
+    // Update both animations
+    updateAnimations(flightState, inCloud) {
+        this.startJetStreamCycling(flightState);
+        this.startCloudOpacityCycle(inCloud);
+    },
+
+    cleanup() {
+        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
+    }
+};
+
 function Update_ETE_Dist2Arr_Bar(flightData) {
     console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
 
