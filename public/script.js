@@ -26,6 +26,109 @@ const elements = {
     precipImage: document.getElementById('precip-image')
 };
 
+function CreateNewRow(flightData, isStatic = false) {
+    const table = document.getElementById("flightTable");
+    const tbody = table.querySelector('tbody');
+    const newRow = document.createElement('tr');
+
+    // Create cells (preserving your exact structure)
+    const aircraftCell = document.createElement('td');
+    const flightNumberCell = document.createElement('td');
+    const departureCell = document.createElement('td');
+    const flightStatusCell = document.createElement('td');
+    const destinationCell = document.createElement('td');
+
+    // Set cell content (unchanged from your original)
+    aircraftCell.style.textAlign = 'center';
+    const img = document.createElement('img');
+    img.src = flightData.image;
+    img.alt = 'Aircraft Image';
+    img.style.width = '100px';
+    img.style.height = 'auto';
+    img.onerror = function () { this.src = '/default-aircraft.png'; }; // Added fallback
+    aircraftCell.appendChild(img);
+    aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
+
+    flightNumberCell.textContent = flightData.flightNumber;
+    departureCell.textContent = flightData.departure;
+    flightStatusCell.textContent = flightData.flightStatus;
+    destinationCell.textContent = flightData.destination;
+
+    // Append cells (unchanged)
+    newRow.appendChild(aircraftCell);
+    newRow.appendChild(flightNumberCell);
+    newRow.appendChild(departureCell);
+    newRow.appendChild(flightStatusCell);
+    newRow.appendChild(destinationCell);
+
+    // MODIFIED: Conditional blinking based on isStatic
+    if (!isStatic) {
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
+        if (blinkingClass) {
+            flightStatusCell.classList.add(blinkingClass); // Only blink status cell
+        }
+    }
+
+    // NEW: Add static flight class if needed
+    if (isStatic) {
+        newRow.classList.add('static-flight');
+    }
+
+    tbody.appendChild(newRow);
+    return newRow; // Return the row for potential chaining
+}
+
+
+async function updateFlightTable(staticData) {
+    const tbody = document.getElementById("flight-rows");
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Check if staticData is an array (forEach won't work on single object)
+    const flightsArray = Array.isArray(staticData) ? staticData : [staticData];
+
+    flightsArray.forEach(flight => {
+        // Ensure field names match exactly with your Supabase columns
+        CreateNewRow({
+            image: flight.image || '',              // Add fallback empty string
+            aircraft: flight.aircraft || 'Unknown',
+            flightNumber: flight.flightnumber || '',
+            departure: flight.departure || '',
+            flightStatus: flight.flightstatus || '',
+            destination: flight.destination || ''
+        });
+    });
+}
+
+
+async function fetch_flight_static() {
+    try {
+        // Corrected: the destructured property should be 'data' not 'staticData'
+        const { data, error } = await supabase
+            .from('flights_static')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10)  // Changed to get multiple records (more typical for a table)
+        // Removed .single() since we want multiple rows
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            updateFlightTable(data);
+            return data;
+        } else {
+            console.log('No data found');
+            return null;
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        return null;
+    }
+}
+
+
 // Helper function to extract aircraft type and flight number
 const parseFlightData = (currentFlight) => {
     if (!currentFlight) return { aircraftType: '', flightNumber: '' };
@@ -121,7 +224,7 @@ const updateFlightUI = (data) => {
     const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
 
     // Update basic flight info
-    elements.aircraftName.textContent = data.current_flight || 'N/A';
+    elements.aircraftName.textContent = parseFlightData(data.current_flight).aircraftType || 'N/A';
     elements.flightNumber.textContent = flightNumber || 'N/A';
     elements.departure.textContent = data.departure_location || 'N/A';
     elements.destination.textContent = data.destination || 'N/A';
@@ -155,6 +258,8 @@ const setupRealtimeUpdates = () => {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    fetch_flight_static()
+
     // First load initial data
     supabase
         .from('flights_realtime')
