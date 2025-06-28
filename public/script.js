@@ -273,10 +273,23 @@ const fetch_flight_static = () => {
 };
 
 
-fetch_flight_static()
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    
+
+    supabase
+        .from('flights_static')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data }) => {
+            if (data) updateFlightTable(data);
+        });
+
+
+
+    fetch_flight_static();
 
     // First load initial data
     supabase
