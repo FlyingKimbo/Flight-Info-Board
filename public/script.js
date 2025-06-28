@@ -19,7 +19,7 @@ let isPollingActive = false;
 
 // SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
-async function updateFlightTable(staticData) {
+async function offupdateFlightTable(staticData) {
     const tbody = document.getElementById("flight-rows");
 
     // Clear existing rows
