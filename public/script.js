@@ -623,7 +623,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 }
 
 
-let LastStatus = null;
+let LastStatus = "";
 
 async function getFlightDataWithPolling() {
  
