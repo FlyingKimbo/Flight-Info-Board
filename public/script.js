@@ -622,10 +622,11 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 }
 
-
+let laststatus = null;
+let StatusRefresh = false;
 
 async function getFlightDataWithPolling() {
-    let StatusRefresh = false;
+    
     try {
         const { data, error } = await supabase
             .from('flights_realtime')
