@@ -622,8 +622,7 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
     };
 }
 
-//let laststatus = null;
-//let StatusRefresh = false;
+
 
 async function getFlightDataWithPolling() {
     
@@ -636,28 +635,6 @@ async function getFlightDataWithPolling() {
             .single();
 
         if (error) throw error;
-
-        
-
-        if (data.flight_status !== laststatus && !StatusRefresh && data.dist_to_destination !== 0) {
-            handleGotDataRefresh();
-            sessionStorage.removeItem('didRefresh2');
-          
-
-
-            // Refresh after delay
-            //setTimeout(() => {
-               // window.location.reload();
-            //}, 2000);
-
-            //StatusRefresh = true;
-        } else {
-            // Update laststatus for next comparison
-            laststatus = data.flight_status;
-            //StatusRefresh = false;
-            handleNoDataRefresh();
-            sessionStorage.removeItem('didRefresh1');
-        }
 
         
         if (data.dist_to_destination > 0) {
