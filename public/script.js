@@ -632,26 +632,18 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        // Flight status change detection
+        // Track flight status changes
         const prevStatus = sessionStorage.getItem('lastFlightStatus');
         const currentStatus = data.flight_status;
 
+        // In your polling function, replace the status change detection with:
         if (prevStatus && prevStatus !== currentStatus) {
-            console.log('Flight status changed:', prevStatus, '→', currentStatus);
-
-            // Only refresh if we haven't already for this status change
-            if (!sessionStorage.getItem('didRefreshForStatusChange')) {
-                sessionStorage.setItem('didRefreshForStatusChange', 'true');
-                sessionStorage.setItem('lastFlightStatus', currentStatus);
-                setTimeout(() => window.location.reload(), 2000);
-                return; // Exit early to prevent other refresh logic
-            }
-        } else if (!prevStatus) {
-            // Initialize if first run
+            console.log(`Flight status changed: ${prevStatus} → ${currentStatus}`);
             sessionStorage.setItem('lastFlightStatus', currentStatus);
+            updateFlightStatusDisplay(currentStatus); // This now updates just the TD element
         }
 
-        // Original distance-based refresh logic
+        // Original distance-based logic
         if (data.dist_to_destination > 0) {
             handleGotDataRefresh();
             sessionStorage.removeItem('didRefresh2');
@@ -663,7 +655,8 @@ async function getFlightDataWithPolling() {
                 current_flight: data.current_flight,
                 flight_state: data.flight_state,
                 airplane_in_cloud: data.airplane_in_cloud,
-                ambient_precipstate: data.ambient_precipstate
+                ambient_precipstate: data.ambient_precipstate,
+                flight_status: currentStatus // Include current status in update
             });
         } else {
             handleNoDataRefresh();
@@ -676,10 +669,27 @@ async function getFlightDataWithPolling() {
     }
 }
 
-// Add this to reset the status change refresh flag when needed
-//function resetStatusChangeRefresh() {
-    //sessionStorage.removeItem('didRefreshForStatusChange');
-//}
+// New function to update just the status display
+// Replace your existing update function with this:
+function updateFlightStatusDisplay(newStatus) {
+    const statusElements = document.querySelectorAll('.flight-status');
+
+    statusElements.forEach(element => {
+        // Only update if status actually changed
+        if (element.textContent.trim() !== newStatus) {
+            element.textContent = newStatus;
+
+            // Visual feedback
+            element.classList.add('status-updated');
+            setTimeout(() => element.classList.remove('status-updated'), 1000);
+
+            // Optional: Status-specific styling
+            element.className = 'flight-status'; // Reset classes
+            element.classList.add(`status-${newStatus.toLowerCase().replace(' ', '-')}`);
+        }
+    });
+}
+
 
 function handleFlightDataError(error) {
     console.error('Flight data error:', error);
