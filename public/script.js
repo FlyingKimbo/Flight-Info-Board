@@ -654,23 +654,22 @@ async function getFlightDataWithPolling() {
             });
             
 
-            if (LastStatus !== data.flight_status && StatusRefreshCount === 0) {
-                LastStatus = data.flight_status;
-                // Refresh after delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 5000);
-
-                StatusRefreshCount = StatusRefreshCount + 1;
-            } else {
-                LastStatus = data.flight_status;
-                StatusRefreshCount = 0;
-            }
-
-
         } else {
             handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
+        }
+
+        if (LastStatus !== data.flight_status && StatusRefreshCount === 0) {
+            LastStatus = data.flight_status;
+            // Refresh after delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
+
+            StatusRefreshCount = StatusRefreshCount + 1;
+        } else {
+            LastStatus = data.flight_status;
+            StatusRefreshCount = 0;
         }
 
     } catch (error) {
