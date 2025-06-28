@@ -632,30 +632,20 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        // Check if flight_status has changed
+        // Track flight_status changes (without refreshing)
         const previousFlightStatus = sessionStorage.getItem('lastFlightStatus');
         const currentFlightStatus = data.flight_status;
 
-        if (previousFlightStatus && previousFlightStatus !== currentFlightStatus) {
-            // Flight status changed - handle refresh
-            if (!sessionStorage.getItem('didRefreshStatus')) {
-                sessionStorage.setItem('didRefreshStatus', 'true');
-                sessionStorage.setItem('lastFlightStatus', currentFlightStatus);
-                setTimeout(() => window.location.reload(), 2000);
-                return; // Exit early to prevent other refresh logic
-            }
-        } else {
-            // Store the current status if not set or no change
+        if (previousFlightStatus !== currentFlightStatus) {
+            console.log('Flight status changed from', previousFlightStatus, 'to', currentFlightStatus);
+            // Just update the stored status - no refresh triggered
             sessionStorage.setItem('lastFlightStatus', currentFlightStatus);
         }
 
         if (data.dist_to_destination > 0) {
             handleGotDataRefresh();
             // Data exists - clear refresh flag
-
             sessionStorage.removeItem('didRefresh2');
-
-            
 
             Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
@@ -664,17 +654,14 @@ async function getFlightDataWithPolling() {
                 current_flight: data.current_flight,
                 flight_state: data.flight_state,
                 airplane_in_cloud: data.airplane_in_cloud,
-                ambient_precipstate: data.ambient_precipstate
+                ambient_precipstate: data.ambient_precipstate,
+                flight_status: currentFlightStatus // Include flight_status in your update if needed
             });
         } else {
             // No data - trigger controlled refresh
             handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
-            
         }
-        
-    
-
 
     } catch (error) {
         console.error('Polling error:', error);
