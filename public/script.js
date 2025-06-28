@@ -659,7 +659,7 @@ async function getFlightDataWithPolling() {
                 // Refresh after delay
                 setTimeout(() => {
                     window.location.reload();
-                }, 2000);
+                }, 5000);
 
                 StatusRefreshCount = StatusRefreshCount + 1;
             } else {
