@@ -258,9 +258,11 @@ const setupRealtimeUpdates = () => {
         .subscribe();
 };
 
+
+fetch_flight_static()
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    fetch_flight_static()
+    
 
     // First load initial data
     supabase
