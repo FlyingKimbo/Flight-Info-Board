@@ -637,12 +637,20 @@ async function getFlightDataWithPolling() {
 
         if (error) throw error;
 
-        
-        if (data.dist_to_destination > 0) {
-            handleGotDataRefresh();
-            sessionStorage.removeItem('didRefresh2');
+        if (LastStatus !== data.flight_status && StatusRefreshCount === 0) {
+            LastStatus = data.flight_status;
+            // Refresh after delay
+            setTimeout(() => {
+                window.location.reload();
+            }, 5000);
 
-            Update_ETE_Dist2Arr_Bar({
+            StatusRefreshCount = StatusRefreshCount + 1;
+        
+            if (data.dist_to_destination > 0) {
+                handleGotDataRefresh();
+                sessionStorage.removeItem('didRefresh2');
+
+                Update_ETE_Dist2Arr_Bar({
                 ete_srgs: data.ete_srgs,
                 dist_to_destination: data.dist_to_destination,
                 start_distance: data.start_distance,
@@ -654,19 +662,12 @@ async function getFlightDataWithPolling() {
             });
             
 
-        } else {
+            } else {
             handleNoDataRefresh();
             sessionStorage.removeItem('didRefresh1');
-        }
+            }
 
-        if (LastStatus !== data.flight_status && StatusRefreshCount === 0) {
-            LastStatus = data.flight_status;
-            // Refresh after delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 5000);
-
-            StatusRefreshCount = StatusRefreshCount + 1;
+        
         } else {
             LastStatus = data.flight_status;
             StatusRefreshCount = 0;
