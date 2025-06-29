@@ -492,41 +492,65 @@ async function fetch_flight_static() {
 }
 
 // 2. Realtime Updates for All Fields
+function updateFlightStatus(flightData) {
+    console.log('Flight status update received:', flightData);
+
+    if (!flightData || !flightData.flightstatus) {
+        console.warn('No valid flight data received');
+        return;
+    }
+
+    try {
+        // Get all relevant DOM elements
+        const elements = {
+            aircraft: document.querySelector('.flight-aircraft span'),
+            flightNumber: document.querySelector('.flight-number'),
+            departure: document.querySelector('.flight-departure'),
+            status: document.querySelector('.flight-status'),
+            destination: document.querySelector('.flight-destination'),
+            image: document.querySelector('.flight-image')
+        };
+
+        // Validate elements exist
+        for (const [name, element] of Object.entries(elements)) {
+            if (!element) {
+                console.error(`Missing DOM element: ${name}`);
+                return;
+            }
+        }
+
+        // Update all fields in one atomic operation
+        elements.aircraft.textContent = flightData.aircraft || '';
+        elements.flightNumber.textContent = flightData.flightnumber || '';
+        elements.departure.textContent = flightData.departure || '';
+        elements.status.textContent = flightData.flightstatus || '';
+        elements.destination.textContent = flightData.destination || '';
+
+        // Update aircraft image if available
+        if (flightData.image) {
+            elements.image.src = flightData.image;
+        }
+
+        console.log('Successfully updated flight display');
+
+    } catch (error) {
+        console.error('Error updating flight status:', error);
+    }
+}
+
+// Modified realtime subscription
 function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
         .on('postgres_changes', {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            // Find row using unique ID (most reliable)
-            const row = document.querySelector(`.flight-row[data-id="${payload.new.id}"]`);
-
-            if (row) {
-                // Update all five fields (Supabase already verified changes)
-                updateRowFields(row, payload.new);
-            }
+            // Use the same direct update approach as ETE-bar
+            updateFlightStatus(payload.new);
         })
         .subscribe();
-}
-
-// Helper: Update all fields in one operation
-function updateRowFields(row, data) {
-    // Map database fields to DOM elements
-    const fields = {
-        '.flight-aircraft span': data.aircraft,
-        '.flight-number': data.flightnumber,
-        '.flight-departure': data.departure,
-        '.flight-status': data.flightstatus,
-        '.flight-destination': data.destination
-    };
-
-    // Batch updates for performance
-    Object.entries(fields).forEach(([selector, value]) => {
-        const element = row.querySelector(selector);
-        if (element) element.textContent = value || '';
-    });
 }
 
 
