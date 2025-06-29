@@ -503,12 +503,11 @@ function updateFlightStatus(flightData) {
     try {
         // Get all relevant DOM elements
         const elements = {
-            aircraft: document.querySelector('.flight-aircraft span'),
+            aircraftName: document.querySelector('.flight-aircraft span'),
             flightNumber: document.querySelector('.flight-number'),
             departure: document.querySelector('.flight-departure'),
             status: document.querySelector('.flight-status'),
             destination: document.querySelector('.flight-destination'),
-            image: document.querySelector('.flight-image')
         };
 
         // Validate elements exist
@@ -520,7 +519,7 @@ function updateFlightStatus(flightData) {
         }
 
         // Update all fields in one atomic operation
-        elements.aircraft.textContent = flightData.aircraft || '';
+        elements.aircraftName.textContent = flightData.aircraft || '';
         elements.flightNumber.textContent = flightData.flightnumber || '';
         elements.departure.textContent = flightData.departure || '';
         elements.status.textContent = flightData.flightstatus || '';
@@ -543,7 +542,7 @@ function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
         .on('postgres_changes', {
-            event: 'UPDATE',
+            event: '*',
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
@@ -557,6 +556,17 @@ function setupStaticRealtimeUpdates() {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
+
+    supabase
+        .from('flights_static')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+        .then(({ data }) => {
+            if (data) updateFlightUI(data);
+        });
+
     setupStaticRealtimeUpdates(); // Cell-level updates
     // First load initial data
     supabase
