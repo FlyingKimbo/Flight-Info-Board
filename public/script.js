@@ -475,24 +475,42 @@ const setupRealtimeUpdates = () => {
 
 async function fetch_flight_static() {
     try {
-        // Corrected: the destructured property should be 'data' not 'staticData'
         const { data, error } = await supabase
             .from('flights_static')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(10)  // Changed to get multiple records (more typical for a table)
-        // Removed .single() since we want multiple rows
+            .limit(10);
 
         if (error) throw error;
 
-        if (data && data.length > 0) {
-            updateFlightTable(data);
-            return data;
-        } else {
-            console.log('No data found');
-            return null;
-        }
+        if (data?.length > 0) {
+            // Get existing flight identifiers from DOM elements
+            const existingFlightKeys = Array.from(
+                document.querySelectorAll('.flight-row') // Add this class to your rows
+            ).map(row => {
+                return {
+                    aircraft: row.querySelector('.flight-aircraft span').textContent.trim(),
+                    flightnumber: row.querySelector('.flight-number').textContent.trim(),
+                    departure: row.querySelector('.flight-departure').textContent.trim()
+                };
+            });
 
+            // Filter new flights
+            const newFlights = data.filter(flight => {
+                return !existingFlightKeys.some(existing =>
+                    existing.aircraft === (flight.aircraft || '').trim() &&
+                    existing.flightnumber === (flight.flightnumber || '').trim() &&
+                    existing.departure === (flight.departure || '').trim()
+                );
+            });
+
+            if (newFlights.length > 0) {
+                updateFlightTable(newFlights);
+            }
+            return data;
+        }
+        console.log('No data found');
+        return null;
     } catch (error) {
         console.error('Error:', error.message);
         return null;
