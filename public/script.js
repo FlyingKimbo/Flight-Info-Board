@@ -497,40 +497,55 @@ async function fetch_flight_static() {
 // Modified realtime subscription
 function setupStaticRealtimeUpdates() {
     return supabase
-        .channel('flights_static_updates')
+        .channel('flight_board_updates')
         .on('postgres_changes', {
-            event: '*', // Listen for INSERTS and UPDATES
+            event: '*', // Listen to ALL events (INSERT/UPDATE/DELETE)
             schema: 'public',
             table: 'flights_static'
-        }, async (payload) => {
-            // For both INSERT and UPDATE operations
-            const flightNumber = payload.new.flightnumber;
+        }, (payload) => {
+            const flightId = payload.new?.id || payload.old?.id;
 
-            // 1. Try to find existing row
-            let flightRow = Array.from(document.querySelectorAll('.flight-number'))
-                .find(el => el.textContent.trim() === flightNumber)
-                ?.closest('tr');
-
-            // 2. If new flight and row doesn't exist, create it
-            if (payload.eventType === 'INSERT' && !flightRow) {
-                await fetch_flight_static(); // Refresh entire table
+            // 1. Handle INSERT (new flight)
+            if (payload.eventType === 'INSERT') {
+                if (!document.querySelector(`[data-flight-id="${flightId}"]`)) {
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.flightId = flightId;
+                    newRow.className = 'flight-row';
+                    newRow.innerHTML = `
+                        <td class="flight-aircraft">
+                            <div class="cell-content">
+                                <img class="flight-image" src="${payload.new.image || ''}">
+                                <span>${payload.new.aircraft || ''}</span>
+                            </div>
+                        </td>
+                        <td class="flight-number">${payload.new.flightnumber || ''}</td>
+                        <td class="flight-departure">${payload.new.departure || ''}</td>
+                        <td class="flight-status">${payload.new.flightstatus || ''}</td>
+                        <td class="flight-destination">${payload.new.destination || ''}</td>
+                    `;
+                    document.getElementById('flight-rows').prepend(newRow);
+                }
                 return;
             }
 
-            // 3. If existing flight, update the row
-            if (flightRow) {
-                // Update all cells
-                flightRow.querySelector('.flight-aircraft span').textContent = payload.new.aircraft || '';
-                flightRow.querySelector('.flight-number').textContent = flightNumber;
-                flightRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
-                flightRow.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
-                flightRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
+            // 2. Handle UPDATE (status change)
+            if (payload.eventType === 'UPDATE') {
+                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
+                if (row) {
+                    row.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
+                    // Update other fields as needed...
+                }
+                return;
+            }
 
-                // Update image
-                const img = flightRow.querySelector('.flight-image');
-                if (img && payload.new.image) img.src = payload.new.image;
-
-                console.log(`${payload.eventType === 'INSERT' ? 'Added' : 'Updated'} flight ${flightNumber}`);
+            // 3. Handle DELETE (remove row from DOM)
+            if (payload.eventType === 'DELETE') {
+                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
+                if (row) {
+                    row.remove();
+                    console.log(`Removed flight ${flightId} from display`);
+                }
+                return;
             }
         })
         .subscribe();
