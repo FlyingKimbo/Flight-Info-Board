@@ -495,7 +495,7 @@ async function fetch_flight_static() {
 
 
 // Modified realtime subscription
-function setupStaticRealtimeUpdates() {
+function offsetupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
@@ -551,9 +551,7 @@ function setupStaticRealtimeUpdates() {
                 cells.forEach(cell => newRow.appendChild(cell));
                 tbody.prepend(newRow);
                 // Refresh after delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                
                 return;
             }
 
@@ -573,9 +571,7 @@ function setupStaticRealtimeUpdates() {
                     img.style.height = 'auto';
                 }
                 // Refresh after delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                
                 return;
             }
 
@@ -587,8 +583,13 @@ function setupStaticRealtimeUpdates() {
         .subscribe();
     
 }
+function RefreshWholePage() {
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+}
 
-function offsetupStaticRealtimeUpdates() {
+function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
@@ -618,6 +619,7 @@ function offsetupStaticRealtimeUpdates() {
                     `;
                     document.getElementById('flight-rows').prepend(newRow);
                 }
+                RefreshWholePage();
                 return;
             }
 
@@ -631,6 +633,7 @@ function offsetupStaticRealtimeUpdates() {
                     row.querySelector('.flight-destination').textContent = payload.new.destination || '';
                     // Update other fields as needed...
                 }
+                RefreshWholePage();
                 return;
             }
 
@@ -641,6 +644,7 @@ function offsetupStaticRealtimeUpdates() {
                     row.remove();
                     console.log(`Removed flight ${flightId} from display`);
                 }
+                RefreshWholePage();
                 return;
             }
         })
