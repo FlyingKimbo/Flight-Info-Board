@@ -593,13 +593,13 @@ function setupStaticRealtimeUpdates() {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            console.log('Realtime update received:', payload);
+            console.log('Realtime update:', payload);
 
             // Use record ID for reliable matching
             const recordId = payload.new?.id || payload.old?.id;
             const existingRow = document.querySelector(`tr[data-flight-id="${recordId}"]`);
 
-            // INSERT handler (unchanged)
+            // INSERT - New flight
             if (payload.eventType === 'INSERT' && !existingRow) {
                 const row = CreateNewRow({
                     image: payload.new.image || '',
@@ -613,45 +613,23 @@ function setupStaticRealtimeUpdates() {
                 return;
             }
 
-            // FOCUSED STATUS UPDATE HANDLER
+            // UPDATE - Status change (SIMPLIFIED)
             if (payload.eventType === 'UPDATE' && existingRow && payload.new.flightstatus) {
                 const statusCell = existingRow.querySelector('.flight-status');
-                if (!statusCell) return;
+                if (statusCell) {
+                    // Direct text update - no blinking classes
+                    statusCell.textContent = payload.new.flightstatus;
 
-                // 1. Force stop any existing animations
-                statusCell.style.animation = 'none';
-                void statusCell.offsetWidth; // Trigger reflow
-
-                // 2. Update text content
-                statusCell.textContent = payload.new.flightstatus;
-
-                // 3. Remove all existing blinking classes
-                const blinkClasses = [
-                    'blinking-boarding',
-                    'blinking-departed',
-                    'blinking-enroute',
-                    'blinking-delayed',
-                    'blinking-landed',
-                    'blinking-deboarding'
-                ];
-                statusCell.classList.remove(...blinkClasses);
-
-                // 4. Add new blinking class and restart animation
-                const blinkClass = getBlinkingClass(payload.new.flightstatus);
-                if (blinkClass) {
-                    statusCell.classList.add(blinkClass);
-                    // Force animation restart
+                    // Visual feedback (temporary)
+                    statusCell.style.backgroundColor = '#e6ffe6'; // Light green
                     setTimeout(() => {
-                        statusCell.style.animation = '';
-                    }, 10);
+                        statusCell.style.backgroundColor = '';
+                    }, 500);
                 }
-
-                // DEBUG: Visual feedback (remove in production)
-                statusCell.style.boxShadow = '0 0 0 2px red';
-                setTimeout(() => statusCell.style.boxShadow = '', 1000);
+                return;
             }
 
-            // DELETE handler (unchanged)
+            // DELETE - Remove flight
             if (payload.eventType === 'DELETE' && existingRow) {
                 existingRow.remove();
             }
