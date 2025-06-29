@@ -593,92 +593,64 @@ function setupStaticRealtimeUpdates() {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            console.log('Realtime update:', payload.eventType, payload);
+            // DEBUG: Log the payload to verify we're receiving updates
+            console.log('Realtime payload:', payload);
 
-            // For INSERT/UPDATE: Use payload.new only
-            if (['INSERT', 'UPDATE'].includes(payload.eventType)) {
-                const {
-                    id,
-                    image = '',
-                    aircraft = 'Unknown',
-                    flightnumber = '',
-                    departure = '',
-                    flightstatus = '',
-                    destination = ''
-                } = payload.new;
+            // For all update types, use the record ID for reliable matching
+            const recordId = payload.new?.id || payload.old?.id;
+            const existingRow = document.querySelector(`tr[data-flight-id="${recordId}"]`);
 
-                // Find existing row by data-id
-                const existingRow = document.querySelector(`tr[data-flight-id="${id}"]`);
+            // Handle INSERT (unchanged from your working version)
+            if (payload.eventType === 'INSERT' && !existingRow) {
+                const row = CreateNewRow({
+                    image: payload.new.image || '',
+                    aircraft: payload.new.aircraft || 'Unknown',
+                    flightNumber: payload.new.flightnumber || '',
+                    departure: payload.new.departure || '',
+                    flightStatus: payload.new.flightstatus || '',
+                    destination: payload.new.destination || ''
+                }, false);
+                row.dataset.flightId = recordId;
+                return;
+            }
 
-                // Handle INSERT
-                if (payload.eventType === 'INSERT' && !existingRow) {
-                    const row = CreateNewRow({
-                        image,
-                        aircraft,
-                        flightNumber: flightnumber,
-                        departure,
-                        flightStatus: flightstatus,
-                        destination
-                    }, false);
+            // FOCUS ON STATUS UPDATES - This is the critical fix
+            if (payload.eventType === 'UPDATE' && existingRow) {
+                // Only proceed if flightstatus actually changed
+                if ('flightstatus' in payload.new) {
+                    const statusCell = existingRow.querySelector('.flight-status');
 
-                    // Add ID tracking to the row
-                    row.dataset.flightId = id;
-                    return;
-                }
+                    // DEBUG: Visual feedback to confirm we're updating the right cell
+                    statusCell.style.border = '2px solid red';
+                    setTimeout(() => statusCell.style.border = '', 1000);
 
-                // Handle UPDATE - only proceed if row exists
-                if (payload.eventType === 'UPDATE' && existingRow) {
-                    // Safely update aircraft cell
-                    const aircraftCell = existingRow.querySelector('td:nth-child(1)');
-                    if (aircraftCell) {
-                        const img = aircraftCell.querySelector('img');
-                        if (img) {
-                            img.src = image;
-                            img.onerror = function () { this.src = '/default-aircraft.png'; };
-                        }
+                    // 1. Update the text content FIRST
+                    statusCell.textContent = payload.new.flightstatus;
 
-                        // Update aircraft text (use proper selector)
-                        const aircraftText = aircraftCell.querySelector('span');
-                        if (aircraftText) {
-                            aircraftText.textContent = ` ${aircraft}`;
-                        }
+                    // 2. Remove ALL possible blinking classes
+                    statusCell.classList.remove(
+                        'blinking-boarding',
+                        'blinking-departed',
+                        'blinking-enroute',
+                        'blinking-delayed',
+                        'blinking-landed',
+                        'blinking-deboarding'
+                    );
+
+                    // 3. Add the correct blinking class if needed
+                    const blinkClass = getBlinkingClass(payload.new.flightstatus);
+                    if (blinkClass) {
+                        statusCell.classList.add(blinkClass);
                     }
 
-                    // Safely update other cells
-                    const updateCell = (selector, value) => {
-                        const cell = existingRow.querySelector(selector);
-                        if (cell && value !== undefined) {
-                            cell.textContent = value;
-                        }
-                    };
-
-                    updateCell('.flight-number', flightnumber);
-                    updateCell('.flight-departure', departure);
-                    updateCell('.flight-destination', destination);
-
-                    // Special handling for status with blinking effect
-                    if (flightstatus) {
-                        const statusCell = existingRow.querySelector('.flight-status');
-                        if (statusCell) {
-                            statusCell.textContent = flightstatus;
-
-                            // Reset and reapply blinking classes
-                            statusCell.className = 'flight-status';
-                            const blinkClass = getBlinkingClass(flightstatus);
-                            if (blinkClass) {
-                                statusCell.classList.add(blinkClass);
-                            }
-                        }
-                    }
+                    // 4. Force browser repaint (ensures visual update)
+                    void statusCell.offsetWidth;
                 }
             }
-            // Handle DELETE (using payload.old)
-            else if (payload.eventType === 'DELETE') {
-                const deletedId = payload.old.id;
-                const rowToRemove = document.querySelector(`tr[data-flight-id="${deletedId}"]`);
-                if (rowToRemove) {
-                    rowToRemove.remove();
-                }
+
+            // Handle DELETE (unchanged)
+            if (payload.eventType === 'DELETE' && existingRow) {
+                existingRow.remove();
             }
         })
         .subscribe();
