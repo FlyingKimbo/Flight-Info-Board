@@ -491,7 +491,7 @@ async function fetch_flight_static() {
     }
 }
 
-// 2. Realtime Cell Updates (Enhanced 5-field version)
+// 2. Realtime Updates for All Fields
 function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
@@ -500,47 +500,33 @@ function setupStaticRealtimeUpdates() {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            // Find matching row using all 5 identifiers
-            const row = findFlightRow(
-                payload.new.aircraft,
-                payload.new.flightnumber,
-                payload.new.departure,
-                payload.new.flightstatus,
-                payload.new.destination
-            );
+            // Find row using unique ID (most reliable)
+            const row = document.querySelector(`.flight-row[data-id="${payload.new.id}"]`);
 
             if (row) {
-                // Update only changed cells (all fields now available)
-                if (payload.new.aircraft !== payload.old.aircraft) {
-                    row.querySelector('.flight-aircraft span').textContent = payload.new.aircraft;
-                }
-                if (payload.new.flightnumber !== payload.old.flightnumber) {
-                    row.querySelector('.flight-number').textContent = payload.new.flightnumber;
-                }
-                if (payload.new.departure !== payload.old.departure) {
-                    row.querySelector('.flight-departure').textContent = payload.new.departure;
-                }
-                if (payload.new.flightstatus !== payload.old.flightstatus) {
-                    row.querySelector('.flight-status').textContent = payload.new.flightstatus;
-                }
-                if (payload.new.destination !== payload.old.destination) {
-                    row.querySelector('.flight-destination').textContent = payload.new.destination;
-                }
+                // Update all five fields (Supabase already verified changes)
+                updateRowFields(row, payload.new);
             }
         })
         .subscribe();
 }
 
-// Helper: Find DOM row using ALL 5 identifiers
-function findFlightRow(aircraft, flightnumber, departure, flightstatus, destination) {
-    const rows = document.querySelectorAll('.flight-row');
-    return Array.from(rows).find(row =>
-        row.querySelector('.flight-aircraft span').textContent.trim() === aircraft?.trim() &&
-        row.querySelector('.flight-number').textContent.trim() === flightnumber?.trim() &&
-        row.querySelector('.flight-departure').textContent.trim() === departure?.trim() &&
-        row.querySelector('.flight-status').textContent.trim() === flightstatus?.trim() &&
-        row.querySelector('.flight-destination').textContent.trim() === destination?.trim()
-    );
+// Helper: Update all fields in one operation
+function updateRowFields(row, data) {
+    // Map database fields to DOM elements
+    const fields = {
+        '.flight-aircraft span': data.aircraft,
+        '.flight-number': data.flightnumber,
+        '.flight-departure': data.departure,
+        '.flight-status': data.flightstatus,
+        '.flight-destination': data.destination
+    };
+
+    // Batch updates for performance
+    Object.entries(fields).forEach(([selector, value]) => {
+        const element = row.querySelector(selector);
+        if (element) element.textContent = value || '';
+    });
 }
 
 
