@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Then set up realtime updates
     setupRealtimeUpdates();
-
+    /*
     supabase_static
         .from('flights_static')
         .select('*')
@@ -579,6 +579,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(({ data }) => {
             if (data) updateFlightUI(data);
         });
-
+        */
     setupStaticRealtimeUpdates(); // Cell-level updates
 });
