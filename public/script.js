@@ -26,6 +26,12 @@ const elements = {
     precipImage: document.getElementById('precip-image')
 };
 
+// Add this utility function (place it with your other global functions)
+function getAircraftImagePath(aircraftType) {
+    if (!aircraftType) return '/Image/Aircraft_Type/default.png';
+    return `/Image/Aircraft_Type/${aircraftType.replace(/\s+/g, '_')}.png`;
+}
+
 function CreateNewRow(flightData, isStatic = false) {
     const table = document.getElementById("flightTable");
     const tbody = table.querySelector('tbody');
@@ -45,7 +51,11 @@ function CreateNewRow(flightData, isStatic = false) {
     img.alt = 'Aircraft Image';
     img.style.width = '100px';
     img.style.height = 'auto';
-    img.onerror = function () { this.src = '/default-aircraft.png'; }; // Added fallback
+    img.onerror = function () {
+        this.src = '/Image/Aircraft_Type/default.png';
+        console.warn(`Failed to load aircraft image: ${flightData.aircraft}`);
+    }; 
+
     aircraftCell.appendChild(img);
     aircraftCell.appendChild(document.createTextNode(` ${flightData.aircraft}`));
 
@@ -74,12 +84,15 @@ function CreateNewRow(flightData, isStatic = false) {
         newRow.classList.add('static-flight');
     }
 
+    // Visual feedback
+    newRow.classList.add('flash-new-row');
+    setTimeout(() => newRow.classList.remove('flash-new-row'), 2000);
+
+
     tbody.appendChild(newRow);
     return newRow; // Return the row for potential chaining
 
-    // Add at the end of your CreateNewRow function, right before return:
-    newRow.classList.add('flash-new-row');
-    setTimeout(() => newRow.classList.remove('flash-new-row'), 2000);
+    
 
 }
 
@@ -537,14 +550,13 @@ const setupStaticRealtimeUpdates = () => {
 function Update_cells_values(staticData) {
     if (!staticData) return;
 
-    // Convert data names to match your CreateNewRow expectations
     const flightPayload = {
         aircraft: staticData.aircraft || realtime_aircraft || 'Unknown',
         flightNumber: staticData.flightnumber || realtime_flightnumber,
         departure: staticData.departure || realtime_departure || '--/--/----',
-        flightStatus: staticData.flightstatus || '-',
+        flightStatus: staticData.flightstatus || '',
         destination: staticData.destination || '-',
-        image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.png`
+        image: `/Image/Aircraft_Type/${(staticData.aircraft || realtime_aircraft || 'default').replace(/\s+/g, '_')}.png`
     };
 
     const existingRow = findMatchingFlightRow(
@@ -556,12 +568,44 @@ function Update_cells_values(staticData) {
     if (existingRow) {
         updateFlightRow(existingRow, flightPayload);
     } else {
-        // Add slight delay to allow DOM to settle
+        // For new rows, force isStatic=false to enable blinking
         setTimeout(() => {
-            CreateNewRow(flightPayload, true);
-            console.log('Created new row for:', flightPayload.flightNumber);
+            CreateNewRow({
+                ...flightPayload,
+                flightStatus: flightPayload.flightStatus || 'Boarding' // Handle blank status
+            }, false); // Changed to false to enable blinking
         }, 100);
     }
+}
+
+// Modified updateFlightRow helper
+function updateFlightRow(row, flightData) {
+    const statusCell = row.cells[3];
+    if (statusCell) {
+        // Clear existing blinking classes
+        statusCell.className = '';
+
+        // Only update if status changed
+        if (statusCell.textContent !== flightData.flightStatus) {
+            statusCell.textContent = flightData.flightStatus || 'Boarding';
+
+            // Apply blinking if status is not empty
+            if (flightData.flightStatus) {
+                const blinkingClass = getBlinkingClass(flightData.flightStatus);
+                if (blinkingClass) statusCell.classList.add(blinkingClass);
+            }
+        }
+    }
+
+    // Update destination if changed
+    const destinationCell = row.cells[4];
+    if (destinationCell && destinationCell.textContent !== flightData.destination) {
+        destinationCell.textContent = flightData.destination;
+    }
+
+    // Visual feedback
+    row.classList.add('row-updated');
+    setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
 
 // Helper function to find matching row
@@ -579,32 +623,6 @@ function findMatchingFlightRow(aircraft, flightNumber, departure) {
         }
     }
     return null;
-}
-
-// Helper function to update row cells
-function updateFlightRow(row, flightData) {
-    // Update status cell if changed
-    const statusCell = row.cells[3];
-    if (statusCell && statusCell.textContent !== flightData.flightStatus) {
-        statusCell.textContent = flightData.flightStatus;
-
-        // Remove any existing blinking classes
-        statusCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
-        }
-    }
-
-    // Update destination cell if changed
-    const destinationCell = row.cells[4];
-    if (destinationCell && destinationCell.textContent !== flightData.destination) {
-        destinationCell.textContent = flightData.destination;
-    }
-
-    // Visual feedback
-    row.classList.add('row-updated');
-    setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
 
 
