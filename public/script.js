@@ -651,9 +651,10 @@ function setupStaticRealtimeUpdates() {
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
 
+  
     
 
-    setupStaticRealtimeUpdates(); // Cell-level updates
+    
     // First load initial data
     supabase
         .from('flights_realtime')
@@ -667,4 +668,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Then set up realtime updates
     setupRealtimeUpdates();
+    setupStaticRealtimeUpdates(); // Cell-level updates
 });
