@@ -591,6 +591,9 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
+    // First check if status is changing (this will be our trigger)
+    const statusCell = row.cells[3];
+    const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
     // 1. Aircraft Cell (cell[0])
     const aircraftCell = row.cells[0];
@@ -599,7 +602,7 @@ function updateFlightRow(row, flightData) {
         const img = aircraftCell.querySelector('img');
         let textSpan = aircraftCell.querySelector('span');
 
-        // If span doesn't exist, create it (but only if we have img as parent)
+        // If span doesn't exist, create it
         if (!textSpan && img && img.parentNode === aircraftCell.querySelector('.cell-content')) {
             textSpan = document.createElement('span');
             img.parentNode.appendChild(textSpan);
@@ -608,96 +611,58 @@ function updateFlightRow(row, flightData) {
         // Update only if text changed
         if (textSpan && textSpan.textContent.trim() !== flightData.aircraft) {
             textSpan.textContent = ` ${flightData.aircraft}`;
-
-            // Blinking effect
-            aircraftCell.className = '';
-            const blinkingClass = getBlinkingClass(flightData.aircraft);
-            if (blinkingClass) aircraftCell.classList.add(blinkingClass);
         }
     }
 
-
-                     
-
-    // Update status cell if changed
+    // 2. Flight Number (cell[1])
     const flightNumberCell = row.cells[1];
     if (flightNumberCell && flightNumberCell.textContent !== flightData.flightNumber) {
         flightNumberCell.textContent = flightData.flightNumber;
-
-        // Remove any existing blinking classes
-        flightNumberCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.flightNumber);
-        if (blinkingClass) {
-            flightNumberCell.classList.add(blinkingClass);
-        }
     }
 
-    // Update departure cell if changed
+    // 3. Departure (cell[2])
     const departureCell = row.cells[2];
     if (departureCell && departureCell.textContent !== flightData.departure) {
         departureCell.textContent = flightData.departure;
-
-        // Remove any existing blinking classes
-        departureCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.departure);
-        if (blinkingClass) {
-            departureCell.classList.add(blinkingClass);
-        }
     }
 
-    // Update status cell if changed
-    const statusCell = row.cells[3];
+    // 4. Status (cell[3]) - Main trigger
     if (statusCell && statusCell.textContent !== flightData.flightStatus) {
         statusCell.textContent = flightData.flightStatus;
-
-        flightNumberCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.flightNumber);
-        if (blinkingClass) {
-            flightNumberCell.classList.add(blinkingClass);
-        }
-
-        // Remove any existing blinking classes
-        departureCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.departure);
-        if (blinkingClass) {
-            departureCell.classList.add(blinkingClass);
-        }
-
-        // Remove any existing blinking classes
-        statusCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
-        }
-
-        // Remove any existing blinking classes
-        destinationCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.destination);
-        if (blinkingClass) {
-            destinationCell.classList.add(blinkingClass);
-        }
-
     }
-    
-    // Update destination cell if changed
+
+    // 5. Destination (cell[4])
     const destinationCell = row.cells[4];
     if (destinationCell && destinationCell.textContent !== flightData.destination) {
         destinationCell.textContent = flightData.destination;
-
-        // Remove any existing blinking classes
-        destinationCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.destination);
-        if (blinkingClass) {
-            destinationCell.classList.add(blinkingClass);
-        }
     }
 
+    // Apply blinking to all cells if status changed
+    if (isStatusChanging) {
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
+        if (blinkingClass) {
+            // Blink all cells in the row
+            for (let i = 0; i < row.cells.length; i++) {
+                row.cells[i].className = '';
+                row.cells[i].classList.add(blinkingClass);
 
-
+                // Special case - keep existing image in aircraft cell
+                if (i === 0) {
+                    const img = row.cells[i].querySelector('img');
+                    if (img) img.style.display = 'inline'; // Ensure image stays visible
+                }
+            }
+        }
+    }
     // Visual feedback
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
+
+
+
+    
+
 
 
 // Initialize when DOM is loaded
