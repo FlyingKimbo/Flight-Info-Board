@@ -593,62 +593,65 @@ function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
-            event: '*', // Listen to ALL events (INSERT/UPDATE/DELETE)
+            event: '*',
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            const flightId = payload.new?.id || payload.old?.id;
+            const flightNumber = payload.new?.flightnumber || payload.old?.flightnumber;
 
-            // 1. Handle INSERT (new flight)
-            if (payload.eventType === 'INSERT') {
-                if (!document.querySelector(`[data-flight-id="${flightId}"]`)) {
-                    const newRow = document.createElement('tr');
-                    newRow.dataset.flightId = flightId;
-                    newRow.className = 'flight-row';
-                    newRow.innerHTML = `
-                        <td class="flight-aircraft">
-                            <div class="cell-content">
-                                <img class="flight-image" src="${payload.new.image || ''}">
-                                <span>${payload.new.aircraft || ''}</span>
-                            </div>
-                        </td>
-                        <td class="flight-number">${payload.new.flightnumber || ''}</td>
-                        <td class="flight-departure">${payload.new.departure || ''}</td>
-                        <td class="flight-status">${payload.new.flightstatus || ''}</td>
-                        <td class="flight-destination">${payload.new.destination || ''}</td>
-                    `;
-                    document.getElementById('flight-rows').prepend(newRow);
-                }
-                
-                return RefreshWholePage();
-                
+            // 1. Find existing row by flight number
+            const existingRow = Array.from(document.querySelectorAll('.flight-number'))
+                .find(el => el.textContent.trim() === flightNumber)
+                ?.closest('tr');
+
+            // 2. Handle INSERT (new flight) - using CreateNewRow structure
+            if (payload.eventType === 'INSERT' && !existingRow) {
+                CreateNewRow({
+                    image: payload.new.image || '',
+                    aircraft: payload.new.aircraft || 'Unknown',
+                    flightNumber: payload.new.flightnumber || '',
+                    departure: payload.new.departure || '',
+                    flightStatus: payload.new.flightstatus || '',
+                    destination: payload.new.destination || ''
+                }, false); // isStatic = false for real-time updates
+                return;
             }
 
-            // 2. Handle UPDATE (status change)
-            if (payload.eventType === 'UPDATE') {
-                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
-                if (row) {
-                    row.querySelector('.flight-number').textContent = payload.new.flightnumber || '';
-                    row.querySelector('.flight-departure').textContent = payload.new.departure || '';
-                    row.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
-                    row.querySelector('.flight-destination').textContent = payload.new.destination || '';
-                    // Update other fields as needed...
+            // 3. Handle UPDATE - match CreateNewRow structure
+            if (payload.eventType === 'UPDATE' && existingRow) {
+                // Update aircraft cell
+                const aircraftCell = existingRow.querySelector('td:first-child');
+                const img = aircraftCell.querySelector('img');
+                if (img) {
+                    img.src = payload.new.image || '';
+                    img.onerror = function () { this.src = '/default-aircraft.png'; };
                 }
-                
-                return RefreshWholePage();
-                
+                aircraftCell.childNodes[1].textContent = ` ${payload.new.aircraft || ''}`;
+
+                // Update other cells
+                existingRow.querySelector('.flight-number').textContent = payload.new.flightnumber || '';
+                existingRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
+
+                // Status cell with blinking class
+                const statusCell = existingRow.querySelector('.flight-status');
+                statusCell.textContent = payload.new.flightstatus || '';
+
+                // Remove all blinking classes first
+                statusCell.className = 'flight-status';
+
+                // Add appropriate blinking class
+                const blinkingClass = getBlinkingClass(payload.new.flightstatus);
+                if (blinkingClass) {
+                    statusCell.classList.add(blinkingClass);
+                }
+
+                existingRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
+                return;
             }
 
-            // 3. Handle DELETE (remove row from DOM)
-            if (payload.eventType === 'DELETE') {
-                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
-                if (row) {
-                    row.remove();
-                    console.log(`Removed flight ${flightId} from display`);
-                }
-                
-                return RefreshWholePage();
-                
+            // 4. Handle DELETE
+            if (payload.eventType === 'DELETE' && existingRow) {
+                existingRow.remove();
             }
         })
         .subscribe();
