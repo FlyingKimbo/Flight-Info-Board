@@ -499,11 +499,63 @@ async function fetch_flight_static() {
     }
 }
 
+// 2. Realtime Cell Updates (Enhanced 5-field version)
+function setupStaticRealtimeUpdates() {
+    return supabase
+        .channel('flights_static_updates')
+        .on('postgres_changes', {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'flights_static'
+        }, (payload) => {
+            // Find matching row using all 5 identifiers
+            const row = findFlightRow(
+                payload.new.aircraft,
+                payload.new.flightnumber,
+                payload.new.departure,
+                payload.new.flightstatus,
+                payload.new.destination
+            );
+
+            if (row) {
+                // Update only changed cells (all fields now available)
+                if (payload.new.aircraft !== payload.old.aircraft) {
+                    row.querySelector('.flight-aircraft span').textContent = payload.new.aircraft;
+                }
+                if (payload.new.flightnumber !== payload.old.flightnumber) {
+                    row.querySelector('.flight-number').textContent = payload.new.flightnumber;
+                }
+                if (payload.new.departure !== payload.old.departure) {
+                    row.querySelector('.flight-departure').textContent = payload.new.departure;
+                }
+                if (payload.new.flightstatus !== payload.old.flightstatus) {
+                    row.querySelector('.flight-status').textContent = payload.new.flightstatus;
+                }
+                if (payload.new.destination !== payload.old.destination) {
+                    row.querySelector('.flight-destination').textContent = payload.new.destination;
+                }
+            }
+        })
+        .subscribe();
+}
+
+// Helper: Find DOM row using ALL 5 identifiers
+function findFlightRow(aircraft, flightnumber, departure, flightstatus, destination) {
+    const rows = document.querySelectorAll('.flight-row');
+    return Array.from(rows).find(row =>
+        row.querySelector('.flight-aircraft span').textContent.trim() === aircraft?.trim() &&
+        row.querySelector('.flight-number').textContent.trim() === flightnumber?.trim() &&
+        row.querySelector('.flight-departure').textContent.trim() === departure?.trim() &&
+        row.querySelector('.flight-status').textContent.trim() === flightstatus?.trim() &&
+        row.querySelector('.flight-destination').textContent.trim() === destination?.trim()
+    );
+}
 
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
+    setupStaticRealtimeUpdates(); // Cell-level updates
     // First load initial data
     supabase
         .from('flights_realtime')
