@@ -588,16 +588,26 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
 
-    // Update status cell if changed
+    // Update aircraft cell (cell[0])
     const aircraftCell = row.cells[0];
-    if (aircraftCell && aircraftCell.textContent !== flightData.aircraft) {
-        aircraftCell.textContent = flightData.aircraft;
+    if (aircraftCell) {
+        // Find the existing text span (or create if missing)
+        let textSpan = aircraftCell.querySelector('span');
+        if (!textSpan) {
+            textSpan = document.createElement('span');
+            aircraftCell.appendChild(textSpan);
+        }
 
-        // Remove any existing blinking classes
-        aircraftCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.aircraft);
-        if (blinkingClass) {
-            aircraftCell.classList.add(blinkingClass);
+        // Only update if text changed
+        if (textSpan.textContent !== flightData.aircraft) {
+            textSpan.textContent = ` ${flightData.aircraft}`; // Added space for padding
+
+            // Handle blinking - apply to the whole cell
+            aircraftCell.className = '';
+            const blinkingClass = getBlinkingClass(flightData.aircraft);
+            if (blinkingClass) {
+                aircraftCell.classList.add(blinkingClass);
+            }
         }
     }
 
