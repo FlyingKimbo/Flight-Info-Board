@@ -557,7 +557,7 @@ function Update_cells_values(staticData) {
         flightPayload.departure
     );
 
-    if (!existingRow && realtime_flightstatus !== "Deboarding Completed") {
+    if (!existingRow) {
         // Second attempt after short delay
         setTimeout(() => {
             existingRow = findMatchingFlightRow(
@@ -568,9 +568,10 @@ function Update_cells_values(staticData) {
 
             if (existingRow) {
                 updateFlightRow(existingRow, flightPayload);
-            } else {
+            } else if (realtime_flightstatus !== "Deboarding Completed") {
+
                 CreateNewRow(flightPayload, true);
-            }
+            } 
         }, 50);
     } else {
         updateFlightRow(existingRow, flightPayload);
