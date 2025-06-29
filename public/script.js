@@ -492,62 +492,42 @@ async function fetch_flight_static() {
 }
 
 // 2. Realtime Updates for All Fields
-function updateFlightStatus(flightData) {
-    console.log('Flight status update received:', flightData);
 
-    if (!flightData || !flightData.flightstatus) {
-        console.warn('No valid flight data received');
-        return;
-    }
-
-    try {
-        // Get all relevant DOM elements
-        const elements = {
-            aircraft: document.querySelector('.flight-aircraft span'),
-            flightNumber: document.querySelector('.flight-number'),
-            departure: document.querySelector('.flight-departure'),
-            status: document.querySelector('.flight-status'),
-            destination: document.querySelector('.flight-destination'),
-        };
-
-        // Validate elements exist
-        for (const [name, element] of Object.entries(elements)) {
-            if (!element) {
-                console.error(`Missing DOM element: ${name}`);
-                return;
-            }
-        }
-
-        // Update all fields in one atomic operation
-        elements.aircraft.textContent = flightData.aircraft || '';
-        elements.flightNumber.textContent = flightData.flightnumber || '';
-        elements.departure.textContent = flightData.departure || '';
-        elements.status.textContent = flightData.flightstatus || '';
-        elements.destination.textContent = flightData.destination || '';
-
-        // Update aircraft image if available
-        if (flightData.image) {
-            elements.image.src = flightData.image;
-        }
-
-        console.log('Successfully updated flight display');
-
-    } catch (error) {
-        console.error('Error updating flight status:', error);
-    }
-}
 
 // Modified realtime subscription
 function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
         .on('postgres_changes', {
-            event: '*',
+            event: 'UPDATE',
             schema: 'public',
-            table: 'flights_static'
+            table: 'flights_static',
+            // Optional: Only trigger when these columns change
+            filter: 'flightstatus=neq.null,destination=neq.null'
         }, (payload) => {
-            // Use the same direct update approach as ETE-bar
-            updateFlightStatus(payload.new);
+            // 1. Find the specific row (using flight number as unique ID)
+            const flightNumber = payload.new.flightnumber;
+            const flightRow = Array.from(document.querySelectorAll('.flight-number'))
+                .find(el => el.textContent.trim() === flightNumber)
+                ?.closest('tr');
+
+            if (!flightRow) {
+                console.warn(`Flight row not found for ${flightNumber}`);
+                return;
+            }
+
+            // 2. Update all cells in one atomic operation
+            flightRow.querySelector('.flight-aircraft span').textContent = payload.new.aircraft || '';
+            flightRow.querySelector('.flight-number').textContent = flightNumber;
+            flightRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
+            flightRow.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
+            flightRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
+
+            // 3. Update image if available
+            const img = flightRow.querySelector('.flight-image');
+            if (img && payload.new.image) img.src = payload.new.image;
+
+            console.log(`Updated flight ${flightNumber}`);
         })
         .subscribe();
 }
@@ -557,15 +537,7 @@ function setupStaticRealtimeUpdates() {
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
 
-    supabase
-        .from('flights_static')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-        .then(({ data }) => {
-            if (data) updateFlightUI(data);
-        });
+    
 
     setupStaticRealtimeUpdates(); // Cell-level updates
     // First load initial data
