@@ -495,6 +495,93 @@ async function fetch_flight_static() {
 
 
 // Modified realtime subscription
+
+function setupStaticRealtimeUpdates() {
+    return supabase
+        .channel('flight_board_updates')
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'flights_static'
+        }, (payload) => {
+            const flightId = payload.new?.id || payload.old?.id;
+
+            // 1. Handle INSERT (new flight)
+            if (payload.eventType === 'INSERT') {
+                if (!document.querySelector(`[data-flight-id="${flightId}"]`)) {
+                    const newRow = document.createElement('tr');
+                    newRow.dataset.flightId = flightId;
+                    newRow.className = 'flight-row';
+
+                    // Aircraft Cell (matches CreateNewRow)
+                    const aircraftCell = document.createElement('td');
+                    aircraftCell.className = 'flight-aircraft';
+                    aircraftCell.style.textAlign = 'center';
+
+                    const img = document.createElement('img');
+                    img.className = 'flight-image';
+                    img.src = payload.new.image || '';
+                    img.alt = 'Aircraft Image';
+                    img.style.width = '100px';
+                    img.style.height = 'auto';
+                    img.style.boxShadow = '4px 4px 10px rgba(0, 0, 0, 1)';
+                    img.onerror = function () { this.src = '/default-aircraft.png'; };
+
+                    aircraftCell.appendChild(img);
+                    aircraftCell.appendChild(document.createTextNode(` ${payload.new.aircraft || ''}`));
+
+                    // Other cells (same classes/structure as CreateNewRow)
+                    const cells = [
+                        { class: 'flight-number', text: payload.new.flightnumber },
+                        { class: 'flight-departure', text: payload.new.departure },
+                        { class: 'flight-status', text: payload.new.flightstatus },
+                        { class: 'flight-destination', text: payload.new.destination }
+                    ].map(cell => {
+                        const td = document.createElement('td');
+                        td.className = cell.class;
+                        td.textContent = cell.text || '';
+                        return td;
+                    });
+
+                    // Build row
+                    newRow.appendChild(aircraftCell);
+                    cells.forEach(cell => newRow.appendChild(cell));
+                    document.getElementById('flight-rows').prepend(newRow);
+                }
+                return;
+            }
+
+            // 2. Handle UPDATE (use same element selectors)
+            if (payload.eventType === 'UPDATE') {
+                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
+                if (row) {
+                    // Update only these elements (same as CreateNewRow)
+                    row.querySelector('.flight-aircraft span').textContent = ` ${payload.new.aircraft || ''}`;
+                    row.querySelector('.flight-number').textContent = payload.new.flightnumber || '';
+                    row.querySelector('.flight-departure').textContent = payload.new.departure || '';
+                    row.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
+                    row.querySelector('.flight-destination').textContent = payload.new.destination || '';
+
+                    // Update image (with same styling/fallback)
+                    const img = row.querySelector('.flight-image');
+                    if (img) {
+                        img.src = payload.new.image || '';
+                        img.style.width = '100px';
+                        img.style.height = 'auto';
+                    }
+                }
+                return;
+            }
+
+            // 3. Handle DELETE
+            if (payload.eventType === 'DELETE') {
+                const row = document.querySelector(`[data-flight-id="${flightId}"]`);
+                if (row) row.remove();
+            }
+        })
+        .subscribe();
+}
+/*
 function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
@@ -532,6 +619,7 @@ function setupStaticRealtimeUpdates() {
             if (payload.eventType === 'UPDATE') {
                 const row = document.querySelector(`[data-flight-id="${flightId}"]`);
                 if (row) {
+                    row.querySelector('.flight-number').textContent = payload.new.flightnumber || '';
                     row.querySelector('.flight-departure').textContent = payload.new.departure || '';
                     row.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
                     row.querySelector('.flight-destination').textContent = payload.new.destination || '';
@@ -552,7 +640,7 @@ function setupStaticRealtimeUpdates() {
         })
         .subscribe();
 }
-
+*/
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
