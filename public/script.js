@@ -506,7 +506,7 @@ const setupRealtimeUpdates = () => {
 
 
 const setupStaticRealtimeUpdates = () => {
-    return supabase_static
+    return supabase
         .channel('flight-updates-static')
         .on('postgres_changes', {
             event: '*',
