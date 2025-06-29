@@ -532,7 +532,9 @@ function setupStaticRealtimeUpdates() {
             if (payload.eventType === 'UPDATE') {
                 const row = document.querySelector(`[data-flight-id="${flightId}"]`);
                 if (row) {
+                    row.querySelector('.flight-departure').textContent = payload.new.departure || '';
                     row.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
+                    row.querySelector('.flight-destination').textContent = payload.new.destination || '';
                     // Update other fields as needed...
                 }
                 return;
