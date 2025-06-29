@@ -484,7 +484,7 @@ async function fetch_flight_static() {
 let realtime_aircraft = null;
 let realtime_flightnumber = null;
 let realtime_departure = null;
-let realtime_flight_status = null;
+let realtime_flightstatus = null;
 
 const setupRealtimeUpdates = () => {
     return supabase
@@ -502,7 +502,8 @@ const setupRealtimeUpdates = () => {
                 payload.current_flight?.split(' ') || [];
 
             // Explicitly set departure (fallback to null)
-            realtime_departure = payload.departure ?? null;
+            realtime_departure = payload.arr_display ?? null;
+            realtime_flightstatus = payload.flight_status ?? null;
         })
         .subscribe();
 };
@@ -556,7 +557,7 @@ function Update_cells_values(staticData) {
         flightPayload.departure
     );
 
-    if (!existingRow) {
+    if (!existingRow && realtime_flightstatus !== "Deboarding Completed") {
         // Second attempt after short delay
         setTimeout(() => {
             existingRow = findMatchingFlightRow(
