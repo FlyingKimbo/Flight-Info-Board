@@ -459,15 +459,7 @@ const setupRealtimeUpdates = () => {
             // This will call your function with realtime data
             Update_ETE_Dist2Arr_Bar(payload.new);
 
-            const newStatus = payload.new?.flight_status; // INSERT/UPDATE
-            const oldStatus = payload.old?.flight_status; // UPDATE/DELETE
-            const currentStatus = newStatus ?? oldStatus; // Fallback logic
-
-            // 3. Trigger ONLY if flight_status exists AND changed
-            if (currentStatus !== undefined && currentStatus !== lastFlightStatus) {
-                lastFlightStatus = currentStatus; // Update tracker
-                fetch_flight_static(); // Call exactly once per change
-            }
+            
 
         })
         .subscribe();
