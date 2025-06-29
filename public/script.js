@@ -446,7 +446,7 @@ const updateFlightUI = (data) => {
 
 // Set up realtime subscription
 
-let lastFlightStatus = null;
+
 
 const setupRealtimeUpdates = () => {
     return supabase
