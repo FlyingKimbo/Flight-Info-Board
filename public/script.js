@@ -520,16 +520,19 @@ const setupStaticRealtimeUpdates = () => {
             console.log('Realtime change detected:', payload);
 
             // Process the update (modified to handle inserts)
-            if (payload.eventType === 'INSERT' && realtime_flightstatus !== "Deboarding Completed" || realtime_flightstatus !== null) {
+            if (payload.eventType === 'INSERT' ) {
                 // For new rows, create immediately
-                CreateNewRow({
-                    aircraft: payload.new.aircraft,
-                    flightNumber: payload.new.flightnumber,
-                    departure: payload.new.departure,
-                    flightStatus: payload.new.flightstatus,
-                    destination: payload.new.destination,
-                    image: `/Image/Aircraft_Type/${payload.new.aircraft}.png`
-                }, true);
+
+                if (realtime_flightstatus !== "Deboarding Completed" || realtime_flightstatus !== null) {
+                    CreateNewRow({
+                        aircraft: payload.new.aircraft,
+                        flightNumber: payload.new.flightnumber,
+                        departure: payload.new.departure,
+                        flightStatus: payload.new.flightstatus,
+                        destination: payload.new.destination,
+                        image: `/Image/Aircraft_Type/${payload.new.aircraft}.png`
+                    }, true);
+                }
             } else {
                 // For updates, use our existing logic
                 Update_cells_values(payload.new);
