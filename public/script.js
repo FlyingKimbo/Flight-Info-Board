@@ -619,8 +619,9 @@ function setupStaticRealtimeUpdates() {
                     `;
                     document.getElementById('flight-rows').prepend(newRow);
                 }
-                RefreshWholePage();
+                
                 return;
+                RefreshWholePage();
             }
 
             // 2. Handle UPDATE (status change)
@@ -633,8 +634,9 @@ function setupStaticRealtimeUpdates() {
                     row.querySelector('.flight-destination').textContent = payload.new.destination || '';
                     // Update other fields as needed...
                 }
+                
+                return
                 RefreshWholePage();
-                return;
             }
 
             // 3. Handle DELETE (remove row from DOM)
@@ -644,8 +646,9 @@ function setupStaticRealtimeUpdates() {
                     row.remove();
                     console.log(`Removed flight ${flightId} from display`);
                 }
-                RefreshWholePage();
+                
                 return;
+                RefreshWholePage();
             }
         })
         .subscribe();
