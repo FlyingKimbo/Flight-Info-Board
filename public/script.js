@@ -656,9 +656,9 @@ function updateFlightRow(row, flightData) {
 
     // Check for non-blink statuses using the global variable
     const shouldRemoveBlinking =
-        realtime_flight_status === null ||
-        realtime_flight_status === "-" ||
-        realtime_flight_status === "Deboarding Completed";
+        realtime_flightstatus === null ||
+        realtime_flightstatus === "-" ||
+        realtime_flightstatus === "Deboarding Completed";
 
     // 1. Remove blinking first if needed
     if (shouldRemoveBlinking) {
