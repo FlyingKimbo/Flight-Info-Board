@@ -485,11 +485,11 @@ async function fetch_flight_static() {
     }
 }
 
-fetch_flight_static();
+
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-
+    fetch_flight_static();
     // First load initial data
     supabase
         .from('flights_realtime')
