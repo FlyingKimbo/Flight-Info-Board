@@ -653,6 +653,30 @@ function updateFlightRow(row, flightData) {
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
+
+    // Check for non-blink statuses using the global variable
+    const shouldRemoveBlinking =
+        realtime_flight_status === null ||
+        realtime_flight_status === "-" ||
+        realtime_flight_status === "Deboarding Completed";
+
+    // 1. Remove blinking first if needed
+    if (shouldRemoveBlinking) {
+        for (let i = 0; i < row.cells.length; i++) {
+            // Remove all blinking classes
+            row.cells[i].className = row.cells[i].className
+                .split(' ')
+                .filter(cls => !cls.startsWith('blink-'))
+                .join(' ');
+
+            // Reset aircraft image display
+            if (i === 0) {
+                const img = row.cells[i].querySelector('img');
+                if (img) img.style.display = '';
+            }
+        }
+    }
+
     // 1. Aircraft Cell (cell[0])
     const aircraftCell = row.cells[0];
     if (aircraftCell) {
@@ -695,8 +719,8 @@ function updateFlightRow(row, flightData) {
         destinationCell.textContent = flightData.destination;
     }
 
-    // Apply blinking to all cells if status changed
-    if (isStatusChanging && realtime_flightstatus !== null) {
+    // Apply blinking to all cells if status changed AND not in non-blink statuses
+    if (isStatusChanging && !shouldRemoveBlinking) {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             // Blink all cells in the row
@@ -707,15 +731,9 @@ function updateFlightRow(row, flightData) {
                 // Special case - keep existing image in aircraft cell
                 if (i === 0) {
                     const img = row.cells[i].querySelector('img');
-                    if (img) img.style.display = 'inline'; // Ensure image stays visible
+                    if (img) img.style.display = 'inline';
                 }
             }
-        } 
-    } else {
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        for (let i = 0; i < row.cells.length; i++) {
-            row.cells[i].className = '';
-            row.cells[i].classList.remove(blinkingClass);
         }
     }
  
