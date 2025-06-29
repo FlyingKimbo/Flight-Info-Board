@@ -599,12 +599,18 @@ function updateFlightRow(row, flightData) {
             statusCell.classList.add(blinkingClass);
         }
     }
-
+    // Update departure cell if changed
+    const departureCell = row.cells[2];
+    if (departureCell && departureCell.textContent !== flightData.departure) {
+        departureCell.textContent = flightData.departure;
+    }
     // Update destination cell if changed
     const destinationCell = row.cells[4];
     if (destinationCell && destinationCell.textContent !== flightData.destination) {
         destinationCell.textContent = flightData.destination;
     }
+
+
 
     // Visual feedback
     row.classList.add('row-updated');
