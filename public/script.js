@@ -459,27 +459,36 @@ const setupRealtimeUpdates = () => {
         .subscribe();
 };
 
-// Set up realtime subscription
-const fetch_flight_static = () => {
-    return supabase
-        .channel('flight-updates-static')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'flights_static'
-        }, (payload) => {
-            updateFlightTable(payload.new);
-        })
-        .subscribe();
-};
+async function fetch_flight_static() {
+    try {
+        // Corrected: the destructured property should be 'data' not 'staticData'
+        const { data, error } = await supabase
+            .from('flights_static')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10)  // Changed to get multiple records (more typical for a table)
+        // Removed .single() since we want multiple rows
 
-//fetch_flight_static();
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            updateFlightTable(data);
+            return data;
+        } else {
+            console.log('No data found');
+            return null;
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        return null;
+    }
+}
+
+fetch_flight_static();
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-
-
-    
 
     // First load initial data
     supabase
