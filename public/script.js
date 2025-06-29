@@ -589,28 +589,41 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 function updateFlightRow(row, flightData) {
 
     // Update status cell if changed
-    const statusCell = row.cells[0];
-    if (statusCell && statusCell.textContent !== flightData.aircraft) {
-        statusCell.textContent = flightData.aircraft;
+    const aircraftCell = row.cells[0];
+    if (aircraftCell && aircraftCell.textContent !== flightData.aircraft) {
+        aircraftCell.textContent = flightData.aircraft;
 
         // Remove any existing blinking classes
-        statusCell.className = '';
+        aircraftCell.className = '';
         const blinkingClass = getBlinkingClass(flightData.aircraft);
         if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
+            aircraftCell.classList.add(blinkingClass);
         }
     }
 
     // Update status cell if changed
-    const statusCell = row.cells[1];
-    if (statusCell && statusCell.textContent !== flightData.flightNumber) {
-        statusCell.textContent = flightData.flightNumber;
+    const flightNumberCell = row.cells[1];
+    if (flightNumberCell && flightNumberCell.textContent !== flightData.flightNumber) {
+        flightNumberCell.textContent = flightData.flightNumber;
 
         // Remove any existing blinking classes
-        statusCell.className = '';
+        flightNumberCell.className = '';
         const blinkingClass = getBlinkingClass(flightData.flightNumber);
         if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
+            flightNumberCell.classList.add(blinkingClass);
+        }
+    }
+
+    // Update departure cell if changed
+    const departureCell = row.cells[2];
+    if (departureCell && departureCell.textContent !== flightData.departure) {
+        departureCell.textContent = flightData.departure;
+
+        // Remove any existing blinking classes
+        departureCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.departure);
+        if (blinkingClass) {
+            departureCell.classList.add(blinkingClass);
         }
     }
 
@@ -626,28 +639,17 @@ function updateFlightRow(row, flightData) {
             statusCell.classList.add(blinkingClass);
         }
     }
-    // Update departure cell if changed
-    const departureCell = row.cells[2];
-    if (departureCell && departureCell.textContent !== flightData.departure) {
-        departureCell.textContent = flightData.departure;
-
-        // Remove any existing blinking classes
-        statusCell.className = '';
-        const blinkingClass = getBlinkingClass(flightData.departure);
-        if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
-        }
-    }
+    
     // Update destination cell if changed
     const destinationCell = row.cells[4];
     if (destinationCell && destinationCell.textContent !== flightData.destination) {
         destinationCell.textContent = flightData.destination;
 
         // Remove any existing blinking classes
-        statusCell.className = '';
+        destinationCell.className = '';
         const blinkingClass = getBlinkingClass(flightData.destination);
         if (blinkingClass) {
-            statusCell.classList.add(blinkingClass);
+            destinationCell.classList.add(blinkingClass);
         }
     }
 
