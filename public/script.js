@@ -559,7 +559,7 @@ function Update_cells_values(staticData) {
 
     if (existingRow) {
         updateFlightRow(existingRow, flightPayload);
-    } else if (realtime_flightstatus !== "Deboarding Completed" || realtime_flightstatus !== "" ) {
+    } else if (realtime_flightstatus !== "Deboarding Completed" || realtime_flightstatus !== null ) {
         // Add slight delay to allow DOM to settle
         setTimeout(() => {
             CreateNewRow(flightPayload, true);
