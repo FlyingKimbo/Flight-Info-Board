@@ -590,17 +590,7 @@ function updateFlightRow(row, flightData) {
 
     // Update aircraft cell (cell[0])
     const aircraftCell = row.cells[0];
-    if (aircraftCell) {
-        // Find the existing text span (or create if missing)
-        let textSpan = aircraftCell.querySelector('span');
-        if (!textSpan) {
-            textSpan = document.createElement('span');
-            aircraftCell.appendChild(textSpan);
-        }
-
-        // Only update if text changed
-        if (textSpan.textContent !== flightData.aircraft) {
-            textSpan.textContent = ` ${flightData.aircraft}`; // Added space for padding
+    
 
             // Handle blinking - apply to the whole cell
             aircraftCell.className = '';
@@ -608,8 +598,7 @@ function updateFlightRow(row, flightData) {
             if (blinkingClass) {
                 aircraftCell.classList.add(blinkingClass);
             }
-        }
-    }
+            
 
     // Update status cell if changed
     const flightNumberCell = row.cells[1];
