@@ -76,9 +76,7 @@ function CreateNewRow(flightData, isStatic = false) {
         newRow.classList.add('static-flight');
     }
 
-    // Add at the end of your CreateNewRow function, right before return:
-    newRow.classList.add('flash-new-row');
-    setTimeout(() => newRow.classList.remove('flash-new-row'), 2000);
+    
 
 
     tbody.appendChild(newRow);
