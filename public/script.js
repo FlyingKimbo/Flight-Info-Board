@@ -90,6 +90,64 @@ function CreateNewRow(flightData, isStatic = false) {
 
 }
 
+function sortTable(columnIndex, dir = 'asc') {
+    var table = document.getElementById("flightTable");
+    var rows = table.rows;
+    var switching = true;
+    var shouldSwitch, i;
+    var switchcount = 0;
+
+    // Clear existing sort indicators
+    var headers = table.getElementsByTagName("th");
+    for (i = 0; i < headers.length; i++) {
+        headers[i].classList.remove("sort-asc", "sort-desc");
+    }
+
+    while (switching) {
+        switching = false;
+        var rowsArray = Array.prototype.slice.call(rows, 2); // Skip the header row and the green bar row
+
+        for (i = 0; i < rowsArray.length - 1; i++) {
+            shouldSwitch = false;
+            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
+            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
+
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+
+    // Add sort indicator to the sorted column header
+    if (dir == "asc") {
+        headers[columnIndex].classList.add("sort-asc");
+    } else {
+        headers[columnIndex].classList.add("sort-desc");
+    }
+
+    // Save sort state
+    localStorage.setItem('sortColumnIndex', columnIndex);
+    localStorage.setItem('sortDirection', dir);
+}
 
 async function updateFlightTable(staticData) {
     const tbody = document.getElementById("flight-rows");
@@ -638,7 +696,7 @@ function updateFlightRow(row, flightData) {
     }
 
     // Apply blinking to all cells if status changed
-    if (isStatusChanging) {
+    if (isStatusChanging && lightData.flightStatus !== "-") {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             // Blink all cells in the row
@@ -653,6 +711,12 @@ function updateFlightRow(row, flightData) {
                 }
             }
         }
+    } else {
+        for (let i = 0; i < row.cells.length; i++) {
+            row.cells[i].className = '';
+            row.cells[i].classList.remove(blinkingClass);
+        }
+
     }
     // Visual feedback
     row.classList.add('row-updated');
