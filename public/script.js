@@ -590,15 +590,12 @@ function updateFlightRow(row, flightData) {
 
     // Update aircraft cell (cell[0])
     const aircraftCell = row.cells[0];
-    
+    // Handle blinking - apply to the whole cell
+    aircraftCell.className = '';
+    const blinkingClass = getBlinkingClass(flightData.aircraft);
+    aircraftCell.classList.add(blinkingClass);
 
-            // Handle blinking - apply to the whole cell
-            aircraftCell.className = '';
-            const blinkingClass = getBlinkingClass(flightData.aircraft);
-            if (blinkingClass) {
-                aircraftCell.classList.add(blinkingClass);
-            }
-            
+                     
 
     // Update status cell if changed
     const flightNumberCell = row.cells[1];
