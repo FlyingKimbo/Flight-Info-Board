@@ -517,37 +517,72 @@ const setupStaticRealtimeUpdates = () => {
 function Update_cells_values(staticData) {
     if (!staticData) return;
 
-    // Get all flight rows
+    // First check if we already have a matching row
+    let matchingRowFound = false;
     const rows = document.querySelectorAll('#flight-rows tr');
 
     for (const row of rows) {
-        // Extract values from the current row
         const rowAircraft = row.querySelector('.flight-aircraft span').textContent.trim();
         const rowFlightNumber = row.querySelector('.flight-number').textContent.trim();
         const rowDeparture = row.querySelector('.flight-departure').textContent.trim();
 
-        // Check if this row matches our realtime data
         if (rowAircraft === realtime_aircraft &&
             rowFlightNumber === realtime_flightnumber &&
             rowDeparture === realtime_departure) {
 
-            // Get the status cell in this specific row
+            matchingRowFound = true;
             const statusCell = row.querySelector('.flight-status');
+            const destinationCell = row.querySelector('.flight-destination');
 
-            // Only update if status changed
+            // Update status if changed
             if (statusCell && realtime_flight_status !== staticData.flightstatus) {
                 statusCell.textContent = staticData.flightstatus || '-';
-                console.log(`Updated status for ${realtime_flightnumber}: ${staticData.flightstatus}`);
-
-                // Update our status reference
                 realtime_flight_status = staticData.flightstatus;
-
-                // Optional: Add visual feedback
-                statusCell.classList.add('status-updated');
-                setTimeout(() => statusCell.classList.remove('status-updated'), 1000);
             }
-            break; // Exit after finding the match
+
+            // Update destination if changed
+            if (destinationCell && destinationCell.textContent.trim() !== staticData.destination) {
+                destinationCell.textContent = staticData.destination || '-';
+            }
+
+            if (statusCell || destinationCell) {
+                console.log(`Updated flight ${realtime_flightnumber}:`, {
+                    status: staticData.flightstatus,
+                    destination: staticData.destination
+                });
+
+                // Visual feedback
+                const updatedCells = [];
+                if (statusCell) updatedCells.push(statusCell);
+                if (destinationCell) updatedCells.push(destinationCell);
+
+                updatedCells.forEach(cell => {
+                    cell.classList.add('cell-updated');
+                    setTimeout(() => cell.classList.remove('cell-updated'), 1000);
+                });
+            }
+            break;
         }
+    }
+
+    // If no matching row found, create a new one with all data
+    if (!matchingRowFound) {
+        console.log("Creating new row for flight:", {
+            aircraft: realtime_aircraft,
+            flightnumber: realtime_flightnumber,
+            departure: realtime_departure,
+            status: staticData.flightstatus,
+            destination: staticData.destination
+        });
+
+        CreateNewRow({
+            aircraft: realtime_aircraft,
+            flightnumber: realtime_flightnumber,
+            departure: realtime_departure,
+            status: staticData.flightstatus || '-',
+            destination: staticData.destination || '-'
+            // Include any other needed properties
+        });
     }
 }
 
