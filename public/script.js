@@ -540,7 +540,6 @@ const setupStaticRealtimeUpdates = () => {
 function Update_cells_values(staticData) {
     if (!staticData) return;
 
-    // Convert data names to match your CreateNewRow expectations
     const flightPayload = {
         aircraft: staticData.aircraft || realtime_aircraft || 'Unknown',
         flightNumber: staticData.flightnumber || realtime_flightnumber,
@@ -550,34 +549,46 @@ function Update_cells_values(staticData) {
         image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.png`
     };
 
-    const existingRow = findMatchingFlightRow(
+    // Enhanced row finding with multiple attempts
+    let existingRow = findMatchingFlightRow(
         flightPayload.aircraft,
         flightPayload.flightNumber,
         flightPayload.departure
     );
 
-    if (existingRow) {
-        updateFlightRow(existingRow, flightPayload);
-    } else {
-        // Add slight delay to allow DOM to settle
+    if (!existingRow) {
+        // Second attempt after short delay
         setTimeout(() => {
-            CreateNewRow(flightPayload, true);
-            console.log('Created new row for:', flightPayload.flightNumber);
-        }, 100);
+            existingRow = findMatchingFlightRow(
+                flightPayload.aircraft,
+                flightPayload.flightNumber,
+                flightPayload.departure
+            );
+
+            if (existingRow) {
+                updateFlightRow(existingRow, flightPayload);
+            } else {
+                CreateNewRow(flightPayload, true);
+            }
+        }, 50);
+    } else {
+        updateFlightRow(existingRow, flightPayload);
     }
 }
 
-// Helper function to find matching row
+// Enhanced row finding function
 function findMatchingFlightRow(aircraft, flightNumber, departure) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
-    for (const row of rows) {
-        const rowAircraft = row.cells[0]?.textContent.trim().replace(/^[^\w]*/, '');
-        const rowFlightNumber = row.cells[1]?.textContent.trim();
-        const rowDeparture = row.cells[2]?.textContent.trim();
+    const normalize = (str) => str?.toString().trim().toLowerCase().replace(/\s+/g, ' ') || '';
 
-        if (rowAircraft === aircraft &&
-            rowFlightNumber === flightNumber &&
-            rowDeparture === departure) {
+    for (const row of rows) {
+        const rowAircraft = normalize(row.cells[0]?.textContent);
+        const rowFlightNumber = normalize(row.cells[1]?.textContent);
+        const rowDeparture = normalize(row.cells[2]?.textContent);
+
+        if (normalize(aircraft) === rowAircraft &&
+            normalize(flightNumber) === rowFlightNumber &&
+            (!departure || normalize(departure) === rowDeparture)) {
             return row;
         }
     }
