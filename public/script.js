@@ -499,35 +499,39 @@ function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
         .on('postgres_changes', {
-            event: 'UPDATE',
+            event: '*', // Listen for INSERTS and UPDATES
             schema: 'public',
-            table: 'flights_static',
-            // Optional: Only trigger when these columns change
-            filter: 'flightstatus=neq.null,destination=neq.null'
-        }, (payload) => {
-            // 1. Find the specific row (using flight number as unique ID)
+            table: 'flights_static'
+        }, async (payload) => {
+            // For both INSERT and UPDATE operations
             const flightNumber = payload.new.flightnumber;
-            const flightRow = Array.from(document.querySelectorAll('.flight-number'))
+
+            // 1. Try to find existing row
+            let flightRow = Array.from(document.querySelectorAll('.flight-number'))
                 .find(el => el.textContent.trim() === flightNumber)
                 ?.closest('tr');
 
-            if (!flightRow) {
-                console.warn(`Flight row not found for ${flightNumber}`);
+            // 2. If new flight and row doesn't exist, create it
+            if (payload.eventType === 'INSERT' && !flightRow) {
+                await fetch_flight_static(); // Refresh entire table
                 return;
             }
 
-            // 2. Update all cells in one atomic operation
-            flightRow.querySelector('.flight-aircraft span').textContent = payload.new.aircraft || '';
-            flightRow.querySelector('.flight-number').textContent = flightNumber;
-            flightRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
-            flightRow.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
-            flightRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
+            // 3. If existing flight, update the row
+            if (flightRow) {
+                // Update all cells
+                flightRow.querySelector('.flight-aircraft span').textContent = payload.new.aircraft || '';
+                flightRow.querySelector('.flight-number').textContent = flightNumber;
+                flightRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
+                flightRow.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
+                flightRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
 
-            // 3. Update image if available
-            const img = flightRow.querySelector('.flight-image');
-            if (img && payload.new.image) img.src = payload.new.image;
+                // Update image
+                const img = flightRow.querySelector('.flight-image');
+                if (img && payload.new.image) img.src = payload.new.image;
 
-            console.log(`Updated flight ${flightNumber}`);
+                console.log(`${payload.eventType === 'INSERT' ? 'Added' : 'Updated'} flight ${flightNumber}`);
+            }
         })
         .subscribe();
 }
