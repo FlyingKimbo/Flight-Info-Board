@@ -496,7 +496,7 @@ function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flights_static_updates')
         .on('postgres_changes', {
-            event: 'UPDATE',
+            event: '*',
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
