@@ -487,7 +487,7 @@ const setupRealtimeUpdates = () => {
             table: 'flights_realtime'
         }, (payload) => {
             // Safely update ETE (if payload.new exists)
-             updateEteDist2ArrBar(payload.new);
+            if (payload.new) updateEteDist2ArrBar(payload.new);
 
             // Safely split flight number (fallback to [null, null])
             [realtime_aircraft, realtime_flightnumber] =
@@ -555,7 +555,7 @@ function Update_cells_values(staticData) {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
-
+    /*
     // First load initial data
     supabase_realtime
         .from('flights_realtime')
@@ -568,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     // Then set up realtime updates
-    setupRealtimeUpdates();
+    
     
     supabase_static
         .from('flights_static')
@@ -579,6 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(({ data }) => {
             if (data) updateFlightUI(data);
         });
-        
+        */
+    setupRealtimeUpdates();
     setupStaticRealtimeUpdates(); // Cell-level updates
 });
