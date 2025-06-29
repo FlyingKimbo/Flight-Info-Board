@@ -524,7 +524,7 @@ const setupStaticRealtimeUpdates = () => {
                     departure: payload.new.departure,
                     flightStatus: payload.new.flightstatus,
                     destination: payload.new.destination,
-                    image: `/Image/Aircraft_Type/${payload.new.aircraft}.jpg`
+                    image: `/Image/Aircraft_Type/${payload.new.aircraft}.png`
                 }, true);
             } else {
                 // For updates, use our existing logic
@@ -544,7 +544,7 @@ function Update_cells_values(staticData) {
         departure: staticData.departure || realtime_departure || '--/--/----',
         flightStatus: staticData.flightstatus || '-',
         destination: staticData.destination || '-',
-        image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.jpg`
+        image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.png`
     };
 
     const existingRow = findMatchingFlightRow(
