@@ -622,6 +622,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     setupStaticRealtimeUpdates(); // Cell-level updates
+    // Then set up realtime updates
+    setupRealtimeUpdates();
     // First load initial data
     supabase
         .from('flights_realtime')
@@ -633,6 +635,5 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data) updateFlightUI(data);
         });
 
-    // Then set up realtime updates
-    //setupRealtimeUpdates();
+    
 });
