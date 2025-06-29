@@ -650,12 +650,33 @@ function updateFlightRow(row, flightData) {
     if (statusCell && statusCell.textContent !== flightData.flightStatus) {
         statusCell.textContent = flightData.flightStatus;
 
+        flightNumberCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.flightNumber);
+        if (blinkingClass) {
+            flightNumberCell.classList.add(blinkingClass);
+        }
+
+        // Remove any existing blinking classes
+        departureCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.departure);
+        if (blinkingClass) {
+            departureCell.classList.add(blinkingClass);
+        }
+
         // Remove any existing blinking classes
         statusCell.className = '';
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             statusCell.classList.add(blinkingClass);
         }
+
+        // Remove any existing blinking classes
+        destinationCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.destination);
+        if (blinkingClass) {
+            destinationCell.classList.add(blinkingClass);
+        }
+
     }
     
     // Update destination cell if changed
