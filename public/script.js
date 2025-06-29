@@ -455,6 +455,12 @@ const setupRealtimeUpdates = () => {
         }, (payload) => {
             // This will call your function with realtime data
             Update_ETE_Dist2Arr_Bar(payload.new);
+
+            if (payload.eventType === 'UPDATE' &&
+                payload.old?.flight_status !== payload.new?.flight_status) {
+                fetch_flight_static();
+            }
+
         })
         .subscribe();
 };
