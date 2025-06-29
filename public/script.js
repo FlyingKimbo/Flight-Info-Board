@@ -591,7 +591,7 @@ function setupStaticRealtimeUpdates() {
         .on('postgres_changes', {
             event: '*',
             schema: 'public',
-            table: 'flights_realtime'
+            table: 'flights_static'
         }, (payload) => {
             console.log('Realtime payload:', payload);
 
@@ -623,16 +623,16 @@ function setupStaticRealtimeUpdates() {
                 const statusCell = existingRow.querySelector('.flight-status');
                 if (statusCell) {
                     // Method 1: Direct text update
-                    statusCell.textContent = payload.new.flight_status || '';
+                    statusCell.textContent = payload.new.flightstatus || '';
 
                     // Method 2: Clone/replace element (bulletproof)
                     const newCell = statusCell.cloneNode(true);
-                    newCell.textContent = payload.new.flight_status || '';
+                    newCell.textContent = payload.new.flightstatus || '';
                     statusCell.replaceWith(newCell);
 
                     // Method 3: Nuclear option (if above fails)
                     setTimeout(() => {
-                        newCell.textContent = payload.new.flight_status || '';
+                        newCell.textContent = payload.new.flightstatus || '';
                         void newCell.offsetWidth; // Force reflow
                     }, 50);
                 }
@@ -646,7 +646,7 @@ function setupStaticRealtimeUpdates() {
         })
         .subscribe();
 }
-fetch_flight_static();
+//fetch_flight_static();
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     //fetch_flight_static();
