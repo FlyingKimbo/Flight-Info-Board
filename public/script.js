@@ -550,6 +550,10 @@ function setupStaticRealtimeUpdates() {
                 newRow.appendChild(aircraftCell);
                 cells.forEach(cell => newRow.appendChild(cell));
                 tbody.prepend(newRow);
+                // Refresh after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
                 return;
             }
 
@@ -568,6 +572,10 @@ function setupStaticRealtimeUpdates() {
                     img.style.width = '100px';
                     img.style.height = 'auto';
                 }
+                // Refresh after delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
                 return;
             }
 
@@ -577,7 +585,7 @@ function setupStaticRealtimeUpdates() {
             }
         })
         .subscribe();
-    fetch_flight_static();
+    
 }
 
 function offsetupStaticRealtimeUpdates() {
