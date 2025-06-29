@@ -587,6 +587,33 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
+
+    // Update status cell if changed
+    const statusCell = row.cells[0];
+    if (statusCell && statusCell.textContent !== flightData.aircraft) {
+        statusCell.textContent = flightData.aircraft;
+
+        // Remove any existing blinking classes
+        statusCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.aircraft);
+        if (blinkingClass) {
+            statusCell.classList.add(blinkingClass);
+        }
+    }
+
+    // Update status cell if changed
+    const statusCell = row.cells[1];
+    if (statusCell && statusCell.textContent !== flightData.flightNumber) {
+        statusCell.textContent = flightData.flightNumber;
+
+        // Remove any existing blinking classes
+        statusCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.flightNumber);
+        if (blinkingClass) {
+            statusCell.classList.add(blinkingClass);
+        }
+    }
+
     // Update status cell if changed
     const statusCell = row.cells[3];
     if (statusCell && statusCell.textContent !== flightData.flightStatus) {
@@ -603,11 +630,25 @@ function updateFlightRow(row, flightData) {
     const departureCell = row.cells[2];
     if (departureCell && departureCell.textContent !== flightData.departure) {
         departureCell.textContent = flightData.departure;
+
+        // Remove any existing blinking classes
+        statusCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.departure);
+        if (blinkingClass) {
+            statusCell.classList.add(blinkingClass);
+        }
     }
     // Update destination cell if changed
     const destinationCell = row.cells[4];
     if (destinationCell && destinationCell.textContent !== flightData.destination) {
         destinationCell.textContent = flightData.destination;
+
+        // Remove any existing blinking classes
+        statusCell.className = '';
+        const blinkingClass = getBlinkingClass(flightData.destination);
+        if (blinkingClass) {
+            statusCell.classList.add(blinkingClass);
+        }
     }
 
 
