@@ -479,7 +479,7 @@ let realtime_departure = null;
 let realtime_flight_status = null;
 
 const setupRealtimeUpdates = () => {
-    return supabase_realtime
+    return supabase
         .channel('flight-updates')
         .on('postgres_changes', {
             event: '*',
@@ -501,7 +501,7 @@ const setupRealtimeUpdates = () => {
 
 
 const setupStaticRealtimeUpdates = () => {
-    return supabase_static
+    return supabase
         .channel('flight-updates-static')
         .on('postgres_changes', {
             event: '*',
