@@ -524,7 +524,7 @@ const setupStaticRealtimeUpdates = () => {
                     departure: payload.new.departure,
                     flightStatus: payload.new.flightstatus,
                     destination: payload.new.destination,
-                    image: `/aircraft-images/${payload.new.aircraft}.jpg`
+                    image: `/Image/Aircraft_Type/${payload.new.aircraft}.jpg`
                 }, true);
             } else {
                 // For updates, use our existing logic
