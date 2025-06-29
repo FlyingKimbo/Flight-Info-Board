@@ -557,9 +557,10 @@ function Update_cells_values(staticData) {
 
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
 
-    if (existingRow && !(realtime_flightstatus !== "Deboarding Completed" && realtime_flightstatus !== null)) {
+    if (existingRow) {
         updateFlightRow(existingRow, flightPayload);
     } else {
+        flightPayload.departure = flightPayload.destination;
         // Add slight delay to allow DOM to settle
         setTimeout(() => {
             CreateNewRow(flightPayload, true);
