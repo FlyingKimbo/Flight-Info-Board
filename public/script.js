@@ -503,7 +503,7 @@ function updateFlightStatus(flightData) {
     try {
         // Get all relevant DOM elements
         const elements = {
-            aircraftName: document.querySelector('.flight-aircraft span'),
+            aircraft: document.querySelector('.flight-aircraft span'),
             flightNumber: document.querySelector('.flight-number'),
             departure: document.querySelector('.flight-departure'),
             status: document.querySelector('.flight-status'),
@@ -519,7 +519,7 @@ function updateFlightStatus(flightData) {
         }
 
         // Update all fields in one atomic operation
-        elements.aircraftName.textContent = flightData.aircraft || '';
+        elements.aircraft.textContent = flightData.aircraft || '';
         elements.flightNumber.textContent = flightData.flightnumber || '';
         elements.departure.textContent = flightData.departure || '';
         elements.status.textContent = flightData.flightstatus || '';
