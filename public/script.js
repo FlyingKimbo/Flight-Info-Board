@@ -593,14 +593,13 @@ function setupStaticRealtimeUpdates() {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            // DEBUG: Log the payload to verify we're receiving updates
-            console.log('Realtime payload:', payload);
+            console.log('Realtime update received:', payload);
 
-            // For all update types, use the record ID for reliable matching
+            // Use record ID for reliable matching
             const recordId = payload.new?.id || payload.old?.id;
             const existingRow = document.querySelector(`tr[data-flight-id="${recordId}"]`);
 
-            // Handle INSERT (unchanged from your working version)
+            // INSERT handler (unchanged)
             if (payload.eventType === 'INSERT' && !existingRow) {
                 const row = CreateNewRow({
                     image: payload.new.image || '',
@@ -614,48 +613,51 @@ function setupStaticRealtimeUpdates() {
                 return;
             }
 
-            // FOCUS ON STATUS UPDATES - This is the critical fix
-            if (payload.eventType === 'UPDATE' && existingRow) {
-                // Only proceed if flightstatus actually changed
-                if ('flightstatus' in payload.new) {
-                    const statusCell = existingRow.querySelector('.flight-status');
+            // FOCUSED STATUS UPDATE HANDLER
+            if (payload.eventType === 'UPDATE' && existingRow && payload.new.flightstatus) {
+                const statusCell = existingRow.querySelector('.flight-status');
+                if (!statusCell) return;
 
-                    // DEBUG: Visual feedback to confirm we're updating the right cell
-                    statusCell.style.border = '2px solid red';
-                    setTimeout(() => statusCell.style.border = '', 1000);
+                // 1. Force stop any existing animations
+                statusCell.style.animation = 'none';
+                void statusCell.offsetWidth; // Trigger reflow
 
-                    // 1. Update the text content FIRST
-                    statusCell.textContent = payload.new.flightstatus;
+                // 2. Update text content
+                statusCell.textContent = payload.new.flightstatus;
 
-                    // 2. Remove ALL possible blinking classes
-                    statusCell.classList.remove(
-                        'blinking-boarding',
-                        'blinking-departed',
-                        'blinking-enroute',
-                        'blinking-delayed',
-                        'blinking-landed',
-                        'blinking-deboarding'
-                    );
+                // 3. Remove all existing blinking classes
+                const blinkClasses = [
+                    'blinking-boarding',
+                    'blinking-departed',
+                    'blinking-enroute',
+                    'blinking-delayed',
+                    'blinking-landed',
+                    'blinking-deboarding'
+                ];
+                statusCell.classList.remove(...blinkClasses);
 
-                    // 3. Add the correct blinking class if needed
-                    const blinkClass = getBlinkingClass(payload.new.flightstatus);
-                    if (blinkClass) {
-                        statusCell.classList.add(blinkClass);
-                    }
-
-                    // 4. Force browser repaint (ensures visual update)
-                    void statusCell.offsetWidth;
+                // 4. Add new blinking class and restart animation
+                const blinkClass = getBlinkingClass(payload.new.flightstatus);
+                if (blinkClass) {
+                    statusCell.classList.add(blinkClass);
+                    // Force animation restart
+                    setTimeout(() => {
+                        statusCell.style.animation = '';
+                    }, 10);
                 }
+
+                // DEBUG: Visual feedback (remove in production)
+                statusCell.style.boxShadow = '0 0 0 2px red';
+                setTimeout(() => statusCell.style.boxShadow = '', 1000);
             }
 
-            // Handle DELETE (unchanged)
+            // DELETE handler (unchanged)
             if (payload.eventType === 'DELETE' && existingRow) {
                 existingRow.remove();
             }
         })
         .subscribe();
 }
-
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
