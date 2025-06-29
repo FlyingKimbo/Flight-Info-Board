@@ -484,7 +484,7 @@ async function fetch_flight_static() {
 let realtime_aircraft = null;
 let realtime_flightnumber = null;
 let realtime_departure = null;
-
+let realtime_flightstatus = null;
 
 const setupRealtimeUpdates = () => {
     return supabase
@@ -503,6 +503,7 @@ const setupRealtimeUpdates = () => {
 
             // Explicitly set departure (fallback to null)
             realtime_departure = payload.arr_display ?? null;
+            realtime_flightstatus = payload.flight_status ?? null;
             
         })
         .subscribe();
@@ -546,18 +547,17 @@ function Update_cells_values(staticData) {
 
     // Convert data names to match your CreateNewRow expectations
     const flightPayload = {
-        aircraft: staticData.aircraft || realtime_aircraft || 'Unknown',
-        flightNumber: staticData.flightnumber || realtime_flightnumber,
-        departure: staticData.departure || realtime_departure || '--/--/----',
-        flightStatus: staticData.flightstatus || '-',
-        destination: staticData.destination || '-',
-        image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.png`
+        aircraft: staticData.aircraft,
+        flightNumber: staticData.flightnumber,
+        departure: staticData.departure, 
+        flightStatus: staticData.flightstatus,
+        destination: staticData.destination,
+        image: `/Image/Aircraft_Type/${staticData.aircraft || 'default'}.png`
     };
 
-    const existingRow = findMatchingFlightRow(
-        flightPayload.aircraft, flightPayload.flightNumber);
+    const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
 
-    if (existingRow) {
+    if (existingRow && !(realtime_flightstatus !== "Deboarding Completed" && realtime_flightstatus !== null)) {
         updateFlightRow(existingRow, flightPayload);
     } else {
         // Add slight delay to allow DOM to settle
