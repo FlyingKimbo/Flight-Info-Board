@@ -577,11 +577,10 @@ function findMatchingFlightRow(aircraft, flightNumber) {
     for (const row of rows) {
         const rowAircraft = row.cells[0]?.textContent.trim().replace(/^[^\w]*/, '');
         const rowFlightNumber = row.cells[1]?.textContent.trim();
-        //const rowDeparture = row.cells[2]?.textContent.trim();
+        
 
         if (rowAircraft === aircraft &&
-            rowFlightNumber === flightNumber &&
-            //rowDeparture === departure) {
+            rowFlightNumber === flightNumber) {
             return row;
         }
     }
