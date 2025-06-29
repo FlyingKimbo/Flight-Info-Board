@@ -544,7 +544,7 @@ function Update_cells_values(staticData) {
         departure: staticData.departure || realtime_departure || '--/--/----',
         flightStatus: staticData.flightstatus || '-',
         destination: staticData.destination || '-',
-        image: `/aircraft-images/${staticData.aircraft || realtime_aircraft || 'default'}.jpg`
+        image: `/Image/Aircraft_Type/${staticData.aircraft || realtime_aircraft || 'default'}.jpg`
     };
 
     const existingRow = findMatchingFlightRow(
