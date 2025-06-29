@@ -484,7 +484,7 @@ async function fetch_flight_static() {
 let realtime_aircraft = null;
 let realtime_flightnumber = null;
 let realtime_departure = null;
-let realtime_flightstatus = null;
+
 
 const setupRealtimeUpdates = () => {
     return supabase
@@ -503,7 +503,7 @@ const setupRealtimeUpdates = () => {
 
             // Explicitly set departure (fallback to null)
             realtime_departure = payload.arr_display ?? null;
-            realtime_flightstatus = payload.flight_status ?? null;
+            
         })
         .subscribe();
 };
@@ -523,7 +523,7 @@ const setupStaticRealtimeUpdates = () => {
             if (payload.eventType === 'INSERT' ) {
                 // For new rows, create immediately
 
-                if (realtime_flightstatus !== "Deboarding Completed" || realtime_flightstatus !== null) {
+                
                     CreateNewRow({
                         aircraft: payload.new.aircraft,
                         flightNumber: payload.new.flightnumber,
@@ -532,7 +532,7 @@ const setupStaticRealtimeUpdates = () => {
                         destination: payload.new.destination,
                         image: `/Image/Aircraft_Type/${payload.new.aircraft}.png`
                     }, true);
-                }
+                
             } else {
                 // For updates, use our existing logic
                 Update_cells_values(payload.new);
@@ -557,7 +557,7 @@ function Update_cells_values(staticData) {
     const existingRow = findMatchingFlightRow(
         flightPayload.aircraft,
         flightPayload.flightNumber,
-        flightPayload.departure
+        //flightPayload.departure
     );
 
     if (existingRow) {
