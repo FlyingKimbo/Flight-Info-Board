@@ -555,10 +555,7 @@ function Update_cells_values(staticData) {
     };
 
     const existingRow = findMatchingFlightRow(
-        flightPayload.aircraft,
-        flightPayload.flightNumber,
-        //flightPayload.departure
-    );
+        flightPayload.aircraft, flightPayload.flightNumber);
 
     if (existingRow) {
         updateFlightRow(existingRow, flightPayload);
