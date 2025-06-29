@@ -76,6 +76,11 @@ function CreateNewRow(flightData, isStatic = false) {
 
     tbody.appendChild(newRow);
     return newRow; // Return the row for potential chaining
+
+    // Add at the end of your CreateNewRow function, right before return:
+    newRow.classList.add('flash-new-row');
+    setTimeout(() => newRow.classList.remove('flash-new-row'), 2000);
+
 }
 
 
@@ -501,37 +506,47 @@ const setupRealtimeUpdates = () => {
 
 
 const setupStaticRealtimeUpdates = () => {
-    return supabase
+    return supabase_static
         .channel('flight-updates-static')
         .on('postgres_changes', {
             event: '*',
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            // This will call your function with realtime data
-            Update_cells_values(payload.new);
+            console.log('Realtime change detected:', payload);
+
+            // Process the update (modified to handle inserts)
+            if (payload.eventType === 'INSERT') {
+                // For new rows, create immediately
+                CreateNewRow({
+                    aircraft: payload.new.aircraft,
+                    flightNumber: payload.new.flightnumber,
+                    departure: payload.new.departure,
+                    flightStatus: payload.new.flightstatus,
+                    destination: payload.new.destination,
+                    image: `/aircraft-images/${payload.new.aircraft}.jpg`
+                }, true);
+            } else {
+                // For updates, use our existing logic
+                Update_cells_values(payload.new);
+            }
         })
         .subscribe();
 };
 
 function Update_cells_values(staticData) {
-    // Validate input data
-    if (!staticData || !staticData.flightNumber) {
-        console.warn('Invalid static data received', staticData);
-        return;
-    }
+    if (!staticData) return;
 
-    // Prepare the data structure matching CreateNewRow's expectations
+    // Convert data names to match your CreateNewRow expectations
     const flightPayload = {
-        aircraft: realtime_aircraft || 'Unknown',
-        flightNumber: realtime_flightnumber || staticData.flightNumber,
-        departure: realtime_departure || staticData.departure || '--/--/----',
-        flightStatus: staticData.flightStatus || '-',
+        aircraft: staticData.aircraft || realtime_aircraft || 'Unknown',
+        flightNumber: staticData.flightnumber || realtime_flightnumber,
+        departure: staticData.departure || realtime_departure || '--/--/----',
+        flightStatus: staticData.flightstatus || '-',
         destination: staticData.destination || '-',
-        image: staticData.image || '/default-aircraft.png'  // Added image fallback
+        image: `/aircraft-images/${staticData.aircraft || realtime_aircraft || 'default'}.jpg`
     };
 
-    // Try to find existing row
     const existingRow = findMatchingFlightRow(
         flightPayload.aircraft,
         flightPayload.flightNumber,
@@ -539,11 +554,13 @@ function Update_cells_values(staticData) {
     );
 
     if (existingRow) {
-        // Update existing row cells
         updateFlightRow(existingRow, flightPayload);
     } else {
-        // Create new row if no match found
-        CreateNewRow(flightPayload, true); // isStatic=true for static flights
+        // Add slight delay to allow DOM to settle
+        setTimeout(() => {
+            CreateNewRow(flightPayload, true);
+            console.log('Created new row for:', flightPayload.flightNumber);
+        }, 100);
     }
 }
 

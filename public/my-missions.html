@@ -137,6 +137,21 @@
             }
         }
 
+        .flash-new-row {
+            animation: flashRow 2s ease-out;
+        }
+
+        @keyframes flashRow {
+            0% {
+                background-color: rgba(0, 255, 0, 0.3);
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+
         .flipped {
             transform: scaleX(-1);
         }
