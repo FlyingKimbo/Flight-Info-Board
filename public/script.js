@@ -555,7 +555,7 @@ function Update_cells_values(staticData) {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
-    /*
+    
     // First load initial data
     supabase_realtime
         .from('flights_realtime')
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(({ data }) => {
             if (data) updateFlightUI(data);
         });
-        */
+        
     setupRealtimeUpdates();
     setupStaticRealtimeUpdates(); // Cell-level updates
 });
