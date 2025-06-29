@@ -577,6 +577,7 @@ function setupStaticRealtimeUpdates() {
             }
         })
         .subscribe();
+    fetch_flight_static();
 }
 
 function offsetupStaticRealtimeUpdates() {
