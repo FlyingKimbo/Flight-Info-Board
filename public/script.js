@@ -6,25 +6,331 @@ const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+// 1. CONSTANTS
+const POLLING_INTERVAL = 5000; // 1 second
 
+//Global Variable
 let GreenbarPercentage = 100
+let hasRefreshed = false; // Track if we've refreshed
+let pollingInterval;
+let isPollingActive = false;
+// ###################################################################### Sub to supabase realtime data
 
 
-// DOM elements from your HTML
-const elements = {
-    aircraftImage: document.querySelector('.flight-image'),
-    aircraftName: document.querySelector('.flight-aircraft span'),
-    flightNumber: document.querySelector('.flight-number'),
-    departure: document.querySelector('.flight-departure'),
-    status: document.querySelector('.flight-status'),
-    destination: document.querySelector('.flight-destination'),
-    eteBar: document.getElementById('ete-bar'),
-    eteBarText: document.getElementById('ete-bar-text'),
-    aircraftIcon: document.getElementById('aircraft-image'),
-    jetstreamImage: document.getElementById('jetstream-image'),
-    cloudImage: document.getElementById('cloud-image'),
-    precipImage: document.getElementById('precip-image')
+// SUPABASE INTEGRATION - Fetching from flights_static  $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+async function offupdateFlightTable(staticData) {
+    const tbody = document.getElementById("flight-rows");
+
+    // Clear existing rows
+    tbody.innerHTML = '';
+
+    // Check if staticData is an array (forEach won't work on single object)
+    const flightsArray = Array.isArray(staticData) ? staticData : [staticData];
+
+    flightsArray.forEach(flight => {
+        // Ensure field names match exactly with your Supabase columns
+        CreateNewRow({
+            image: flight.image || '',              // Add fallback empty string
+            aircraft: flight.aircraft || 'Unknown',
+            flightNumber: flight.flightnumber || '',
+            departure: flight.departure || '',
+            flightStatus: flight.flightstatus || '',
+            destination: flight.destination || ''
+        });
+    });
+}
+
+async function fetch_flight_static() {
+    try {
+        // Corrected: the destructured property should be 'data' not 'staticData'
+        const { data, error } = await supabase
+            .from('flights_static')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10)  // Changed to get multiple records (more typical for a table)
+        // Removed .single() since we want multiple rows
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            updateFlightTable(data);
+            return data;
+        } else {
+            console.log('No data found');
+            return null;
+        }
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        return null;
+    }
+}
+
+
+
+
+
+
+
+// Cloud opacity manager (now with better state control)
+let cloudOpacityState = {
+    interval: null,
+    currentOpacity: 0.3,
+    direction: 1,
+    baseOpacity: 0.3,
+    peakOpacity: 1.0,
+    increment: 0.01,
+    speed: 30 // ms
 };
+
+
+
+
+
+
+function updatePositions() {
+    let Xoffset = 0;
+    let XoffsetFix = 250;
+
+
+    if (GreenbarPercentage >= 50) {
+        Xoffset = 1;
+    }
+    const eteBar = document.getElementById('ete-bar');
+    const aircraftImage = document.getElementById('aircraft-image');
+    const eteText = document.getElementById('ete-bar-text'); // ETE text element
+    const jetstream = document.getElementById('jetstream-image');
+    const cloud = document.getElementById('cloud-image');
+    const precipImage = document.getElementById('precip-image'); // New precipitation image element
+
+    const barWidth = eteBar.getBoundingClientRect().width;
+    const containerRight = eteBar.parentElement.getBoundingClientRect().right;
+    const barRight = containerRight - barWidth;
+    const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105 + (Xoffset * XoffsetFix);
+    const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+    const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+    const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
+    const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
+
+    aircraftImage.style.left = `${imagePosition}px`;
+    eteText.style.left = `${textPosition}px`;
+    jetstream.style.left = `${jetstream_imagePosition}px`;
+    cloud.style.left = `${cloud_imagePosition}px`;
+    precipImage.style.left = `${precip_imagePosition}px`;
+
+    //aircraftImage.style.opacity = 1; // Make sure the image is visible %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+}
+
+function sortTable(columnIndex, dir = 'asc') {
+    var table = document.getElementById("flightTable");
+    var rows = table.rows;
+    var switching = true;
+    var shouldSwitch, i;
+    var switchcount = 0;
+
+    // Clear existing sort indicators
+    var headers = table.getElementsByTagName("th");
+    for (i = 0; i < headers.length; i++) {
+        headers[i].classList.remove("sort-asc", "sort-desc");
+    }
+
+    while (switching) {
+        switching = false;
+        var rowsArray = Array.prototype.slice.call(rows, 2); // Skip the header row and the green bar row
+
+        for (i = 0; i < rowsArray.length - 1; i++) {
+            shouldSwitch = false;
+            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
+            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
+
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+
+        if (shouldSwitch) {
+            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+
+    // Add sort indicator to the sorted column header
+    if (dir == "asc") {
+        headers[columnIndex].classList.add("sort-asc");
+    } else {
+        headers[columnIndex].classList.add("sort-desc");
+    }
+
+    // Save sort state
+    localStorage.setItem('sortColumnIndex', columnIndex);
+    localStorage.setItem('sortDirection', dir);
+}
+
+function initialize() {
+    // Supabase change - Replaced fetchFlightStateJSON() with Supabase version
+    updateFlightTable(); // Now handles both realtime and static flights from Supabase
+
+
+
+    // Set image paths
+    const baseUrl = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://flight-info-board.vercel.app';
+    document.querySelectorAll('img[data-src]').forEach(img => {
+        img.src = baseUrl + img.getAttribute('data-src');
+        console.log('Setting image src:', img.src); // Debugging line
+    });
+
+    // Restore sort state
+    var sortColumnIndex = localStorage.getItem('sortColumnIndex');
+    var sortDirection = localStorage.getItem('sortDirection');
+    if (sortColumnIndex !== null && sortDirection !== null) {
+        sortTable(parseInt(sortColumnIndex), sortDirection);
+    } else {
+        // Default sort by Flight Status on first load
+        sortTable(3, 'asc');
+    }
+
+    // Supabase change - Replaced fetchFlightData()
+    checkFlightStatus(); // Now uses Supabase instead of API endpoint
+
+
+
+    // Fetch initial ETE value
+    //fetchInitialETE();
+
+    // Automatically sort by Flight Status every 20000 milliseconds
+    setInterval(function () {
+        sortTable(3, localStorage.getItem('sortDirection') || 'asc'); // Sort by Flight Status (column index 3)
+    }, 20000);
+
+
+
+
+}
+
+function setBlinking(currentFlight, flightStatus) {
+    const rows = document.getElementById("flightTable").rows;
+    for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
+        const cells = rows[i].cells;
+        const aircraft = cells[0].textContent.trim();
+        const flightNumber = cells[1].textContent.trim();
+        if (`${aircraft} ${flightNumber}` === currentFlight) {
+            removeBlinkingClasses(cells); // Remove any existing blinking classes
+            const blinkingClass = getBlinkingClass(flightStatus);
+            cells[0].classList.add(blinkingClass);
+            cells[1].classList.add(blinkingClass);
+            cells[2].classList.add(blinkingClass);
+            cells[3].classList.add(blinkingClass);
+            cells[4].classList.add(blinkingClass);
+        } else {
+            removeBlinkingClasses(cells);
+        }
+    }
+}
+
+function removeBlinking(currentFlight) {
+    const rows = document.getElementById("flightTable").rows;
+    for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
+        const cells = rows[i].cells;
+        const aircraft = cells[0].textContent.trim();
+        const flightNumber = cells[1].textContent.trim();
+        if (`${aircraft} ${flightNumber}` === currentFlight) {
+            removeBlinkingClasses(cells);
+        }
+    }
+}
+
+function removeBlinkingClasses(cells) {
+    const classes = [
+        'blinking-boarding', 'blinking-departed', 'blinking-enroute',
+        'blinking-delayed', 'blinking-landed', 'blinking-deboarding'
+    ];
+    cells[0].classList.remove(...classes);
+    cells[1].classList.remove(...classes);
+    cells[2].classList.remove(...classes);
+    cells[3].classList.remove(...classes);
+    cells[4].classList.remove(...classes);
+}
+
+function getBlinkingClass(flightStatus) {
+    switch (flightStatus) {
+        case 'Boarding':
+            return 'blinking-boarding';
+        case 'Departed':
+            return 'blinking-departed';
+        case 'Enroute':
+            return 'blinking-enroute';
+        case 'Delayed':
+            return 'blinking-delayed';
+        case 'Landed':
+            return 'blinking-landed';
+        case 'Deboarding':
+            return 'blinking-deboarding';
+        default:
+            return '';
+    }
+}
+
+function updateFlightCells(currentFlight, flightStatus, destination, departure = '') {
+    const rows = document.getElementById("flightTable").rows;
+    let matchFound = false;
+    for (let i = 2; i < rows.length; i++) { // Skip header and green bar rows
+        const cells = rows[i].cells;
+        const aircraft = cells[0].textContent.trim();
+        const flightNumber = cells[1].textContent.trim();
+        if (`${aircraft} ${flightNumber}` === currentFlight) {
+            cells[3].textContent = flightStatus;
+            cells[4].textContent = destination;
+            if (departure) {
+                cells[2].textContent = departure;
+            }
+            matchFound = true;
+            break;
+        }
+    }
+    return matchFound;
+}
+
+//       ##################### ETE and Distance bar update ################################################
+function resetETEVisuals() {
+    const elements = [
+        'ete-bar', 'aircraft-image', 'ete-bar-text',
+        'jetstream-image', 'cloud-image', 'precip-image'
+    ].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.opacity = 0;
+            if (id === 'ete-bar') {
+                el.style.width = '0%';  // ← Explicitly reset width
+            }
+        }
+    });
+
+}
+
+
+
+
+//       ##################### END      OF      ETE and Distance bar update ################################################
+
+////  #################### INITIAISE flightStore the realtime sub to supabase $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
 
 function CreateNewRow(flightData, isStatic = false) {
     const table = document.getElementById("flightTable");
@@ -79,112 +385,54 @@ function CreateNewRow(flightData, isStatic = false) {
 }
 
 
-async function updateFlightTable(staticData) {
-    const tbody = document.getElementById("flight-rows");
 
-    // Clear existing rows
-    tbody.innerHTML = '';
-
-    // Check if staticData is an array (forEach won't work on single object)
-    const flightsArray = Array.isArray(staticData) ? staticData : [staticData];
-
-    flightsArray.forEach(flight => {
-        // Ensure field names match exactly with your Supabase columns
-        CreateNewRow({
-            image: flight.image || '',              // Add fallback empty string
-            aircraft: flight.aircraft || 'Unknown',
-            flightNumber: flight.flightnumber || '',
-            departure: flight.departure || '',
-            flightStatus: flight.flightstatus || '',
-            destination: flight.destination || ''
-        });
-    });
-}
-
-
-async function offfetch_flight_static() {
+// 4. Status Checking System -----------------------------------------------
+async function checkFlightStatus() {
     try {
-        // Corrected: the destructured property should be 'data' not 'staticData'
-        const { data, error } = await supabase
-            .from('flights_static')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(10)  // Changed to get multiple records (more typical for a table)
-        // Removed .single() since we want multiple rows
+        // 1. Fetch realtime data
+        const { data: realtimeData } = await supabase
+            .from('flights_realtime')
+            .select('current_flight, flight_status, arr_display')
+            .maybeSingle();
 
-        if (error) throw error;
+        // 2. Define valid statuses
+        const validStatuses = new Set([
+            "Boarding",
+            "Departed",
+            "Delayed",
+            "Enroute",
+            "Landed",
+            "Deboarding Completed"
+        ]);
 
-        if (data && data.length > 0) {
-            updateFlightTable(data);
-            return data;
-        } else {
-            console.log('No data found');
-            return null;
+        // 3. Check if we should update
+        const shouldUpdate =
+            realtimeData?.flight_status &&
+            !["-", ""].includes(realtimeData.flight_status) &&
+            validStatuses.has(realtimeData.flight_status);
+
+        if (shouldUpdate) {
+            const fullFlightId = `${realtimeData.current_flight} ${realtimeData.current_flight.split(' ').pop()}`;
+
+            updateFlightCells(
+                fullFlightId,
+                realtimeData.flight_status,
+                realtimeData.arr_display
+            );
+            return;
         }
 
+        // 4. No update needed - log reason
+        console.log(
+            !realtimeData ? "No realtime data" :
+                !realtimeData.flight_status ? "Empty flight status" :
+                    ["-", ""].includes(realtimeData.flight_status) ? "Status is '-' or blank" :
+                        `Status '${realtimeData.flight_status}' not in allowed values`
+        );
+
     } catch (error) {
-        console.error('Error:', error.message);
-        return null;
+        console.error('Flight status check error:', error);
     }
-}
-
-
-// Helper function to extract aircraft type and flight number
-const parseFlightData = (currentFlight) => {
-    if (!currentFlight) return { aircraftType: '', flightNumber: '' };
-
-    const parts = currentFlight.split(' ');
-    return {
-        aircraftType: parts[0] || '',
-        flightNumber: parts.slice(1).join(' ') || '' // Handles cases with spaces in flight number
-    };
-};
-
-// Update aircraft images
-const updateAircraftImages = (data) => {
-    const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
-
-    // Update main aircraft image
-    if (aircraftType) {
-        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-        elements.aircraftImage.alt = aircraftType;
-    }
-
-    // Update small aircraft icon in progress bar
-    elements.aircraftIcon.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-    elements.aircraftIcon.alt = aircraftType;
-};
-function updatePositions() {
-    let Xoffset = 0;
-    let XoffsetFix = 250;
-
-
-    if (GreenbarPercentage >= 50) {
-        Xoffset = 1;
-    }
-    const eteBar = document.getElementById('ete-bar');
-    const aircraftImage = document.getElementById('aircraft-image');
-    const eteText = document.getElementById('ete-bar-text'); // ETE text element
-    const jetstream = document.getElementById('jetstream-image');
-    const cloud = document.getElementById('cloud-image');
-    const precipImage = document.getElementById('precip-image'); // New precipitation image element
-
-    const barWidth = eteBar.getBoundingClientRect().width;
-    const containerRight = eteBar.parentElement.getBoundingClientRect().right;
-    const barRight = containerRight - barWidth;
-    const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105 + (Xoffset * XoffsetFix);
-    const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
-    const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
-    const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
-    const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
-
-    aircraftImage.style.left = `${imagePosition}px`;
-    eteText.style.left = `${textPosition}px`;
-    jetstream.style.left = `${jetstream_imagePosition}px`;
-    cloud.style.left = `${cloud_imagePosition}px`;
-    precipImage.style.left = `${precip_imagePosition}px`;
-
-    //aircraftImage.style.opacity = 1; // Make sure the image is visible %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
 
 const AnimationManager = {
@@ -267,6 +515,9 @@ const AnimationManager = {
     }
 };
 
+
+/*
+// Modified to accept direct flight data
 function Update_ETE_Dist2Arr_Bar(flightData) {
     console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
 
@@ -363,212 +614,245 @@ function Update_ETE_Dist2Arr_Bar(flightData) {
 
     updatePositions();
 
-  
+    // Return cleanup function
+    return () => {
+
+
+        console.log('ETE updates stopped');
+    };
 }
 
 
 
-// Handle status cell updates with animation
-const updateStatusCell = (status) => {
-    const statusCell = elements.status;
-
-    // Remove all blinking classes
-    statusCell.className = 'flight-status';
-
-    if (status) {
-        statusCell.textContent = status;
-        const statusClass = getStatusClass(status);
-        if (statusClass) statusCell.classList.add(statusClass);
-    }
-};
-
-
-
-// Map status to CSS class
-const getBlinkingClass = (status) => {
-    const statusMap = {
-        'Boarding': 'blinking-boarding',
-        'Departed': 'blinking-departed',
-        'Enroute': 'blinking-enroute',
-        'Delayed': 'blinking-delayed',
-        'Landed': 'blinking-landed',
-        'Deboarding': 'blinking-deboarding'
-    };
-    return statusMap[status] || '';
-};
-
-// Update weather effects
-const updateWeatherEffects = (data) => {
-    // Cloud visibility
-    elements.cloudImage.style.display = data.airplane_in_cloud ? 'block' : 'none';
-
-    // Precipitation effects
-    if (data.ambient_precipstate) {
-        elements.precipImage.style.display = 'block';
-        elements.precipImage.src = getPrecipImage(data.ambient_precipstate);
-    } else {
-        elements.precipImage.style.display = 'none';
-    }
-};
-
-// Helper function for precipitation images
-const getPrecipImage = (precipState) => {
-    const precipImages = {
-        'Rain': '/Image/Weather/rain.gif',
-        'Snow': '/Image/Weather/snow.gif',
-        'Thunderstorm': '/Image/Weather/lightning.gif'
-    };
-    return precipImages[precipState] || '';
-};
-
-// Update all UI elements
-const updateFlightUI = (data) => {
-    //const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
-
-    // Update basic flight info
-    //elements.aircraftName.textContent = parseFlightData(data.current_flight).aircraftType || 'N/A';
-   // elements.flightNumber.textContent = flightNumber || 'N/A';
-    //elements.departure.textContent = data.departure_location || 'N/A';
-    //elements.destination.textContent = data.destination || 'N/A';
-
-    // Update aircraft images
-    //updateAircraftImages(data);
-
-    // Update status with animation class
-    //updateStatusCell(data.flight_status);
-
-    // Update progress bar
-    //updateProgressBar(data);
-
-    // Update weather effects
-    //updateWeatherEffects(data);
-};
-
-// Set up realtime subscription
-
-
-
-const setupRealtimeUpdates = () => {
-    return supabase
-        .channel('flight-updates')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'flights_realtime'
-        }, (payload) => {
-            // This will call your function with realtime data
-            Update_ETE_Dist2Arr_Bar(payload.new);
-
-            
-
-        })
-        .subscribe();
-};
-
-async function fetch_flight_static() {
+async function getFlightDataWithPolling() {
+ 
     try {
-        // Corrected: the destructured property should be 'data' not 'staticData'
         const { data, error } = await supabase
-            .from('flights_static')
+            .from('flights_realtime')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(10)  // Changed to get multiple records (more typical for a table)
-        // Removed .single() since we want multiple rows
+            .limit(1)
+            .single();
 
         if (error) throw error;
 
-        if (data && data.length > 0) {
-            updateFlightTable(data);
-            return data;
+        
+        if (data.dist_to_destination > 0) {
+            handleGotDataRefresh();
+            sessionStorage.removeItem('didRefresh2');
+
+            Update_ETE_Dist2Arr_Bar({
+                ete_srgs: data.ete_srgs,
+                dist_to_destination: data.dist_to_destination,
+                start_distance: data.start_distance,
+                current_flight: data.current_flight,
+                flight_state: data.flight_state,
+                airplane_in_cloud: data.airplane_in_cloud,
+                ambient_precipstate: data.ambient_precipstate,
+                
+            });
+            
+
         } else {
-            console.log('No data found');
-            return null;
+            handleNoDataRefresh();
+            sessionStorage.removeItem('didRefresh1');
         }
 
+        
+
     } catch (error) {
-        console.error('Error:', error.message);
-        return null;
+        console.error('Polling error:', error);
+        handleNoDataRefresh();
+    }
+    
+}
+
+
+
+
+
+function handleFlightDataError(error) {
+    console.error('Flight data error:', error);
+    if (!hasRefreshed) {
+        hasRefreshed = true;
+        setTimeout(() => window.location.reload(), 2000);
     }
 }
 
-// 2. Realtime Updates for All Fields
+// 1. Add this helper function (put it with your other utility functions)
 
 
-// Modified realtime subscription
+function handleGotDataRefresh() {
+    // Skip if already refreshed during this session
+    if (sessionStorage.getItem('didRefresh1')) return;
 
+    // Mark refresh as done
+    sessionStorage.setItem('didRefresh1', 'true');
 
-
-function setupStaticRealtimeUpdates() {
-    return supabase
-        .channel('flight_board_updates')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'flights_static'
-        }, (payload) => {
-            console.log('Realtime payload:', payload);
-
-            // 1. Use record ID for 100% reliable matching
-            const recordId = payload.new?.id || payload.old?.id;
-            const existingRow = document.querySelector(`tr[data-flight-id="${recordId}"]`);
-
-            // 2. INSERT handler
-            if (payload.eventType === 'INSERT' && !existingRow) {
-                const row = CreateNewRow({
-                    image: payload.new.image || '',
-                    aircraft: payload.new.aircraft || 'Unknown',
-                    flightNumber: payload.new.flightnumber || '',
-                    departure: payload.new.departure || '',
-                    flightStatus: payload.new.flightstatus || '',
-                    destination: payload.new.destination || ''
-                }, false);
-                row.dataset.flightId = recordId;
-                return;
-            }
-
-            // 3. UPDATE handler (FOCUS HERE)
-            if (payload.eventType === 'UPDATE' && existingRow) {
-                // DEBUG: Visual confirmation
-                existingRow.style.outline = '2px solid red';
-                setTimeout(() => existingRow.style.outline = '', 1000);
-
-                // FORCE STATUS UPDATE - Three independent methods
-                const statusCell = existingRow.querySelector('.flight-status');
-                if (statusCell) {
-                    // Method 1: Direct text update
-                    statusCell.textContent = payload.new.flightstatus || '';
-
-                    // Method 2: Clone/replace element (bulletproof)
-                    const newCell = statusCell.cloneNode(true);
-                    newCell.textContent = payload.new.flightstatus || '';
-                    statusCell.replaceWith(newCell);
-
-                    // Method 3: Nuclear option (if above fails)
-                    setTimeout(() => {
-                        newCell.textContent = payload.new.flightstatus || '';
-                        void newCell.offsetWidth; // Force reflow
-                    }, 50);
-                }
-                return;
-            }
-
-            // 4. DELETE handler
-            if (payload.eventType === 'DELETE' && existingRow) {
-                existingRow.remove();
-            }
-        })
-        .subscribe();
+    // Refresh after delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
 }
+
+
+
+function handleNoDataRefresh() {
+    // Skip if already refreshed during this session
+    if (sessionStorage.getItem('didRefresh2')) return;
+
+    // Mark refresh as done
+    sessionStorage.setItem('didRefresh2', 'true');
+
+    // Refresh after delay
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+}
+*/
+// Load static data
+fetch_flight_static();
+
+// 5. INITIALIZATION & CLEANUP
+async function initializeApp(event) {
+    // Skip if already polling
+    if (isPollingActive) return;
+
+    try {
+        // Initial data fetch
+        await getFlightDataWithPolling();
+
+        // Start polling
+        pollingInterval = setInterval(getFlightDataWithPolling, POLLING_INTERVAL);
+        isPollingActive = true;
+
+
+
+        console.log('Polling started');
+    } catch (error) {
+        handleFlightDataError(error);
+    }
+}
+
+function stopPolling() {
+    if (!isPollingActive) return;
+
+    clearInterval(pollingInterval);
+    isPollingActive = false;
+    console.log('Polling stopped');
+}
+
+// 6. EVENT LISTENERS
+window.addEventListener('pageshow', initializeApp);
+window.addEventListener('pagehide', stopPolling);
+
+// 7. INITIAL LOAD
+// For pages loaded from cache (back/forward navigation)
+if (document.readyState === 'complete') {
+    initializeApp({ persisted: true });
+}
+// Normal page load
+else {
+    window.addEventListener('load', initializeApp);
+}
+
+// Initialize Supabase Realtime Subscription
+const setupRealtimeUpdates = () => {
+    const subscription = supabase
+        .channel('flight-updates')
+        .on(
+            'postgres_changes',
+            {
+                event: '*',
+                schema: 'public',
+                table: 'flights_realtime'
+            },
+            (payload) => {
+                updateFlightTable(payload.new);
+            }
+        )
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(subscription);
+    };
+};
+
+// Update specific table elements
+const updateFlightTable = (flightData) => {
+    // Update main status bar
+    const eteBar = document.getElementById('ete-bar');
+    const eteBarText = document.getElementById('ete-bar-text');
+
+    if (flightData.dist_to_destination) {
+        const percentage = calculatePercentage(flightData);
+        eteBar.style.width = `${percentage}%`;
+        eteBarText.textContent = `${flightData.ete_srgs} | ${flightData.dist_to_destination}nm`;
+    }
+
+    // Update aircraft image
+    const aircraftImage = document.querySelector('.flight-image');
+    if (flightData.aircraft_image_url) {
+        aircraftImage.src = flightData.aircraft_image_url;
+        aircraftImage.alt = flightData.current_flight;
+    }
+
+    // Update status cells
+    const statusCell = document.querySelector('.flight-status');
+    if (statusCell.textContent !== flightData.flight_status) {
+        statusCell.textContent = flightData.flight_status;
+        statusCell.classList.add('updated');
+        setTimeout(() => statusCell.classList.remove('updated'), 1000);
+    }
+
+    // Update other cells
+    document.querySelector('.flight-aircraft span').textContent = flightData.current_flight || 'N/A';
+    document.querySelector('.flight-number').textContent = flightData.flight_number || 'N/A';
+    document.querySelector('.flight-departure').textContent = flightData.departure_location || 'N/A';
+    document.querySelector('.flight-destination').textContent = flightData.destination || 'N/A';
+
+    // Update weather images
+    updateWeatherImages(flightData);
+};
+
+const updateWeatherImages = (flightData) => {
+    const cloudImage = document.getElementById('cloud-image');
+    const precipImage = document.getElementById('precip-image');
+
+    // Cloud visibility
+    if (flightData.airplane_in_cloud) {
+        cloudImage.style.display = 'block';
+        cloudImage.src = 'path/to/cloud-image.png';
+    } else {
+        cloudImage.style.display = 'none';
+    }
+
+    // Precipitation
+    if (flightData.ambient_precipstate) {
+        precipImage.style.display = 'block';
+        precipImage.src = getPrecipImage(flightData.ambient_precipstate);
+    } else {
+        precipImage.style.display = 'none';
+    }
+};
+
+// Helper function to calculate ETE percentage
+const calculatePercentage = (flightData) => {
+    return Math.min(
+        100,
+        Math.max(
+            0,
+            ((flightData.start_distance - flightData.dist_to_destination) /
+                flightData.start_distance) * 100
+        )
+    );
+};
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    fetch_flight_static();
+    setupRealtimeUpdates();
 
-  
-    
-
-    
-    // First load initial data
+    // Initial data fetch
     supabase
         .from('flights_realtime')
         .select('*')
@@ -576,10 +860,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .limit(1)
         .single()
         .then(({ data }) => {
-            if (data) updateFlightUI(data);
+            if (data) updateFlightTable(data);
         });
-
-    // Then set up realtime updates
-    setupRealtimeUpdates();
-    setupStaticRealtimeUpdates(); // Cell-level updates
 });
