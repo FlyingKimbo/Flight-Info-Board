@@ -696,7 +696,7 @@ function updateFlightRow(row, flightData) {
     }
 
     // Apply blinking to all cells if status changed
-    if (isStatusChanging && flightData.flightStatus !== "-") {
+    if (isStatusChanging && realtime_flightstatus !== null) {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             // Blink all cells in the row
@@ -711,14 +711,8 @@ function updateFlightRow(row, flightData) {
                 }
             }
         }
-    } else {
-        const blinkingClass = getBlinkingClass(flightData.flightStatus);
-        for (let i = 0; i < row.cells.length; i++) {
-            row.cells[i].className = '';
-            row.cells[i].classList.remove(blinkingClass);
-        }
-
-    }
+    } else return (!blinkingClass);
+ 
     // Visual feedback
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
