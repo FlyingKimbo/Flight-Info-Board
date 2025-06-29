@@ -495,7 +495,7 @@ async function fetch_flight_static() {
 
 
 // Modified realtime subscription
-function offsetupStaticRealtimeUpdates() {
+function setupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
@@ -585,7 +585,7 @@ function offsetupStaticRealtimeUpdates() {
 }
 
 
-function setupStaticRealtimeUpdates() {
+function offsetupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
