@@ -67,7 +67,11 @@ function CreateNewRow(flightData, isStatic = false) {
     if (!isStatic) {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
+            aircraftCell.classList.add(blinkingClass);
+            flightNumberCell.classList.add(blinkingClass); // Only blink status cell
+            departureCell.classList.add(blinkingClass); // Only blink status cell
             flightStatusCell.classList.add(blinkingClass); // Only blink status cell
+            destinationCell.classList.add(blinkingClass); // Only blink status cell
         }
     }
 
