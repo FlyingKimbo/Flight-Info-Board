@@ -607,7 +607,7 @@ function setupStaticRealtimeUpdates() {
                     destination = ''
                 } = payload.new;
 
-                // Find existing row by data-id (more reliable than flight number)
+                // Find existing row by data-id
                 const existingRow = document.querySelector(`tr[data-flight-id="${id}"]`);
 
                 // Handle INSERT
@@ -626,46 +626,50 @@ function setupStaticRealtimeUpdates() {
                     return;
                 }
 
-                // Handle UPDATE
+                // Handle UPDATE - only proceed if row exists
                 if (payload.eventType === 'UPDATE' && existingRow) {
-                    // Update aircraft cell
-                    const aircraftCell = existingRow.querySelector('td:first-child');
-                    const img = aircraftCell.querySelector('img');
-                    if (img) {
-                        img.src = image;
-                        img.onerror = function () { this.src = '/default-aircraft.png'; };
+                    // Safely update aircraft cell
+                    const aircraftCell = existingRow.querySelector('td:nth-child(1)');
+                    if (aircraftCell) {
+                        const img = aircraftCell.querySelector('img');
+                        if (img) {
+                            img.src = image;
+                            img.onerror = function () { this.src = '/default-aircraft.png'; };
+                        }
+
+                        // Update aircraft text (use proper selector)
+                        const aircraftText = aircraftCell.querySelector('span');
+                        if (aircraftText) {
+                            aircraftText.textContent = ` ${aircraft}`;
+                        }
                     }
 
-                    // Update aircraft text (childNodes[1] is the text node after img)
-                    if (aircraftCell.childNodes[1]) {
-                        aircraftCell.childNodes[1].textContent = ` ${aircraft}`;
-                    }
+                    // Safely update other cells
+                    const updateCell = (selector, value) => {
+                        const cell = existingRow.querySelector(selector);
+                        if (cell && value !== undefined) {
+                            cell.textContent = value;
+                        }
+                    };
 
-                    // Update other cells
-                    if (flightnumber) {
-                        existingRow.querySelector('.flight-number').textContent = flightnumber;
-                    }
-                    if (departure) {
-                        existingRow.querySelector('.flight-departure').textContent = departure;
-                    }
-                    if (destination) {
-                        existingRow.querySelector('.flight-destination').textContent = destination;
-                    }
+                    updateCell('.flight-number', flightnumber);
+                    updateCell('.flight-departure', departure);
+                    updateCell('.flight-destination', destination);
 
                     // Special handling for status with blinking effect
                     if (flightstatus) {
                         const statusCell = existingRow.querySelector('.flight-status');
-                        statusCell.textContent = flightstatus;
+                        if (statusCell) {
+                            statusCell.textContent = flightstatus;
 
-                        // Reset and reapply blinking classes
-                        statusCell.className = 'flight-status';
-                        const blinkClass = getBlinkingClass(flightstatus);
-                        if (blinkClass) {
-                            statusCell.classList.add(blinkClass);
+                            // Reset and reapply blinking classes
+                            statusCell.className = 'flight-status';
+                            const blinkClass = getBlinkingClass(flightstatus);
+                            if (blinkClass) {
+                                statusCell.classList.add(blinkClass);
+                            }
                         }
                     }
-
-                    return;
                 }
             }
             // Handle DELETE (using payload.old)
