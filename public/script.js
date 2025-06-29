@@ -710,14 +710,14 @@ function updateFlightRow(row, flightData) {
                     if (img) img.style.display = 'inline'; // Ensure image stays visible
                 }
             }
-        } else {
-
-            for (let i = 0; i < row.cells.length; i++) {
-                row.cells[i].className = '';
-                row.cells[i].classList.remove(blinkingClass);
-            }
+        } 
+    } else {
+        const blinkingClass = getBlinkingClass(flightData.flightStatus);
+        for (let i = 0; i < row.cells.length; i++) {
+            row.cells[i].className = '';
+            row.cells[i].classList.remove(blinkingClass);
         }
-    } 
+    }
  
     // Visual feedback
     row.classList.add('row-updated');
