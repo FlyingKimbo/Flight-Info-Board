@@ -649,12 +649,11 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
-    // First check if status is changing (this will be our trigger)
+    // First check if status is changing
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
-
-    // Check for non-blink statuses using the global variable
+    // Check for non-blink statuses using flightData (not global)
     const shouldRemoveBlinking =
         flightData.flightStatus === null ||
         flightData.flightStatus === "-" ||
@@ -720,7 +719,11 @@ function updateFlightRow(row, flightData) {
     }
 
     // Apply blinking to all cells if status changed AND not in non-blink statuses
-    if (isStatusChanging && !shouldRemoveBlinking) {
+    if (isStatusChanging &&
+        !shouldRemoveBlinking &&
+        flightData.flightStatus &&
+        flightData.flightStatus !== "-") {
+
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
         if (blinkingClass) {
             // Blink all cells in the row
@@ -728,7 +731,7 @@ function updateFlightRow(row, flightData) {
                 row.cells[i].className = '';
                 row.cells[i].classList.add(blinkingClass);
 
-                // Special case - keep existing image in aircraft cell
+                // Keep image visible in aircraft cell
                 if (i === 0) {
                     const img = row.cells[i].querySelector('img');
                     if (img) img.style.display = 'inline';
@@ -736,7 +739,7 @@ function updateFlightRow(row, flightData) {
             }
         }
     }
- 
+
     // Visual feedback
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
