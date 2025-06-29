@@ -495,97 +495,10 @@ async function fetch_flight_static() {
 
 
 // Modified realtime subscription
+
+
+
 function setupStaticRealtimeUpdates() {
-    return supabase
-        .channel('flight_board_updates')
-        .on('postgres_changes', {
-            event: '*',
-            schema: 'public',
-            table: 'flights_static'
-        }, (payload) => {
-            const flightNumber = payload.new?.flightnumber || payload.old?.flightnumber;
-
-            // 1. Find existing row by flight number (matching CreateNewRow's structure)
-            const existingRow = Array.from(document.querySelectorAll('.flight-number'))
-                .find(el => el.textContent.trim() === flightNumber)
-                ?.closest('tr');
-
-            // 2. Handle INSERT (new flight)
-            if (payload.eventType === 'INSERT' && !existingRow) {
-                const tbody = document.getElementById('flight-rows');
-                const newRow = document.createElement('tr');
-                newRow.className = 'flight-row';
-
-                // Aircraft Cell (identical to CreateNewRow)
-                const aircraftCell = document.createElement('td');
-                aircraftCell.className = 'flight-aircraft';
-                aircraftCell.style.textAlign = 'center';
-
-                const img = document.createElement('img');
-                img.className = 'flight-image';
-                img.src = payload.new.image || '';
-                img.alt = 'Aircraft Image';
-                img.style.width = '100px';
-                img.style.height = 'auto';
-                img.style.boxShadow = '4px 4px 10px rgba(0, 0, 0, 1)';
-                img.onerror = function () { this.src = '/default-aircraft.png'; };
-
-                aircraftCell.appendChild(img);
-                aircraftCell.appendChild(document.createTextNode(` ${payload.new.aircraft || ''}`));
-
-                // Other cells (identical structure)
-                const cells = [
-                    { class: 'flight-number', text: payload.new.flightnumber },
-                    { class: 'flight-departure', text: payload.new.departure },
-                    { class: 'flight-status', text: payload.new.flightstatus },
-                    { class: 'flight-destination', text: payload.new.destination }
-                ].map(cell => {
-                    const td = document.createElement('td');
-                    td.className = cell.class;
-                    td.textContent = cell.text || '';
-                    return td;
-                });
-
-                // Build row
-                newRow.appendChild(aircraftCell);
-                cells.forEach(cell => newRow.appendChild(cell));
-                tbody.prepend(newRow);
-                // Refresh after delay
-                
-                return;
-            }
-
-            // 3. Handle UPDATE (same element targeting as CreateNewRow)
-            if (payload.eventType === 'UPDATE' && existingRow) {
-                existingRow.querySelector('.flight-aircraft span').textContent = ` ${payload.new.aircraft || ''}`;
-                existingRow.querySelector('.flight-number').textContent = payload.new.flightnumber || '';
-                existingRow.querySelector('.flight-departure').textContent = payload.new.departure || '';
-                existingRow.querySelector('.flight-status').textContent = payload.new.flightstatus || '';
-                existingRow.querySelector('.flight-destination').textContent = payload.new.destination || '';
-
-                const img = existingRow.querySelector('.flight-image');
-                if (img) {
-                    img.src = payload.new.image || '';
-                    // Maintain identical image styling
-                    img.style.width = '100px';
-                    img.style.height = 'auto';
-                }
-                // Refresh after delay
-                
-                return;
-            }
-
-            // 4. Handle DELETE (find by flight number)
-            if (payload.eventType === 'DELETE' && existingRow) {
-                existingRow.remove();
-            }
-        })
-        .subscribe();
-    
-}
-
-
-function offsetupStaticRealtimeUpdates() {
     return supabase
         .channel('flight_board_updates')
         .on('postgres_changes', {
