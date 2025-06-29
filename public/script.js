@@ -593,13 +593,13 @@ function setupStaticRealtimeUpdates() {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            console.log('Realtime update:', payload);
+            console.log('Realtime payload:', payload);
 
-            // Use record ID for reliable matching
+            // 1. Use record ID for 100% reliable matching
             const recordId = payload.new?.id || payload.old?.id;
             const existingRow = document.querySelector(`tr[data-flight-id="${recordId}"]`);
 
-            // INSERT - New flight
+            // 2. INSERT handler
             if (payload.eventType === 'INSERT' && !existingRow) {
                 const row = CreateNewRow({
                     image: payload.new.image || '',
@@ -613,23 +613,33 @@ function setupStaticRealtimeUpdates() {
                 return;
             }
 
-            // UPDATE - Status change (SIMPLIFIED)
-            if (payload.eventType === 'UPDATE' && existingRow && payload.new.flightstatus) {
+            // 3. UPDATE handler (FOCUS HERE)
+            if (payload.eventType === 'UPDATE' && existingRow) {
+                // DEBUG: Visual confirmation
+                existingRow.style.outline = '2px solid red';
+                setTimeout(() => existingRow.style.outline = '', 1000);
+
+                // FORCE STATUS UPDATE - Three independent methods
                 const statusCell = existingRow.querySelector('.flight-status');
                 if (statusCell) {
-                    // Direct text update - no blinking classes
-                    statusCell.textContent = payload.new.flightstatus;
+                    // Method 1: Direct text update
+                    statusCell.textContent = payload.new.flightstatus || '';
 
-                    // Visual feedback (temporary)
-                    statusCell.style.backgroundColor = '#e6ffe6'; // Light green
+                    // Method 2: Clone/replace element (bulletproof)
+                    const newCell = statusCell.cloneNode(true);
+                    newCell.textContent = payload.new.flightstatus || '';
+                    statusCell.replaceWith(newCell);
+
+                    // Method 3: Nuclear option (if above fails)
                     setTimeout(() => {
-                        statusCell.style.backgroundColor = '';
-                    }, 500);
+                        newCell.textContent = payload.new.flightstatus || '';
+                        void newCell.offsetWidth; // Force reflow
+                    }, 50);
                 }
                 return;
             }
 
-            // DELETE - Remove flight
+            // 4. DELETE handler
             if (payload.eventType === 'DELETE' && existingRow) {
                 existingRow.remove();
             }
