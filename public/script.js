@@ -641,7 +641,7 @@ function setupStaticRealtimeUpdates() {
         .subscribe();
 }
 */
-
+setupStaticRealtimeUpdates();
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     fetch_flight_static();
