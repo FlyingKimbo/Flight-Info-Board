@@ -650,7 +650,7 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
 
-    console.log('🟢 DEBUG updateFlightRow:', staticData.flightStatus);
+    console.log('🟢 DEBUG updateFlightRow:', flightData.flightStatus);
 
     // First check if status is changing
     const statusCell = row.cells[3];
