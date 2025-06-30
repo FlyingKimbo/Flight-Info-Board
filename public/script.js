@@ -314,7 +314,7 @@ const AnimationManager = {
     `;
 
         // Only control opacity through animation logic
-        if (inCloud === 1) {
+        if (inCloud === "1") {
             console.log('[DEBUG] Starting cloud animation');
             let increasing = true;
             let currentOpacity = 0.2;
