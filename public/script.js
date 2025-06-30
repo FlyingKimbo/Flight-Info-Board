@@ -403,14 +403,14 @@ function updateEteDist2ArrBar(flightData) {
         }
 
         // Update ETE bar width
-        //const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
-        //elements.eteBar.style.width = `${etePercentage}%`;
-        //elements.eteBar.style.opacity = '1';
+        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
+        elements.eteBar.style.width = `${etePercentage}%`;
+        elements.eteBar.style.opacity = '1';
 
         // Update aircraft image
-        const aircraftType = flightData.current_flight.split(' ')[0];
-        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-        elements.aircraftImage.style.opacity = '1';
+        //const aircraftType = flightData.current_flight.split(' ')[0];
+        //elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+        //elements.aircraftImage.style.opacity = '1';
 
         // Handle aircraft image - MODIFIED SECTION
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
