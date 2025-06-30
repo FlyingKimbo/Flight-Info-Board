@@ -771,68 +771,57 @@ function updateFlightRow(row, flightData) {
 }
 
 function updateCellsAfterBlinking(row, flightData) {
-    // 1. Save aircraft image reference before any changes
+    // 1. Handle aircraft cell (cell 0) separately to prevent duplication
     const aircraftCell = row.cells[0];
-    const existingImg = aircraftCell?.querySelector('img');
-    const imgSrc = existingImg?.src;
-
-    // 2. Reset all cell styles (except aircraft image)
-    Array.from(row.cells).forEach((cell, index) => {
-        // Skip special handling for aircraft cell (index 0)
-        if (index !== 0) {
-            cell.className = cell.className
-                .split(' ')
-                .filter(cls => !cls.startsWith('blink-'))
-                .join(' ');
-            cell.style.animation = 'none';
-        }
-    });
-
-    // 3. Restore aircraft image with proper handling
     if (aircraftCell) {
-        // Preserve or recreate the image element
-        let img = aircraftCell.querySelector('img');
-        if (!img) {
-            img = document.createElement('img');
-            aircraftCell.prepend(img);
+        // Clear existing content but preserve the image
+        const existingImg = aircraftCell.querySelector('img');
+        aircraftCell.innerHTML = ''; // Clear all content
+
+        // Re-add the image if it exists
+        if (existingImg) {
+            aircraftCell.appendChild(existingImg);
+        } else {
+            // Create new image if missing
+            const img = document.createElement('img');
+            img.src = flightData.image || '/default-aircraft.png';
+            img.alt = 'Aircraft';
+            img.style.cssText = 'width:100px;height:auto;display:inline-block;';
+            aircraftCell.appendChild(img);
         }
 
-        // Set image source (use existing or fallback)
-        img.src = imgSrc || flightData.image || '/default-aircraft.png';
-        img.alt = flightData.aircraft || 'Aircraft';
-        img.style.cssText = `
-            width: 100px;
-            height: auto;
-            display: inline-block;
-            opacity: 1;
-            animation: none !important;
-        `;
-
-        // Update aircraft text
-        const textSpan = aircraftCell.querySelector('span') || document.createElement('span');
-        textSpan.textContent = ` ${flightData.aircraft || ''}`;
-        if (!textSpan.parentNode) {
-            aircraftCell.appendChild(textSpan);
-        }
+        // Add aircraft name text (only once)
+        const aircraftText = document.createTextNode(` ${flightData.aircraft || ''}`);
+        aircraftCell.appendChild(aircraftText);
     }
 
-    // 4. Update other cell contents
-    const cellUpdates = [
-        { index: 1, value: flightData.flightNumber },
-        { index: 2, value: flightData.departure },
-        { index: 3, value: flightData.flightStatus },
-        { index: 4, value: flightData.destination }
-    ];
+    // 2. Update other cells (1-4)
+    const cellsToUpdate = {
+        1: flightData.flightNumber,
+        2: flightData.departure,
+        3: flightData.flightStatus,
+        4: flightData.destination
+    };
 
-    cellUpdates.forEach(({ index, value }) => {
-        if (row.cells[index] && value !== undefined) {
-            row.cells[index].textContent = value;
+    Object.entries(cellsToUpdate).forEach(([index, value]) => {
+        const cellIndex = parseInt(index);
+        if (row.cells[cellIndex] && value !== undefined) {
+            row.cells[cellIndex].textContent = value;
         }
     });
 
-    // 5. Visual confirmation (optional)
-    row.classList.add('blink-removed');
-    setTimeout(() => row.classList.remove('blink-removed'), 500);
+    // 3. Remove any residual blinking classes from all cells
+    Array.from(row.cells).forEach(cell => {
+        cell.className = cell.className
+            .split(' ')
+            .filter(cls => !cls.startsWith('blink-'))
+            .join(' ');
+        cell.style.animation = 'none';
+    });
+
+    // 4. Visual feedback
+    //row.classList.add('blink-updated');
+    //setTimeout(() => row.classList.remove('blink-updated'), 500);
 }
 
 
