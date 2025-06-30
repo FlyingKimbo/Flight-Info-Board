@@ -403,14 +403,31 @@ function updateEteDist2ArrBar(flightData) {
         }
 
         // Update ETE bar width
-        const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
-        elements.eteBar.style.width = `${etePercentage}%`;
-        elements.eteBar.style.opacity = '1';
+        //const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
+        //elements.eteBar.style.width = `${etePercentage}%`;
+        //elements.eteBar.style.opacity = '1';
 
         // Update aircraft image
         const aircraftType = flightData.current_flight.split(' ')[0];
         elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
         elements.aircraftImage.style.opacity = '1';
+
+        // Handle aircraft image - MODIFIED SECTION
+        const aircraftType = flightData.current_flight?.split(' ')[0] || '';
+        if (flightData.flight_state === "Deboarding Completed") {
+            // Special case for deboarding completed
+            elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
+            elements.aircraftImage.style.opacity = '0.7'; // Slightly transparent
+        } else if (aircraftType) {
+            // Normal operation for other statuses
+            elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+            elements.aircraftImage.style.opacity = '1';
+        } else {
+            // Fallback for empty/missing aircraft type
+            elements.aircraftImage.src = '/Image/Aircraft_Type/default_aircraft.png';
+            elements.aircraftImage.style.opacity = '0.5';
+        }
+
 
 
         // Update ETE text
