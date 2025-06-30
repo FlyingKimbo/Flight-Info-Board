@@ -218,18 +218,10 @@
             *animation: opacity 5s ease-in-out;
         }
 
-        .cloud-image {
+        #cloud-image {
             position: absolute;
-            top: -9px;
-            height: 30px;
-            z-index: 7;
-            opacity: 0; /* Start hidden */
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.3s ease; /* Smooth fade */
         }
-
-            .cloud-image.visible {
-                opacity: 1;
-            }
 
         .precip-image {
             position: absolute;

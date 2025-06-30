@@ -290,21 +290,17 @@ const AnimationManager = {
         }
     },
 
-    // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
         const cloud = document.getElementById('cloud-image');
         if (!cloud) return;
 
-        // Handle both string "1"/"0" and number 1/0
-        const shouldShow = String(inCloud) === "1";
-
         // Set image source if not already set
         if (!cloud.src) {
-            cloud.src = '/Image/Cloud/Cloud1.png'; // Your actual image path
+            cloud.src = '/Image/Cloud/Cloud1.png'; // Ensure this path is correct
         }
 
-        // Toggle visibility
-        cloud.classList.toggle('visible', shouldShow);
+        // Direct opacity control - no class toggle needed
+        cloud.style.opacity = String(inCloud) === "1" ? '1' : '0';
     },
 
 
@@ -366,6 +362,12 @@ function updateEteDist2ArrBar(flightData) {
                 console.error(`Missing DOM element: ${name}`);
                 return;
             }
+        }
+
+        // Inside updateEteDist2ArrBar, right after validating elements exist:
+        const cloud = document.getElementById('cloud-image');
+        if (cloud && !cloud.src) {
+            cloud.src = '/Image/Cloud/Cloud1.png'; // Initialize if not set
         }
 
         // Single call handles both animations
