@@ -341,10 +341,10 @@ const AnimationManager = {
         this.startCloudOpacityCycle(inCloud);
     },
 
-    cleanup() {
-        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
-        if (this.cloudInterval) clearInterval(this.cloudInterval);
-    }
+    //cleanup() {
+      //  if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
+       // if (this.cloudInterval) clearInterval(this.cloudInterval);
+    //}
 };
 
 
