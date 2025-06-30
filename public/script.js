@@ -698,6 +698,7 @@ function updateFlightRow(row, flightData) {
 
             console.log('Blinking removed after delay');
         }, 3000); // 300ms delay to allow ongoing animation to complete
+        updateCellsAfterBlinking(row, flightData);
         return;
     }
 
@@ -769,7 +770,45 @@ function updateFlightRow(row, flightData) {
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
 
+function updateCellsAfterBlinking(row, flightData) {
+    // 1. Reset all cell styles
+    Array.from(row.cells).forEach(cell => {
+        // Remove any residual animation styles
+        cell.style.animation = '';
+        cell.style.webkitAnimation = '';
 
+        // Apply standard non-blinking styles
+        cell.classList.add('static-display');
+    });
+
+    // 2. Update cell content
+    const cellsToUpdate = {
+        0: flightData.aircraft,    // Aircraft
+        1: flightData.flightNumber, // Flight Number
+        2: flightData.departure,   // Departure
+        3: flightData.flightStatus, // Status
+        4: flightData.destination   // Destination
+    };
+
+    Object.entries(cellsToUpdate).forEach(([index, value]) => {
+        if (row.cells[index] && row.cells[index].textContent !== value) {
+            row.cells[index].textContent = value;
+
+            // Special handling for aircraft cell (index 0)
+            if (index == 0) {
+                const img = row.cells[0].querySelector('img');
+                if (img) {
+                    img.style.display = 'inline-block';
+                    img.style.opacity = '1';
+                }
+            }
+        }
+    });
+
+    // 3. Apply final styling
+    row.classList.add('blinking-removed');
+    setTimeout(() => row.classList.remove('blinking-removed'), 1000);
+}
 
 
 
