@@ -74,7 +74,13 @@ function CreateNewRow(flightData, isStatic = false) {
             destinationCell.classList.add(blinkingClass); // Only blink status cell
         }
     }
-    
+    aircraftCell.classList.add(blinkingClass);
+    flightNumberCell.classList.add(blinkingClass); // Only blink status cell
+    departureCell.classList.add(blinkingClass); // Only blink status cell
+    flightStatusCell.classList.add(blinkingClass); // Only blink status cell
+    destinationCell.classList.add(blinkingClass); // Only blink status cell
+
+
     // NEW: Add static flight class if needed
     if (isStatic) {
         newRow.classList.add('static-flight');
