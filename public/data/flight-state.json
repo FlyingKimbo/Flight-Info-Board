@@ -33,7 +33,7 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "ggggg",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "BAW702",
         "flightStatus": "-",
@@ -145,7 +145,7 @@
     },
     {
         "aircraft": "Longitude",
-        "departure": "ggggg",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "NC890",
         "flightStatus": "-",

@@ -346,7 +346,7 @@ const AnimationManager = {
     }
 };
 function handleDeboardingCompleted() {
-    // Clear all ETE components visually
+    // Fade out ETE components while maintaining layout
     const elements = {
         eteBar: document.getElementById('ete-bar'),
         eteText: document.getElementById('ete-bar-text'),
@@ -356,26 +356,17 @@ function handleDeboardingCompleted() {
         precipImage: document.getElementById('precip-image')
     };
 
-    // Reset each element to blank/empty state
-    if (elements.eteBar) {
-        elements.eteBar.style.width = '0%';
-        elements.eteBar.style.opacity = '0';
-    }
+    // Set opacity to 0 for all elements
+    Object.values(elements).forEach(el => {
+        if (el) {
+            el.style.transition = 'opacity 0.5s ease-out'; // Smooth fade
+            el.style.opacity = '0';
 
-    if (elements.eteText) {
-        elements.eteText.textContent = '';
-        elements.eteText.style.opacity = '0';
-    }
-
-    if (elements.aircraftImage) {
-        elements.aircraftImage.style.opacity = '0';
-        elements.aircraftImage.src = ''; // Clear image source
-    }
-
-    // Reset weather effects
-    if (elements.jetStreamImage) elements.jetStreamImage.style.opacity = '0';
-    if (elements.cloudImage) elements.cloudImage.style.opacity = '0';
-    if (elements.precipImage) elements.precipImage.style.opacity = '0';
+            // Optional: Clear interactive elements
+            if ('src' in el) el.src = '';
+            if ('textContent' in el) el.textContent = '';
+        }
+    });
 
     // Force immediate visual update
     void document.body.offsetWidth;
@@ -384,7 +375,7 @@ function handleDeboardingCompleted() {
 function updateEteDist2ArrBar(flightData) {
     //console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
 
-    if (!flightData || !flightData.flight_status) {
+    if (!flightData || !flightData.flight_state) {
         AnimationManager.cleanup();
         return;
     }
@@ -435,7 +426,7 @@ function updateEteDist2ArrBar(flightData) {
 
         // Single call handles both animations
         AnimationManager.updateAnimations(
-            flightData.flight_status,      // For jet stream
+            flightData.flight_state,      // For jet stream
             flightData.airplane_in_cloud  // For cloud (1 or 0)
         );
 
