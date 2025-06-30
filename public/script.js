@@ -345,11 +345,26 @@ const AnimationManager = {
         if (this.cloudInterval) clearInterval(this.cloudInterval);
     }
 };
+function handleDeboardingCompleted() {
+    // Minimal visual refresh for ETE components only
+    const refreshElements = [
+        document.getElementById('ete-bar'),
+        document.getElementById('ete-bar-text'),
+        document.getElementById('aircraft-image')
+    ];
+
+    refreshElements.forEach(el => {
+        if (!el) return;
+        el.style.transform = 'translateZ(0)'; // Force hardware acceleration
+        void el.offsetWidth; // Trigger reflow
+        el.style.transform = '';
+    });
+}
 
 function updateEteDist2ArrBar(flightData) {
     //console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
 
-    if (!flightData || !flightData.flight_state) {
+    if (!flightData || !flightData.flight_status) {
         AnimationManager.cleanup();
         return;
     }
@@ -400,7 +415,7 @@ function updateEteDist2ArrBar(flightData) {
 
         // Single call handles both animations
         AnimationManager.updateAnimations(
-            flightData.flight_state,      // For jet stream
+            flightData.flight_status,      // For jet stream
             flightData.airplane_in_cloud  // For cloud (1 or 0)
         );
 
@@ -423,7 +438,7 @@ function updateEteDist2ArrBar(flightData) {
 
         // Handle aircraft image - MODIFIED SECTION
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
-        if (flightData.flight_state === "Deboarding Completed") {
+        if (flightData.flight_status === "Deboarding Completed") {
             // Special case for deboarding completed
             elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
             elements.aircraftImage.style.opacity = '1'; // Slightly transparent

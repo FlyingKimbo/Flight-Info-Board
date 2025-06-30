@@ -1,7 +1,7 @@
 [
     {
         "aircraft": "Airbus330-MAS",
-        "departure": "fffff",
+        "departure": "ggggg",
         "destination": "-",
         "flightNumber": "MAS12",
         "flightStatus": "-",
@@ -33,7 +33,7 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "fffff",
+        "departure": "ggggg",
         "destination": "-",
         "flightNumber": "BAW702",
         "flightStatus": "-",
@@ -145,7 +145,7 @@
     },
     {
         "aircraft": "Longitude",
-        "departure": "WSSS Changi",
+        "departure": "ggggg",
         "destination": "-",
         "flightNumber": "NC890",
         "flightStatus": "-",
