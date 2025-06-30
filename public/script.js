@@ -341,11 +341,29 @@ const AnimationManager = {
         this.startCloudOpacityCycle(inCloud);
     },
 
-    //cleanup() {
-      //  if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
-       // if (this.cloudInterval) clearInterval(this.cloudInterval);
-    //}
+    cleanup() {
+        if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
+       if (this.cloudInterval) clearInterval(this.cloudInterval);
+    }
 };
+function startCloudOpacityCycling(cloudImage) {
+    let opacity = 0.3;
+    let direction = 1; // 1 for increasing, -1 for decreasing
+    const increment = 0.01; // Smaller increment for smoother transition
+    const intervalTime = 30; // Smaller interval for more frequent updates
+
+    cloudOpacityInterval = setInterval(() => {
+        opacity += direction * increment;
+        if (opacity >= 1.0) {
+            opacity = 1.0;
+            direction = -1;
+        } else if (opacity <= 0.3) {
+            opacity = 0.3;
+            direction = 1;
+        }
+        cloudImage.style.opacity = opacity;
+    }, intervalTime); // Adjust the interval as needed
+}
 
 
 function updateEteDist2ArrBar(flightData) {
@@ -434,6 +452,7 @@ function updateEteDist2ArrBar(flightData) {
             elements.aircraftImage.style.opacity = '1';
         }
 
+        startCloudOpacityCycling(cloudImage);
 
 
         // Update ETE text
