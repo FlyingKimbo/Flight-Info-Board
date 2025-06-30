@@ -240,7 +240,7 @@ function updateEteDist2ArrBar(flightData) {
         console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
         console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
         console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
-        
+        updatePositions();
 
         // Get DOM elements
         const elements = {
@@ -327,7 +327,7 @@ function updateEteDist2ArrBar(flightData) {
     }
 
 
-    updatePositions();
+    
 
   
 }
