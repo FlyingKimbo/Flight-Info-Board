@@ -312,7 +312,7 @@ const AnimationManager = {
 
     cleanup() {
         if (this.jetStreamInterval) clearInterval(this.jetStreamInterval);
-       if (this.cloudInterval) clearInterval(this.cloudInterval);
+       //if (this.cloudInterval) clearInterval(this.cloudInterval);
     }
 };
 
