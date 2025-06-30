@@ -292,46 +292,51 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        // Clear existing interval
-        if (this.cloudInterval) clearInterval(this.cloudInterval);
+        // 1. Clear any existing animation
+        if (this.cloudInterval) {
+            clearInterval(this.cloudInterval);
+            this.cloudInterval = null;
+        }
 
-        // Get and verify cloud element
+
+        // 2. Get cloud element with null check
         const cloud = document.getElementById('cloud-image');
         if (!cloud) {
-            console.error("Cloud element missing!");
+            console.error("Cloud element not found!");
             return;
         }
-        /*
-        // DEBUG: Keep these styles but remove opacity
-        cloud.style.cssText = `
-        z-index: 9999 !important;
-        border: 2px solid red !important;
-        position: absolute !important;
-        width: 100px !important;
-        height: 100px !important;
-        top: 50px !important;
-        left: 50px !important;
-    `;
-    */
-        // Only control opacity through animation logic
+        // 3. Debugging logs
+        console.log(`Cloud animation triggered. inCloud: ${inCloud}`);
+        console.log('Current cloud opacity:', cloud.style.opacity);
+
+
+
+        // 4. Only animate if inCloud === 1
         if (inCloud === 1) {
-            console.log('[DEBUG] Starting cloud animation');
-            let increasing = true;
+            console.log("Starting cloud pulsing animation");
             let currentOpacity = 0.2;
+            let increasing = true;
 
             this.cloudInterval = setInterval(() => {
+                // Update opacity
                 currentOpacity += increasing ? 0.01 : -0.01;
+
+                // Reverse direction at bounds
                 if (currentOpacity >= 0.7) increasing = false;
                 if (currentOpacity <= 0.2) increasing = true;
 
+                // Apply with debugging
                 cloud.style.opacity = currentOpacity;
-                console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
-            }, 50);
+                console.log(`Updated cloud opacity: ${currentOpacity.toFixed(2)}`);
+
+            }, 50); // 50ms = 20fps animation
         } else {
-            //console.log('[DEBUG] Cloud hidden (normal state)');
-            // Don't force hide if we're debugging
-            // cloud.style.opacity = '0'; // Comment this out temporarily
+            // 5. Ensure cloud is hidden when not in cloud
+            console.log("Hiding cloud (not in cloud)");
+            cloud.style.opacity = '0';
+            cloud.style.transition = 'opacity 0.5s ease';
         }
+    
     },
 
     // Update both animations
