@@ -771,43 +771,68 @@ function updateFlightRow(row, flightData) {
 }
 
 function updateCellsAfterBlinking(row, flightData) {
-    // 1. Reset all cell styles
-    Array.from(row.cells).forEach(cell => {
-        // Remove any residual animation styles
-        cell.style.animation = '';
-        cell.style.webkitAnimation = '';
+    // 1. Save aircraft image reference before any changes
+    const aircraftCell = row.cells[0];
+    const existingImg = aircraftCell?.querySelector('img');
+    const imgSrc = existingImg?.src;
 
-        // Apply standard non-blinking styles
-        cell.classList.add('static-display');
-    });
-
-    // 2. Update cell content
-    const cellsToUpdate = {
-        0: flightData.aircraft,    // Aircraft
-        1: flightData.flightNumber, // Flight Number
-        2: flightData.departure,   // Departure
-        3: flightData.flightStatus, // Status
-        4: flightData.destination   // Destination
-    };
-
-    Object.entries(cellsToUpdate).forEach(([index, value]) => {
-        if (row.cells[index] && row.cells[index].textContent !== value) {
-            row.cells[index].textContent = value;
-
-            // Special handling for aircraft cell (index 0)
-            if (index == 0) {
-                const img = row.cells[0].querySelector('img');
-                if (img) {
-                    img.style.display = 'inline-block';
-                    img.style.opacity = '1';
-                }
-            }
+    // 2. Reset all cell styles (except aircraft image)
+    Array.from(row.cells).forEach((cell, index) => {
+        // Skip special handling for aircraft cell (index 0)
+        if (index !== 0) {
+            cell.className = cell.className
+                .split(' ')
+                .filter(cls => !cls.startsWith('blink-'))
+                .join(' ');
+            cell.style.animation = 'none';
         }
     });
 
-    // 3. Apply final styling
-    row.classList.add('blinking-removed');
-    setTimeout(() => row.classList.remove('blinking-removed'), 1000);
+    // 3. Restore aircraft image with proper handling
+    if (aircraftCell) {
+        // Preserve or recreate the image element
+        let img = aircraftCell.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            aircraftCell.prepend(img);
+        }
+
+        // Set image source (use existing or fallback)
+        img.src = imgSrc || flightData.image || '/default-aircraft.png';
+        img.alt = flightData.aircraft || 'Aircraft';
+        img.style.cssText = `
+            width: 100px;
+            height: auto;
+            display: inline-block;
+            opacity: 1;
+            animation: none !important;
+        `;
+
+        // Update aircraft text
+        const textSpan = aircraftCell.querySelector('span') || document.createElement('span');
+        textSpan.textContent = ` ${flightData.aircraft || ''}`;
+        if (!textSpan.parentNode) {
+            aircraftCell.appendChild(textSpan);
+        }
+    }
+
+    // 4. Update other cell contents
+    const cellUpdates = [
+        { index: 1, value: flightData.flightNumber },
+        { index: 2, value: flightData.departure },
+        { index: 3, value: flightData.flightStatus },
+        { index: 4, value: flightData.destination }
+    ];
+
+    cellUpdates.forEach(({ index, value }) => {
+        if (row.cells[index] && value !== undefined) {
+            row.cells[index].textContent = value;
+        }
+    });
+
+    // 5. Visual confirmation (optional)
+    row.classList.add('blink-removed');
+    setTimeout(() => row.classList.remove('blink-removed'), 500);
 }
 
 
