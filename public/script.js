@@ -370,9 +370,9 @@ function updateEteDist2ArrBar(flightData) {
             'airplane_in_cloud',
             'ambient_precipstate'
         ];
-        //console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
-        //console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
-        //console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
+        console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
+        console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
+        console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
         
 
         // Get DOM elements
