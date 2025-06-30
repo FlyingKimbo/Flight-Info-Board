@@ -33,13 +33,13 @@
             border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
             border-collapse: collapse; /* To collapse borders between cells */
             position: relative;
-	    margin-top: 200px; /* Shifts the table down by 200px */
+	    margin-top: 50px; /* Shifts the table down by 200px */
         }
 
         th, td {
             text-align: center;
             position: relative;
-            border: 2px solid rgba(0, 0, 0, 0.3); /* Black border with 50% opacity */
+            border: 10px solid rgba(0, 0, 0, 0.0); /* Black border with 50% opacity */
             /* padding: 10px; /* Optional: adds padding for better readability */
             background-color: rgba(100, 100, 100, 0.3); /* Semi-transparent background to ensure text readability */
             font-weight: bold; /* Makes the text bold */
@@ -47,7 +47,7 @@
         }
 
         .cell-content {
-            display: flex;
+            *display: flex;*
             align-items: center;
             justify-content: center;
         }
@@ -185,7 +185,7 @@
         .ete-bar-text {
             position: absolute;
             left: 0; /* Initial position, will be updated via JS */
-            top: 0; /* Adjust as needed */
+            top: 1px; /* Adjust as needed */
             z-index: 4;
             color: white;
             white-space: nowrap; /* Prevents the text from breaking into multiple lines */
