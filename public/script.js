@@ -680,33 +680,30 @@ function updateFlightRow(row, flightData) {
 
     // 1. FORCE REMOVE BLINKING FIRST if needed
     if (shouldRemoveBlinking) {
-        console.log('🛑 Removing blinking for status:', flightData.flightStatus);
-        for (let i = 0; i < row.cells.length; i++) {
-            // Completely reset classes (more aggressive approach)
-            row.cells[i].className = row.cells[i].className
-                .split(' ')
-                .filter(cls => !cls.startsWith('blink-'))
-                .join(' ');
 
-            // Add a neutral class if needed
-            row.cells[i].classList.add('no-blink');
+        setTimeout(() => {
+            console.log('🛑 Removing blinking for status:', flightData.flightStatus);
+            for (let i = 0; i < row.cells.length; i++) {
+                // Completely reset classes (more aggressive approach)
+                row.cells[i].className = row.cells[i].className
+                    .split(' ')
+                    .filter(cls => !cls.startsWith('blink-'))
+                    .join(' ');
 
-            // Reset aircraft image display
-            if (i === 0) {
-                const img = row.cells[i].querySelector('img');
-                if (img) {
-                    img.style.display = '';
-                    img.classList.remove(...Array.from(img.classList).filter(c => c.startsWith('blink-')));
+                // Add a neutral class if needed
+                row.cells[i].classList.add('no-blink');
+
+                // Reset aircraft image display
+                if (i === 0) {
+                    const img = row.cells[i].querySelector('img');
+                    if (img) {
+                        img.style.display = '';
+                        img.classList.remove(...Array.from(img.classList).filter(c => c.startsWith('blink-')));
+                    }
                 }
             }
-        }
-        // Add this to ensure blinking stops completely
-        row.style.animation = 'none';
-        row.style.webkitAnimation = 'none';
-        void row.offsetWidth; // Trigger reflow
-        row.style.animation = null;
-        row.style.webkitAnimation = null;
-
+        }, 5000);
+        
         return; // Skip the rest of the updates for "-" status
     }
 
