@@ -290,23 +290,47 @@ const AnimationManager = {
         }
     },
 
+    // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
+        // Clear existing interval
+        if (this.cloudInterval) clearInterval(this.cloudInterval);
+
+        // Get and verify cloud element
         const cloud = document.getElementById('cloud-image');
-        if (!cloud) return;
+        if (!cloud) {
+            console.error("Cloud element missing!");
+            return;
+        }
+        /*
+        // DEBUG: Keep these styles but remove opacity
+        cloud.style.cssText = `
+        z-index: 9999 !important;
+        border: 2px solid red !important;
+        position: absolute !important;
+        width: 100px !important;
+        height: 100px !important;
+        top: 50px !important;
+        left: 50px !important;
+    `;
+    */
+        // Only control opacity through animation logic
+        if (inCloud === 1) {
+            console.log('[DEBUG] Starting cloud animation');
+            let increasing = true;
+            let currentOpacity = 0.2;
 
-        // Clear any existing classes first
-        cloud.classList.remove('cloud-pulse');
+            this.cloudInterval = setInterval(() => {
+                currentOpacity += increasing ? 0.01 : -0.01;
+                if (currentOpacity >= 0.7) increasing = false;
+                if (currentOpacity <= 0.2) increasing = true;
 
-        // Force reflow before applying new state
-        void cloud.offsetWidth;
-
-        if (Number(inCloud) === 1) {
-            // Start pulsing animation
-            cloud.classList.add('cloud-pulse');
-            cloud.style.opacity = '0.2'; // Initial state
+                cloud.style.opacity = currentOpacity;
+                console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
+            }, 50);
         } else {
-            // Hide completely
-            cloud.style.opacity = '0';
+            //console.log('[DEBUG] Cloud hidden (normal state)');
+            // Don't force hide if we're debugging
+            // cloud.style.opacity = '0'; // Comment this out temporarily
         }
     },
 
