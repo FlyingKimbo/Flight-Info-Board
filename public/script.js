@@ -680,31 +680,25 @@ function updateFlightRow(row, flightData) {
 
     // 1. FORCE REMOVE BLINKING FIRST if needed
     if (shouldRemoveBlinking) {
+        console.log('🛑 Removing blinking for status:', flightData.flightStatus);
 
+        // Add delay before removal
         setTimeout(() => {
-            console.log('🛑 Removing blinking for status:', flightData.flightStatus);
-            for (let i = 0; i < row.cells.length; i++) {
-                // Completely reset classes (more aggressive approach)
-                row.cells[i].className = row.cells[i].className
+            // Nuclear class removal
+            [row, ...row.cells].forEach(element => {
+                element.className = element.className
                     .split(' ')
                     .filter(cls => !cls.startsWith('blink-'))
                     .join(' ');
 
-                // Add a neutral class if needed
-                row.cells[i].classList.add('no-blink');
+                // Force stop animations
+                element.style.animation = 'none';
+                void element.offsetWidth; // Trigger reflow
+            });
 
-                // Reset aircraft image display
-                if (i === 0) {
-                    const img = row.cells[i].querySelector('img');
-                    if (img) {
-                        img.style.display = '';
-                        img.classList.remove(...Array.from(img.classList).filter(c => c.startsWith('blink-')));
-                    }
-                }
-            }
-        }, 5000);
-        
-        return; // Skip the rest of the updates for "-" status
+            console.log('Blinking removed after delay');
+        }, 3000); // 300ms delay to allow ongoing animation to complete
+        return;
     }
 
     // 1. Aircraft Cell (cell[0])
