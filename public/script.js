@@ -301,7 +301,7 @@ const AnimationManager = {
             console.error("Cloud element missing!");
             return;
         }
-
+        /*
         // DEBUG: Keep these styles but remove opacity
         cloud.style.cssText = `
         z-index: 9999 !important;
@@ -312,7 +312,7 @@ const AnimationManager = {
         top: 50px !important;
         left: 50px !important;
     `;
-
+    */
         // Only control opacity through animation logic
         if (inCloud === 1) {
             console.log('[DEBUG] Starting cloud animation');
@@ -345,32 +345,7 @@ const AnimationManager = {
         if (this.cloudInterval) clearInterval(this.cloudInterval);
     }
 };
-function handleDeboardingCompleted() {
-    // Fade out ETE components while maintaining layout
-    const elements = {
-        eteBar: document.getElementById('ete-bar'),
-        eteText: document.getElementById('ete-bar-text'),
-        aircraftImage: document.getElementById('aircraft-image'),
-        jetStreamImage: document.getElementById('jetstream-image'),
-        cloudImage: document.getElementById('cloud-image'),
-        precipImage: document.getElementById('precip-image')
-    };
 
-    // Set opacity to 0 for all elements
-    Object.values(elements).forEach(el => {
-        if (el) {
-            el.style.transition = 'opacity 0.5s ease-out'; // Smooth fade
-            el.style.opacity = '0';
-
-            // Optional: Clear interactive elements
-            if ('src' in el) el.src = '';
-            if ('textContent' in el) el.textContent = '';
-        }
-    });
-
-    // Force immediate visual update
-    void document.body.offsetWidth;
-}
 
 function updateEteDist2ArrBar(flightData) {
     //console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
@@ -444,8 +419,7 @@ function updateEteDist2ArrBar(flightData) {
         // Handle aircraft image - MODIFIED SECTION
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
         if (flightData.flight_status === "Deboarding Completed") {
-            handleDeboardingCompleted();
-            return;
+            
             // Special case for deboarding completed
             elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
             elements.aircraftImage.style.opacity = '1'; // Slightly transparent
