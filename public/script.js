@@ -300,7 +300,7 @@ const AnimationManager = {
 
         // Set image source if not already set
         if (!cloud.src) {
-            cloud.src = '/Image/Cloud/cloud.png'; // Your actual image path
+            cloud.src = '/Image/Cloud/Cloud1.png'; // Your actual image path
         }
 
         // Toggle visibility
@@ -311,7 +311,7 @@ const AnimationManager = {
     // Update both animations
     updateAnimations(flightState, inCloud) {
         this.startJetStreamCycling(flightState);
-        this.startCloudOpacityCycle(inCloud);
+       this.startCloudOpacityCycle(inCloud);
     },
 
     cleanup() {
