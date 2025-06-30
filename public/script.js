@@ -379,13 +379,7 @@ function updateEteDist2ArrBar(flightData) {
         AnimationManager.cleanup();
         return;
     }
-
-
-
     try {
-
-
-
         if (!flightData) {
             resetETEVisuals();
             return;
@@ -451,6 +445,7 @@ function updateEteDist2ArrBar(flightData) {
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
         if (flightData.flight_status === "Deboarding Completed") {
             handleDeboardingCompleted();
+            return;
             // Special case for deboarding completed
             elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
             elements.aircraftImage.style.opacity = '1'; // Slightly transparent
