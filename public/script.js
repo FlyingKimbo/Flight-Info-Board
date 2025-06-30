@@ -315,7 +315,7 @@ const AnimationManager = {
 
         // Only control opacity through animation logic
         if (inCloud === "1") {
-            cloud.style.opacity = '1';
+            cloud.style.opacity = '100';
             console.log('[DEBUG] Starting cloud animation');
             //let increasing = true;
             //let currentOpacity = 0.2;
@@ -327,7 +327,7 @@ const AnimationManager = {
 
                // cloud.style.opacity = currentOpacity;
                // console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
-            }, 50);
+            //}, 50);
         } else {
             console.log('[DEBUG] Cloud hidden (normal state)');
             // Don't force hide if we're debugging
