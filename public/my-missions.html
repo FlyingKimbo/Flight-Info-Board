@@ -209,12 +209,27 @@
 
         .cloud-image {
             position: absolute;
-            top: 20px; /* Changed from negative to positive */
+            top: 20px;
             height: 50px;
-            /* REMOVE opacity: 0 - let JavaScript control this */
             z-index: 7;
-            /* REMOVE CSS animation - we'll control via JavaScript */
-            will-change: opacity; /* Improves animation performance */
+            will-change: opacity;
+            opacity: 0; /* Start hidden */
+            transition: opacity 0.5s ease-in-out; /* Smooth fade */
+        }
+
+        /* Cloud pulsing animation */
+        .cloud-pulse {
+            animation: cloudPulse 2s infinite alternate;
+        }
+
+        @keyframes cloudPulse {
+            from {
+                opacity: 0.2;
+            }
+
+            to {
+                opacity: 0.7;
+            }
         }
 
         .precip-image {

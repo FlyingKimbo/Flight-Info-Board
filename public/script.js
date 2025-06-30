@@ -290,53 +290,24 @@ const AnimationManager = {
         }
     },
 
-    // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        // 1. Clear any existing animation
-        if (this.cloudInterval) {
-            clearInterval(this.cloudInterval);
-            this.cloudInterval = null;
-        }
-
-
-        // 2. Get cloud element with null check
         const cloud = document.getElementById('cloud-image');
-        if (!cloud) {
-            console.error("Cloud element not found!");
-            return;
-        }
-        // 3. Debugging logs
-        console.log(`Cloud animation triggered. inCloud: ${inCloud}`);
-        console.log('Current cloud opacity:', cloud.style.opacity);
+        if (!cloud) return;
 
+        // Clear any existing classes first
+        cloud.classList.remove('cloud-pulse');
 
+        // Force reflow before applying new state
+        void cloud.offsetWidth;
 
-        // 4. Only animate if inCloud === 1
-        if (inCloud === 1) {
-            console.log("Starting cloud pulsing animation");
-            let currentOpacity = 0.2;
-            let increasing = true;
-
-            this.cloudInterval = setInterval(() => {
-                // Update opacity
-                currentOpacity += increasing ? 0.01 : -0.01;
-
-                // Reverse direction at bounds
-                if (currentOpacity >= 0.7) increasing = false;
-                if (currentOpacity <= 0.2) increasing = true;
-
-                // Apply with debugging
-                cloud.style.opacity = currentOpacity;
-                console.log(`Updated cloud opacity: ${currentOpacity.toFixed(2)}`);
-
-            }, 50); // 50ms = 20fps animation
+        if (Number(inCloud) === 1) {
+            // Start pulsing animation
+            cloud.classList.add('cloud-pulse');
+            cloud.style.opacity = '0.2'; // Initial state
         } else {
-            // 5. Ensure cloud is hidden when not in cloud
-            console.log("Hiding cloud (not in cloud)");
+            // Hide completely
             cloud.style.opacity = '0';
-            cloud.style.transition = 'opacity 0.5s ease';
         }
-    
     },
 
     // Update both animations
