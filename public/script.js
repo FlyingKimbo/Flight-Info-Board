@@ -346,19 +346,39 @@ const AnimationManager = {
     }
 };
 function handleDeboardingCompleted() {
-    // Minimal visual refresh for ETE components only
-    const refreshElements = [
-        document.getElementById('ete-bar'),
-        document.getElementById('ete-bar-text'),
-        document.getElementById('aircraft-image')
-    ];
+    // Clear all ETE components visually
+    const elements = {
+        eteBar: document.getElementById('ete-bar'),
+        eteText: document.getElementById('ete-bar-text'),
+        aircraftImage: document.getElementById('aircraft-image'),
+        jetStreamImage: document.getElementById('jetstream-image'),
+        cloudImage: document.getElementById('cloud-image'),
+        precipImage: document.getElementById('precip-image')
+    };
 
-    refreshElements.forEach(el => {
-        if (!el) return;
-        el.style.transform = 'translateZ(0)'; // Force hardware acceleration
-        void el.offsetWidth; // Trigger reflow
-        el.style.transform = '';
-    });
+    // Reset each element to blank/empty state
+    if (elements.eteBar) {
+        elements.eteBar.style.width = '0%';
+        elements.eteBar.style.opacity = '0';
+    }
+
+    if (elements.eteText) {
+        elements.eteText.textContent = '';
+        elements.eteText.style.opacity = '0';
+    }
+
+    if (elements.aircraftImage) {
+        elements.aircraftImage.style.opacity = '0';
+        elements.aircraftImage.src = ''; // Clear image source
+    }
+
+    // Reset weather effects
+    if (elements.jetStreamImage) elements.jetStreamImage.style.opacity = '0';
+    if (elements.cloudImage) elements.cloudImage.style.opacity = '0';
+    if (elements.precipImage) elements.precipImage.style.opacity = '0';
+
+    // Force immediate visual update
+    void document.body.offsetWidth;
 }
 
 function updateEteDist2ArrBar(flightData) {
