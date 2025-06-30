@@ -301,7 +301,7 @@ const AnimationManager = {
             console.error("Cloud element missing!");
             return;
         }
-        /*
+
         // DEBUG: Keep these styles but remove opacity
         cloud.style.cssText = `
         z-index: 9999 !important;
@@ -312,7 +312,7 @@ const AnimationManager = {
         top: 50px !important;
         left: 50px !important;
     `;
-    */
+
         // Only control opacity through animation logic
         if (inCloud === 1) {
             console.log('[DEBUG] Starting cloud animation');
