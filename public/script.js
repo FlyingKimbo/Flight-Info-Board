@@ -328,9 +328,9 @@ const AnimationManager = {
                 console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
             }, 50);
         } else {
-            //console.log('[DEBUG] Cloud hidden (normal state)');
-            // Don't force hide if we're debugging
-            // cloud.style.opacity = '0'; // Comment this out temporarily
+            console.log('[DEBUG] Cloud hidden (normal state)');
+             Don't force hide if we're debugging
+             cloud.style.opacity = '0'; // Comment this out temporarily
         }
     },
 
