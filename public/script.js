@@ -99,64 +99,7 @@ function CreateNewRow(flightData, isStatic = false) {
 
 }
 
-function sortTable(columnIndex, dir = 'asc') {
-    var table = document.getElementById("flightTable");
-    var rows = table.rows;
-    var switching = true;
-    var shouldSwitch, i;
-    var switchcount = 0;
 
-    // Clear existing sort indicators
-    var headers = table.getElementsByTagName("th");
-    for (i = 0; i < headers.length; i++) {
-        headers[i].classList.remove("sort-asc", "sort-desc");
-    }
-
-    while (switching) {
-        switching = false;
-        var rowsArray = Array.prototype.slice.call(rows, 2); // Skip the header row and the green bar row
-
-        for (i = 0; i < rowsArray.length - 1; i++) {
-            shouldSwitch = false;
-            var x = rowsArray[i].getElementsByTagName("TD")[columnIndex];
-            var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex];
-
-            if (dir == "asc") {
-                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            } else if (dir == "desc") {
-                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                    shouldSwitch = true;
-                    break;
-                }
-            }
-        }
-
-        if (shouldSwitch) {
-            rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
-            switching = true;
-            switchcount++;
-        } else {
-            if (switchcount == 0 && dir == "asc") {
-                dir = "desc";
-                switching = true;
-            }
-        }
-    }
-
-    // Add sort indicator to the sorted column header
-    if (dir == "asc") {
-        headers[columnIndex].classList.add("sort-asc");
-    } else {
-        headers[columnIndex].classList.add("sort-desc");
-    }
-
-    // Save sort state
-    localStorage.setItem('sortColumnIndex', columnIndex);
-    localStorage.setItem('sortDirection', dir);
-}
 
 async function updateFlightTable(staticData) {
     const tbody = document.getElementById("flight-rows");
@@ -181,58 +124,11 @@ async function updateFlightTable(staticData) {
 }
 
 
-async function offfetch_flight_static() {
-    try {
-        // Corrected: the destructured property should be 'data' not 'staticData'
-        const { data, error } = await supabase
-            .from('flights_static')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(10)  // Changed to get multiple records (more typical for a table)
-        // Removed .single() since we want multiple rows
-
-        if (error) throw error;
-
-        if (data && data.length > 0) {
-            updateFlightTable(data);
-            return data;
-        } else {
-            console.log('No data found');
-            return null;
-        }
-
-    } catch (error) {
-        console.error('Error:', error.message);
-        return null;
-    }
-}
 
 
-// Helper function to extract aircraft type and flight number
-const parseFlightData = (currentFlight) => {
-    if (!currentFlight) return { aircraftType: '', flightNumber: '' };
 
-    const parts = currentFlight.split(' ');
-    return {
-        aircraftType: parts[0] || '',
-        flightNumber: parts.slice(1).join(' ') || '' // Handles cases with spaces in flight number
-    };
-};
 
-// Update aircraft images
-const updateAircraftImages = (data) => {
-    const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
 
-    // Update main aircraft image
-    if (aircraftType) {
-        elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-        elements.aircraftImage.alt = aircraftType;
-    }
-
-    // Update small aircraft icon in progress bar
-    elements.aircraftIcon.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-    elements.aircraftIcon.alt = aircraftType;
-};
 function updatePositions() {
     let Xoffset = 0;
     let XoffsetFix = 250;
@@ -438,19 +334,7 @@ function updateEteDist2ArrBar(flightData) {
 
 
 
-// Handle status cell updates with animation
-const updateStatusCell = (status) => {
-    const statusCell = elements.status;
 
-    // Remove all blinking classes
-    statusCell.className = 'flight-status';
-
-    if (status) {
-        statusCell.textContent = status;
-        const statusClass = getStatusClass(status);
-        if (statusClass) statusCell.classList.add(statusClass);
-    }
-};
 
 
 
@@ -467,52 +351,9 @@ const getBlinkingClass = (status) => {
     return statusMap[status] || '';
 };
 
-// Update weather effects
-const updateWeatherEffects = (data) => {
-    // Cloud visibility
-    elements.cloudImage.style.display = data.airplane_in_cloud ? 'block' : 'none';
 
-    // Precipitation effects
-    if (data.ambient_precipstate) {
-        elements.precipImage.style.display = 'block';
-        elements.precipImage.src = getPrecipImage(data.ambient_precipstate);
-    } else {
-        elements.precipImage.style.display = 'none';
-    }
-};
 
-// Helper function for precipitation images
-const getPrecipImage = (precipState) => {
-    const precipImages = {
-        'Rain': '/Image/Weather/rain.gif',
-        'Snow': '/Image/Weather/snow.gif',
-        'Thunderstorm': '/Image/Weather/lightning.gif'
-    };
-    return precipImages[precipState] || '';
-};
 
-// Update all UI elements
-const updateFlightUI = (data) => {
-    //const { aircraftType, flightNumber } = parseFlightData(data.current_flight);
-
-    // Update basic flight info
-    //elements.aircraftName.textContent = parseFlightData(data.current_flight).aircraftType || 'N/A';
-   // elements.flightNumber.textContent = flightNumber || 'N/A';
-    //elements.departure.textContent = data.departure_location || 'N/A';
-    //elements.destination.textContent = data.destination || 'N/A';
-
-    // Update aircraft images
-    //updateAircraftImages(data);
-
-    // Update status with animation class
-    //updateStatusCell(data.flight_status);
-
-    // Update progress bar
-    //updateProgressBar(data);
-
-    // Update weather effects
-    //updateWeatherEffects(data);
-};
 
 // Set up realtime subscription
 async function fetch_flight_static() {
@@ -821,9 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
-        .then(({ data }) => {
-            if (data) updateFlightUI(data);
-        });
+     
 
     // Then set up realtime updates
     
@@ -834,9 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
-        .then(({ data }) => {
-            if (data) updateFlightUI(data);
-        });
+    
         
     setupRealtimeUpdates();
     setupStaticRealtimeUpdates(); // Cell-level updates
