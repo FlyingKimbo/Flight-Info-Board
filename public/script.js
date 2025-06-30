@@ -765,7 +765,7 @@ function updateFlightRow(row, flightData) {
             }
         }
     }
-    
+    updateCellsAfterBlinking(row, flightData);
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
