@@ -616,7 +616,7 @@ function Update_cells_values(staticData) {
         destination: staticData.destination,
         image: `/Image/Aircraft_Type/${staticData.aircraft || 'default'}.png`
     };
-    console.log('🟢 DEBUG updateFlightRow:', staticData.flightStatus);
+    
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
 
     if (existingRow) {
@@ -650,7 +650,7 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
 
-    
+    console.log('🟢 DEBUG updateFlightRow:', staticData.flightStatus);
 
     // First check if status is changing
     const statusCell = row.cells[3];
