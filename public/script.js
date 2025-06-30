@@ -439,6 +439,7 @@ function updateEteDist2ArrBar(flightData) {
         // Handle aircraft image - MODIFIED SECTION
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
         if (flightData.flight_status === "Deboarding Completed") {
+            handleDeboardingCompleted();
             // Special case for deboarding completed
             elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
             elements.aircraftImage.style.opacity = '1'; // Slightly transparent
