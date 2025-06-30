@@ -649,36 +649,48 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
-
     console.log('🟢 DEBUG updateFlightRow:', flightData.flightStatus);
 
     // First check if status is changing
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
-    
- 
-    // Check for non-blink statuses using flightData (not global)
+    // Check for non-blink statuses
     const shouldRemoveBlinking =
         flightData.flightStatus === null ||
         flightData.flightStatus === "-" ||
         flightData.flightStatus === "Deboarding Completed";
 
-    // 1. Remove blinking first if needed
+    // 1. FORCE REMOVE BLINKING FIRST if needed
     if (shouldRemoveBlinking) {
+        console.log('🛑 Removing blinking for status:', flightData.flightStatus);
         for (let i = 0; i < row.cells.length; i++) {
-            // Remove all blinking classes
+            // Completely reset classes (more aggressive approach)
             row.cells[i].className = row.cells[i].className
                 .split(' ')
                 .filter(cls => !cls.startsWith('blink-'))
                 .join(' ');
 
+            // Add a neutral class if needed
+            row.cells[i].classList.add('no-blink');
+
             // Reset aircraft image display
             if (i === 0) {
                 const img = row.cells[i].querySelector('img');
-                if (img) img.style.display = '';
+                if (img) {
+                    img.style.display = '';
+                    img.classList.remove(...Array.from(img.classList).filter(c => c.startsWith('blink-')));
+                }
             }
         }
+        // Add this to ensure blinking stops completely
+        row.style.animation = 'none';
+        row.style.webkitAnimation = 'none';
+        void row.offsetWidth; // Trigger reflow
+        row.style.animation = null;
+        row.style.webkitAnimation = null;
+
+        return; // Skip the rest of the updates for "-" status
     }
 
     // 1. Aircraft Cell (cell[0])
