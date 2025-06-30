@@ -292,48 +292,21 @@ const AnimationManager = {
 
     // Cloud animation (uses airplane_in_cloud)
     startCloudOpacityCycle(inCloud) {
-        // Clear existing interval
-        if (this.cloudInterval) clearInterval(this.cloudInterval);
-
-        // Get and verify cloud element
         const cloud = document.getElementById('cloud-image');
-        if (!cloud) {
-            console.error("Cloud element missing!");
-            return;
+        if (!cloud) return;
+
+        // Handle both string "1"/"0" and number 1/0
+        const shouldShow = String(inCloud) === "1";
+
+        // Set image source if not already set
+        if (!cloud.src) {
+            cloud.src = '/Image/Cloud/cloud.png'; // Your actual image path
         }
 
-        // DEBUG: Keep these styles but remove opacity
-        cloud.style.cssText = `
-        z-index: 9999 !important;
-        border: 2px solid red !important;
-        position: absolute !important;
-        width: 100px !important;
-        height: 100px !important;
-        top: 50px !important;
-        left: 50px !important;
-    `;
-
-        // Only control opacity through animation logic
-        if (inCloud === "1") {
-            cloud.style.opacity = '100';
-            console.log('[DEBUG] Starting cloud animation');
-            //let increasing = true;
-            //let currentOpacity = 0.2;
-
-            //this.cloudInterval = setInterval(() => {
-             //   currentOpacity += increasing ? 0.01 : -0.01;
-             //   if (currentOpacity >= 1) increasing = false;
-             //   if (currentOpacity <= 0.7) increasing = true;
-
-               // cloud.style.opacity = currentOpacity;
-               // console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
-            //}, 50);
-        } else {
-            console.log('[DEBUG] Cloud hidden (normal state)');
-            // Don't force hide if we're debugging
-            //cloud.style.opacity = '0'; // Comment this out temporarily
-        }
+        // Toggle visibility
+        cloud.classList.toggle('visible', shouldShow);
     },
+
 
     // Update both animations
     updateAnimations(flightState, inCloud) {
@@ -346,24 +319,7 @@ const AnimationManager = {
        if (this.cloudInterval) clearInterval(this.cloudInterval);
     }
 };
-function startCloudOpacityCycling(cloudImage) {
-    let opacity = 0.3;
-    let direction = 1; // 1 for increasing, -1 for decreasing
-    const increment = 0.01; // Smaller increment for smoother transition
-    const intervalTime = 30; // Smaller interval for more frequent updates
 
-    cloudOpacityInterval = setInterval(() => {
-        opacity += direction * increment;
-        if (opacity >= 1.0) {
-            opacity = 1.0;
-            direction = -1;
-        } else if (opacity <= 0.3) {
-            opacity = 0.3;
-            direction = 1;
-        }
-        cloudImage.style.opacity = opacity;
-    }, intervalTime); // Adjust the interval as needed
-}
 
 
 function updateEteDist2ArrBar(flightData) {
@@ -452,7 +408,7 @@ function updateEteDist2ArrBar(flightData) {
             elements.aircraftImage.style.opacity = '1';
         }
 
-        startCloudOpacityCycling(cloudImage);
+        
 
 
         // Update ETE text

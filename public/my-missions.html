@@ -207,17 +207,29 @@
             z-index: 3;
         }
 
-        .cloud-image {
+        .cloud-imageoff {
             position: relative;
             top: -20px; /*Adjust as needed to align with the green bar */
             height: 50px; /*Adjust as needed */
             /*opacity: 0;*/
             opacity: 1;
-            z-index: 6;
+            z-index: 5;
             /*animation: opacity 5s ease-in-out;*/ /* Cycle over 4 seconds infinitely */
             *animation: opacity 5s ease-in-out;
         }
 
+        #cloud-image {
+            position: absolute;
+            top: 20px;
+            height: 50px;
+            z-index: 7;
+            opacity: 0; /* Start hidden */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+            #cloud-image.visible {
+                opacity: 1;
+            }
 
         .precip-image {
             position: absolute;
