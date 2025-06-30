@@ -62,7 +62,7 @@ function CreateNewRow(flightData, isStatic = false) {
     newRow.appendChild(departureCell);
     newRow.appendChild(flightStatusCell);
     newRow.appendChild(destinationCell);
-    /*
+    
     // MODIFIED: Conditional blinking based on isStatic
     if (!isStatic) {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
@@ -74,7 +74,7 @@ function CreateNewRow(flightData, isStatic = false) {
             destinationCell.classList.add(blinkingClass); // Only blink status cell
         }
     }
-    */
+    
     // NEW: Add static flight class if needed
     if (isStatic) {
         newRow.classList.add('static-flight');
@@ -644,7 +644,7 @@ function Update_cells_values(staticData) {
         setTimeout(() => {
             CreateNewRow(flightPayload, true);
             console.log('Created new row for:', flightPayload.flightNumber);
-        }, 100);
+        }, 2000);
     }
 }
 
@@ -765,7 +765,7 @@ function updateFlightRow(row, flightData) {
             }
         }
     }
-    updateCellsAfterBlinking(row, flightData);
+    //updateCellsAfterBlinking(row, flightData);
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
