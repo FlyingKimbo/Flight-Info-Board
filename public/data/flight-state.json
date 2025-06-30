@@ -1,7 +1,7 @@
 [
     {
         "aircraft": "Airbus330-MAS",
-        "departure": "bbbb",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "MAS12",
         "flightStatus": "-",
@@ -33,7 +33,7 @@
     },
     {
         "aircraft": "Concorde-BAW",
-        "departure": "bbbb",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "BAW702",
         "flightStatus": "-",
@@ -145,7 +145,7 @@
     },
     {
         "aircraft": "Longitude",
-        "departure": "bbbb",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "NC890",
         "flightStatus": "-",
@@ -153,7 +153,7 @@
     },
     {
         "aircraft": "Boeing773ER-SIA",
-        "departure": "ffffffffff",
+        "departure": "WSSS Changi",
         "destination": "-",
         "flightNumber": "SIA135",
         "flightStatus": "-",

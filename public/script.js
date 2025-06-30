@@ -62,7 +62,7 @@ function CreateNewRow(flightData, isStatic = false) {
     newRow.appendChild(departureCell);
     newRow.appendChild(flightStatusCell);
     newRow.appendChild(destinationCell);
-
+    /*
     // MODIFIED: Conditional blinking based on isStatic
     if (!isStatic) {
         const blinkingClass = getBlinkingClass(flightData.flightStatus);
@@ -74,7 +74,7 @@ function CreateNewRow(flightData, isStatic = false) {
             destinationCell.classList.add(blinkingClass); // Only blink status cell
         }
     }
-
+    */
     // NEW: Add static flight class if needed
     if (isStatic) {
         newRow.classList.add('static-flight');
@@ -319,7 +319,7 @@ const AnimationManager = {
                 console.log('[DEBUG] Current opacity:', currentOpacity); // Add this line
             }, 50);
         } else {
-            console.log('[DEBUG] Cloud hidden (normal state)');
+            //console.log('[DEBUG] Cloud hidden (normal state)');
             // Don't force hide if we're debugging
             // cloud.style.opacity = '0'; // Comment this out temporarily
         }
@@ -338,7 +338,7 @@ const AnimationManager = {
 };
 
 function updateEteDist2ArrBar(flightData) {
-    console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
+    //console.log('Cloud element exists:', !!document.getElementById('cloud-image'));
 
     if (!flightData || !flightData.flight_state) {
         AnimationManager.cleanup();
@@ -366,10 +366,10 @@ function updateEteDist2ArrBar(flightData) {
             'airplane_in_cloud',
             'ambient_precipstate'
         ];
-        console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
-        console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
-        console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
-
+        //console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
+        //console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
+        //console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
+        
 
         // Get DOM elements
         const elements = {
@@ -580,7 +580,7 @@ const setupStaticRealtimeUpdates = () => {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-            console.log('Realtime change detected:', payload);
+           // console.log('Realtime change detected:', payload);
 
             // Process the update (modified to handle inserts)
             if (payload.eventType === 'INSERT' ) {
@@ -616,7 +616,7 @@ function Update_cells_values(staticData) {
         destination: staticData.destination,
         image: `/Image/Aircraft_Type/${staticData.aircraft || 'default'}.png`
     };
-
+    console.log('🟢 DEBUG updateFlightRow:', staticData.flightStatus);
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
 
     if (existingRow) {
@@ -649,10 +649,15 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
+
+    
+
     // First check if status is changing
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
+    
+ 
     // Check for non-blink statuses using flightData (not global)
     const shouldRemoveBlinking =
         flightData.flightStatus === null ||
@@ -739,15 +744,13 @@ function updateFlightRow(row, flightData) {
             }
         }
     }
-
-    // Visual feedback
+    
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
 
 
 
-    
 
 
 
