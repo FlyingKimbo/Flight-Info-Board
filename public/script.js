@@ -479,24 +479,14 @@ const setupStaticRealtimeUpdates = () => {
                 if (defaultImg) defaultImg.remove();
             } else {
 
-                const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
-                if (row) {
-                    const statusCell = row.cells[3]; // Status cell
-                    const currentStatus = statusCell?.textContent.trim();
-                    const newStatus = payload.new.flightstatus;
-
-                    // Case A: Transition to "-"
-                    if (currentStatus && currentStatus !== "-" && newStatus === "-") {
+                // NEW: Special handling for Deboarding Completed -> - transition
+                if (realtime_flightstatus === "Deboarding Completed") {
+                    const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
+                    if (row) {
+                        // Clone and replace row to reset DOM state
                         const newRow = row.cloneNode(true);
                         row.parentNode.replaceChild(newRow, row);
-                        void newRow.offsetWidth;
-                    }
-                    // Case B: Normal blinking case
-                    else if (currentStatus && currentStatus !== newStatus) {
-                        [row, ...row.cells].forEach(el => {
-                            el.style.animation = 'none';
-                            void el.offsetWidth;
-                        });
+                        void newRow.offsetWidth; // Force reflow
                     }
                 }
 
