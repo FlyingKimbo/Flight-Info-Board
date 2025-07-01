@@ -521,6 +521,10 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
         if (rowAircraft === aircraft &&
             rowFlightNumber === flightNumber) {
+            if (flightData) {
+                updateCellsAfterBlinking(row, flightData);
+            }
+
             return row;
         }
     }
@@ -639,8 +643,8 @@ function updateFlightRow(row, flightData) {
         }
     }
     //updateCellsAfterBlinking(row, flightData);
-    row.classList.add('row-updated');
-    setTimeout(() => row.classList.remove('row-updated'), 1000);
+    //row.classList.add('row-updated');
+    //setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
 
 function updateCellsAfterBlinking(row, flightData) {
@@ -697,14 +701,7 @@ function updateCellsAfterBlinking(row, flightData) {
     setTimeout(() => row.classList.remove('blink-updated'), 500);
 }
 
-// Function to check if the flights_static table is empty
-async function isFlightsTableEmpty() {
-    const { data } = await supabase
-        .from('flights_static')
-        .select('*')
-        .limit(1);
-    return data?.length === 0;
-}
+
 
 
 // Initialize when DOM is loaded
