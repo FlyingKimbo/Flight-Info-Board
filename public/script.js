@@ -535,11 +535,19 @@ function updateFlightRow(row, flightData) {
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
+    
+
     // Check for non-blink statuses
     const shouldRemoveBlinking =
         flightData.flightStatus === null ||
         flightData.flightStatus === "-" ||
         flightData.flightStatus === "Deboarding Completed";
+
+   
+    if (realtime_flightstatus === "Boarding") {
+        flightData.flightStatus = realtime_flightstatus;
+    }
+
 
     // 1. FORCE REMOVE BLINKING FIRST if needed
     if (shouldRemoveBlinking) {
