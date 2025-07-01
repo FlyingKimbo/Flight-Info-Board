@@ -131,7 +131,7 @@ async function updateFlightTable(staticData) {
 
 function updatePositions() {
     let Xoffset = 0;
-    let XoffsetFix = 250;
+    let XoffsetFix = 255;
 
 
     if (GreenbarPercentage >= 50) {
