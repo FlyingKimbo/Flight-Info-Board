@@ -484,7 +484,7 @@ const setupStaticRealtimeUpdates = () => {
         .subscribe();
 };
 
-function Update_cells_values(staticData) {
+function Update_cells_values(staticData, flightData) {
     if (!staticData) return;
 
     // Convert data names to match your CreateNewRow expectations
@@ -500,6 +500,12 @@ function Update_cells_values(staticData) {
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
 
     if (existingRow) {
+        if (flightData) {
+            setTimeout(() => {
+                updateCellsAfterBlinking(row, flightData);
+            }, 2000);
+
+        }
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
