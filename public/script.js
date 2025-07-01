@@ -479,15 +479,21 @@ const setupStaticRealtimeUpdates = () => {
                 if (defaultImg) defaultImg.remove();
             } else {
 
-                // NEW: Special handling for Deboarding Completed -> - transition
-                if (payload.old?.flightstatus === "Deboarding Completed" &&
+                // NEW: Detect ANY status transition to "-"
+                if (payload.old?.flightstatus &&
+                    payload.old.flightstatus !== "-" &&
                     payload.new.flightstatus === "-") {
+
                     const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
                     if (row) {
                         // Clone and replace row to reset DOM state
                         const newRow = row.cloneNode(true);
                         row.parentNode.replaceChild(newRow, row);
                         void newRow.offsetWidth; // Force reflow
+
+                        // Update the fresh row
+                        Update_cells_values(payload.new);
+                        return;
                     }
                 }
 
