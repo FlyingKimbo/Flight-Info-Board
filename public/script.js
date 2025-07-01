@@ -488,7 +488,7 @@ const setupStaticRealtimeUpdates = () => {
         .subscribe();
 };
 
-function Update_cells_values(staticData, flightData) {
+function Update_cells_values(staticData) {
     if (!staticData) return;
 
     // Convert data names to match your CreateNewRow expectations
@@ -527,7 +527,7 @@ function findMatchingFlightRow(aircraft, flightNumber) {
         if (rowAircraft === aircraft &&
             rowFlightNumber === flightNumber) {
             // Safely update if flightData exists
-            
+            updateCellsAfterBlinking(row, flightData);
             return row;
         }
     }
