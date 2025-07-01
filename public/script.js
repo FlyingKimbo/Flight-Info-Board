@@ -424,6 +424,23 @@ const setupStaticRealtimeUpdates = () => {
         }, (payload) => {
             // Original logic (preserved exactly)
             if (payload.eventType === 'INSERT') {
+
+                // Check if this is the first row being inserted
+                const { count } = await supabase
+                    .from('flights_static')
+                    .select('*', { count: 'exact', head: true });
+
+                if (count === 1) {  // Only refresh if this is the first row
+                  
+
+                    // Refresh after a short delay (1 second)
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+
+
+
                 CreateNewRow({
                     aircraft: payload.new.aircraft,
                     flightNumber: payload.new.flightnumber,
