@@ -1,7 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script> /* refresh once when in focus, not in tab or minimized will not refresh */
+        if (!sessionStorage.getItem('refreshed')) {
+            const handleVisibilityChange = () => {
+                if (document.visibilityState === 'visible') {
+                    sessionStorage.setItem('refreshed', 'true');
+                    window.location.reload();
+                    document.removeEventListener('visibilitychange', handleVisibilityChange);
+                }
+            };
+
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // Also check immediately in case page is already visible
+            if (document.visibilityState === 'visible') {
+                sessionStorage.setItem('refreshed', 'true');
+                window.location.reload();
+            }
+        }
+    </script>
+
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-45NLM76RVR"></script>
     <script>
@@ -11,10 +32,10 @@
 
         gtag('config', 'G-45NLM76RVR');
     </script>
-	
+
     <title>Flight Status</title>
 
-    
+
 
     <style>
         body {
@@ -33,7 +54,7 @@
             border: 2px solid rgba(0, 0, 0, 0.5); /* 50% opacity for table border */
             border-collapse: collapse; /* To collapse borders between cells */
             position: relative;
-	    margin-top: 50px; /* Shifts the table down by 200px */
+            margin-top: 50px; /* Shifts the table down by 200px */
         }
 
         th, td {
@@ -47,7 +68,8 @@
         }
 
         .cell-content {
-            *display: flex;*
+            *display: flex;
+            *
             align-items: center;
             justify-content: center;
         }
@@ -62,7 +84,6 @@
 
         .blinking-boarding {
             animation: blinker-boarding 4s linear infinite;
-            
         }
 
         @keyframes blinker-boarding {
@@ -73,7 +94,6 @@
 
         .blinking-departed {
             animation: blinker-departed 4s linear infinite;
-            
         }
 
         @keyframes blinker-departed {
@@ -101,7 +121,7 @@
                 background-color: red; /* Delayed color */
             }
         }
-        
+
         .blinking-landed {
             animation: blinker-landed 2s linear infinite;
         }
@@ -163,7 +183,7 @@
         th.sort-desc:after {
             content: " ▼";
         }
-    
+
         .ete-bar-container {
             position: relative;
             height: 20px;
