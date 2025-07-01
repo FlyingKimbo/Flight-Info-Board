@@ -499,37 +499,32 @@ function Update_cells_values(staticData, flightData) {
     
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
-    if (existingRow) {      
-        // 1. FIRST apply blinking if status changed
+    if (existingRow) {
+        // 1. Check if status changed and requires blinking
         const statusCell = existingRow.cells[3];
-        const isStatusChanged = statusCell && statusCell.textContent !== flightPayload.flightStatus;
+        const isStatusChanging = statusCell &&
+            statusCell.textContent !== flightPayload.flightStatus &&
+            shouldBlink(flightPayload.flightStatus);
 
-        if (isStatusChanged &&
-            flightPayload.flightStatus &&
-            !["-", "Deboarding Completed"].includes(flightPayload.flightStatus)) {
+        // 2. If blinking needed
+        if (isStatusChanging) {
+            // A. Remove previous blinking IMMEDIATELY
+            [existingRow, ...existingRow.cells].forEach(el => {
+                el.className = el.className.split(' ')
+                    .filter(cls => !cls.startsWith('blink-'))
+                    .join(' ');
+            });
 
+            // B. Apply new blinking class
             const blinkClass = getBlinkingClass(flightPayload.flightStatus);
-            if (blinkClass) {
-                // Clear previous blinking
-                Array.from(existingRow.cells).forEach(cell => {
-                    cell.className = cell.className
-                        .split(' ')
-                        .filter(cls => !cls.startsWith('blink-'))
-                        .join(' ');
-                });
+            existingRow.classList.add(blinkClass);
 
-                // Apply new blinking
-                Array.from(existingRow.cells).forEach(cell => {
-                    cell.classList.add(blinkClass);
-                });
-
-                // Auto-remove blinking after 3 seconds
-                setTimeout(() => {
-                    updateFlightRow(existingRow, flightPayload);
-                }, 3000);
-                return;
-            }
+            // C. Update content AFTER blink duration (3000ms)
+            setTimeout(() => {
+                updateFlightRow(existingRow, flightPayload);
+            }, 3000);
         }
+        // 3. If no blinking needed
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
