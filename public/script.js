@@ -535,7 +535,7 @@ function updateFlightRow(row, flightData) {
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
 
-    
+    updateCellsAfterBlinking(row, flightData);
 
     // Check for non-blink statuses
     const shouldRemoveBlinking =
@@ -565,11 +565,11 @@ function updateFlightRow(row, flightData) {
 
             console.log('Blinking removed after delay');
         }, 3000); // 300ms delay to allow ongoing animation to complete
-        updateCellsAfterBlinking(row, flightData);
+        
         // Refresh after delay
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        //setTimeout(() => {
+            //window.location.reload();
+        //}, 1000);
         return;
     }
 
