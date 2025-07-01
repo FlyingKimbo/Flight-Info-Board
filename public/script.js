@@ -413,7 +413,7 @@ const setupRealtimeUpdates = () => {
         .subscribe();
 };
 
-
+let hasRows = false; // Track if we had rows initially
 const setupStaticRealtimeUpdates = () => {
     return supabase
         .channel('flight-updates-static')
@@ -422,6 +422,29 @@ const setupStaticRealtimeUpdates = () => {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
+
+            // Check table count after each change
+            supabase
+                .from('flights_static')
+                .select('*', { count: 'exact', head: true })
+                .then(({ count }) => {
+                    const nowHasRows = count > 0;
+
+                    // If we previously had rows but now don't
+                    if (hasRows && !nowHasRows) {
+                        // Visual feedback before refresh
+                        document.body.style.opacity = '0.7';
+                        document.body.style.transition = 'opacity 0.5s';
+
+                        // Refresh after delay
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+
+                    // Update our tracking
+                    hasRows = nowHasRows;
+                });
             // Original logic (preserved exactly)
             if (payload.eventType === 'INSERT') {
 
@@ -647,9 +670,6 @@ function updateCellsAfterBlinking(row, flightData) {
         const cellIndex = parseInt(index);
         if (row.cells[cellIndex] && value !== undefined) {
             row.cells[cellIndex].textContent = value;
-            setTimeout(() => {
-                window.location.reload();
-            }, 100);
         }
     });
 
