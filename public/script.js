@@ -571,7 +571,7 @@ function updateFlightRow(row, flightData) {
          //   window.location.reload();
         //}, 1000);
 
-        updateCellsAfterBlinking(row, flightData);
+        //updateCellsAfterBlinking(row, flightData);
         return;
     }
     
