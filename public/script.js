@@ -571,7 +571,7 @@ function updateFlightRow(row, flightData) {
          //   window.location.reload();
         //}, 1000);
 
-        //updateCellsAfterBlinking(row, flightData);
+        updateCellsAfterBlinking(row, flightData);
         return;
     }
     
@@ -638,7 +638,7 @@ function updateFlightRow(row, flightData) {
             }
         }
     }
-    updateCellsAfterBlinking(row, flightData);
+    //updateCellsAfterBlinking(row, flightData);
     row.classList.add('row-updated');
     setTimeout(() => row.classList.remove('row-updated'), 1000);
 }
