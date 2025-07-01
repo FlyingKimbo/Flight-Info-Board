@@ -304,15 +304,15 @@ function updateEteDist2ArrBar(flightData) {
             // Normal operation for other statuses
             elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
             elements.aircraftImage.style.opacity = '1';
-        
+            // Update ETE text
+            elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
+            elements.eteText.style.opacity = '1';
         }
 
         
 
 
-        // Update ETE text
-        elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
-        elements.eteText.style.opacity = '1';
+        
 
 
 
