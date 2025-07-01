@@ -296,16 +296,13 @@ function updateEteDist2ArrBar(flightData) {
         if (flightData.flight_status === "Deboarding Completed") {
             
             // Special case for deboarding completed
-            elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
-            elements.aircraftImage.style.opacity = '1'; // Slightly transparent
+            
+            
         } else if (aircraftType) {
             // Normal operation for other statuses
             elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
             elements.aircraftImage.style.opacity = '1';
-        } else {
-            // Fallback for empty/missing aircraft type
-            elements.aircraftImage.src = '/Image/Aircraft_Type/default_aircraft.png';
-            elements.aircraftImage.style.opacity = '1';
+        
         }
 
         
