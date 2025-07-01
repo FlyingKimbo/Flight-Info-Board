@@ -422,25 +422,22 @@ const setupStaticRealtimeUpdates = () => {
             schema: 'public',
             table: 'flights_static'
         }, (payload) => {
-           // console.log('Realtime change detected:', payload);
+            // Original logic (preserved exactly)
+            if (payload.eventType === 'INSERT') {
+                CreateNewRow({
+                    aircraft: payload.new.aircraft,
+                    flightNumber: payload.new.flightnumber,
+                    departure: payload.new.departure,
+                    flightStatus: payload.new.flightstatus,
+                    destination: payload.new.destination,
+                    image: `/Image/Aircraft_Type/${payload.new.aircraft}.png` // Original path
+                }, true);
 
-            // Process the update (modified to handle inserts)
-            if (payload.eventType === 'INSERT' ) {
-                // For new rows, create immediately
-
-                
-                    CreateNewRow({
-                        aircraft: payload.new.aircraft,
-                        flightNumber: payload.new.flightnumber,
-                        departure: payload.new.departure,
-                        flightStatus: payload.new.flightstatus,
-                        destination: payload.new.destination,
-                        image: `/Image/Aircraft_Type/${payload.new.aircraft}.png`
-                    }, true);
-                
+                // NEW: Remove default image when first row arrives (non-intrusive)
+                const defaultImg = document.querySelector('#flight-image-container .flight-image[src*="default.png"]');
+                if (defaultImg) defaultImg.remove();
             } else {
-                // For updates, use our existing logic
-                Update_cells_values(payload.new);
+                Update_cells_values(payload.new); // Original update logic
             }
         })
         .subscribe();
@@ -649,11 +646,32 @@ function updateCellsAfterBlinking(row, flightData) {
     //setTimeout(() => row.classList.remove('blink-updated'), 500);
 }
 
+// Function to check if the flights_static table is empty
+async function isFlightsTableEmpty() {
+    const { data, error } = await supabase
+        .from('flights_static')
+        .select('*')
+        .limit(1); // Just check if any row exists
 
+    return data?.length === 0; // true if empty, false if data exists
+}
 
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    const isEmpty = await isFlightsTableEmpty();
+    const flightImageContainer = document.getElementById('flight-image-container');
+    if (isEmpty) {
+        flightImageContainer.innerHTML = `
+      <img class="flight-image"
+           src="/Image/Aircraft_Type/default.png"
+           alt="Default Aircraft"
+           style="width:100px;height:auto;box-shadow:4px 4px 10px rgba(0,0,0,1);">
+    `;
+    }
+
+
+
     fetch_flight_static();
     
     // First load initial data

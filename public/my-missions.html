@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script> /* refresh once when in focus, not in tab or minimized will not refresh */
+    <script>
+    /* refresh once when in focus, not in tab or minimized will not refresh */
         if (!sessionStorage.getItem('refreshed')) {
             const handleVisibilityChange = () => {
                 if (document.visibilityState === 'visible') {
@@ -35,7 +36,7 @@
 
     <title>Flight Status</title>
 
-
+    
 
     <style>
         body {
@@ -260,49 +261,66 @@
             filter: brightness(5); /* Increase brightness */
             animation: opacity 5s ease-in-out; /* Cycle over 4 seconds infinitely           <pre id="flight-data">Loading...</pre> <pre id="saved-flight-state">Loading...</pre>*/
         }
+
+        
+        /* Add this new style at the bottom of your existing styles */
+        #default-image-placeholder {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+        }
     </style>
+    
 </head>
 <body>
-  <main>
-    <!-- <pre id="flight-data">Loading...</pre>-->
-    <table id="flightTable" border='1'>
-        <tr>
-            <th onclick="sortTable(0)">Aircraft</th>
-            <th>Flight Number</th>
-            <th>Departure/Location</th>
-            <th onclick="sortTable(3)">Flight Status</th>
-            <th>Destination</th>
-        </tr>
-        <tr>
-            <td colspan="5" class="ete-bar-container">
-                <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
-                <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
-                <img id="aircraft-image" class="aircraft-image" src="" alt="">
-                <img id="jetstream-image" class="jetstream-image" src="" alt="">
-                <img id="cloud-image" class="cloud-image" src="" alt="">
-                <img id="precip-image" class="precip-image flipped" src="" alt="Precipitation">
-            </td>
-        </tr>
-        <tbody id="flight-rows">
+    <main>
+        <!-- <pre id="flight-data">Loading...</pre>-->
+        <table id="flightTable" border='1'>
             <tr>
-                <td class="flight-aircraft">
-                    <div class="cell-content">
-                        <img class="flight-image" src="" alt="Aircraft Image" style="width:100px;height:auto;box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);">
-                        <span>Waiting for Happiness...</span>
-                    </div>
-                </td>
-                <td class="flight-number">-</td>
-                <td class="flight-departure">-</td>
-                <td class="flight-status">-</td>
-                <td class="flight-destination">-</td>
+                <th onclick="sortTable(0)">Aircraft</th>
+                <th>Flight Number</th>
+                <th>Departure/Location</th>
+                <th onclick="sortTable(3)">Flight Status</th>
+                <th>Destination</th>
             </tr>
-        </tbody>
-    </table>
- 
-  
-    
+            <tr>
+                <td colspan="5" class="ete-bar-container">
+                    <div class="ete-bar" id="ete-bar" style="width: 0%;"></div>
+                    <span class="ete-bar-text" id="ete-bar-text"></span> <!-- Add this -->
+                    <img id="aircraft-image" class="aircraft-image" src="" alt="">
+                    <img id="jetstream-image" class="jetstream-image" src="" alt="">
+                    <img id="cloud-image" class="cloud-image" src="" alt="">
+                    <img id="precip-image" class="precip-image flipped" src="" alt="Precipitation">
+                </td>
+            </tr>
+            <tbody id="flight-rows">
+                <tr>
+                    <td class="flight-aircraft">
+                        <div class="cell-content">
+                            <img class="flight-image" src="" alt="Aircraft Image" style="width:100px;height:auto;box-shadow: 4px 4px 10px rgba(0, 0, 0, 1);">
+                            <span>Waiting for Happiness...</span>
+                        </div>
+                    </td>
+                    <td class="flight-number">-</td>
+                    <td class="flight-departure">-</td>
+                    <td class="flight-status">-</td>
+                    <td class="flight-destination">-</td>
+                </tr>
+            </tbody>
+        </table>
 
-    <script type="module" src="script.js"></script>
-  </main>
+        <!-- Add this new element at the bottom of your body (doesn't affect existing layout) -->
+        <div id="default-image-placeholder">
+            <img src="/Image/Aircraft_Type/default.png"
+                 alt="No Flights Available"
+                 style="width:300px; height:auto; box-shadow: 8px 8px 20px rgba(0,0,0,0.8);">
+        </div>
+
+
+        <script type="module" src="script.js"></script>
+    </main>
 </body>
 </html>
