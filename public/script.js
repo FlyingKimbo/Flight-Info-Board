@@ -658,15 +658,27 @@ async function isFlightsTableEmpty() {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
-    const isEmpty = await isFlightsTableEmpty();
-    const flightImageContainer = document.getElementById('flight-image-container');
-    if (isEmpty) {
-        flightImageContainer.innerHTML = `
-      <img class="flight-image"
-           src="/Image/Aircraft_Type/default.png"
-           alt="Default Aircraft"
-           style="width:100px;height:auto;box-shadow:4px 4px 10px rgba(0,0,0,1);">
-    `;
+    try {
+        // Check if flights table is empty
+        const isEmpty = await isFlightsTableEmpty();
+        const flightImages = document.querySelectorAll('.cell-content .flight-image');
+
+        if (isEmpty && flightImages.length > 0) {
+            flightImages.forEach(img => {
+                // Only set src if it's empty (preserve existing images)
+                if (!img.src) {
+                    img.src = "/Image/Aircraft_Type/default.png";
+                    img.alt = "Default Aircraft";
+                    // Find the adjacent span and update if needed
+                    const statusSpan = img.nextElementSibling;
+                    if (statusSpan && statusSpan.tagName === 'SPAN') {
+                        statusSpan.textContent = "No flights available";
+                    }
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Error checking flights:", error);
     }
 
 
