@@ -544,14 +544,6 @@ function updateFlightRow(row, flightData) {
         flightData.flightStatus === "Deboarding Completed";
 
    
-    if (realtime_flightstatus === "Boarding") {
-        flightData.flightStatus = "Boarding";
-        // Refresh after delay
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
-    }
-
 
     // 1. FORCE REMOVE BLINKING FIRST if needed
     if (shouldRemoveBlinking) {
@@ -574,6 +566,10 @@ function updateFlightRow(row, flightData) {
             console.log('Blinking removed after delay');
         }, 3000); // 300ms delay to allow ongoing animation to complete
         updateCellsAfterBlinking(row, flightData);
+        // Refresh after delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
         return;
     }
 
