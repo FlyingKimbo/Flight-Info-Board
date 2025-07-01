@@ -545,7 +545,11 @@ function updateFlightRow(row, flightData) {
 
    
     if (realtime_flightstatus === "Boarding") {
-        flightData.flightStatus = realtime_flightstatus;
+        flightData.flightStatus = "Boarding";
+        // Refresh after delay
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     }
 
 
