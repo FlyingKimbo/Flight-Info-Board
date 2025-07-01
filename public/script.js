@@ -522,9 +522,11 @@ function findMatchingFlightRow(aircraft, flightNumber, flightData) {
         if (rowAircraft === aircraft &&
             rowFlightNumber === flightNumber) {
             if (flightData) {
-                updateCellsAfterBlinking(row, flightData);
+                setTimeout(() => {
+                    updateCellsAfterBlinking(row, flightData);
+                }, 2000);
+            
             }
-
             return row;
         }
     }
