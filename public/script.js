@@ -567,9 +567,9 @@ function updateFlightRow(row, flightData) {
         }, 3000); // 300ms delay to allow ongoing animation to complete
         updateCellsAfterBlinking(row, flightData);
         // Refresh after delay
-        //setTimeout(() => {
-            //window.location.reload();
-        //}, 1000);
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
         return;
     }
 
