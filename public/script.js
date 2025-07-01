@@ -659,23 +659,24 @@ async function isFlightsTableEmpty() {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Check if flights table is empty
-        const isEmpty = await isFlightsTableEmpty();
-        const flightImages = document.querySelectorAll('.cell-content .flight-image');
+        // 1. Check if flights table is empty
+        const { data } = await supabase
+            .from('flights_static')
+            .select('*')
+            .limit(1);
 
-        if (isEmpty && flightImages.length > 0) {
-            flightImages.forEach(img => {
-                // Only set src if it's empty (preserve existing images)
-                if (!img.src) {
-                    img.src = "/Image/Aircraft_Type/default.png";
-                    img.alt = "Default Aircraft";
-                    // Find the adjacent span and update if needed
-                    const statusSpan = img.nextElementSibling;
-                    if (statusSpan && statusSpan.tagName === 'SPAN') {
-                        statusSpan.textContent = "No flights available";
-                    }
-                }
-            });
+        // 2. Only proceed if table is empty AND image element exists
+        const flightImage = document.querySelector('.cell-content .flight-image');
+        if (data?.length === 0 && flightImage) {
+            // 3. Set the image source (use full path if needed)
+            flightImage.src = "/Image/Aircraft_Type/default.png";
+            flightImage.alt = "Default Aircraft";
+
+            // 4. Optional: Update the status text
+            const statusText = document.querySelector('.cell-content span');
+            if (statusText) {
+                statusText.textContent = "No flights available";
+            }
         }
     } catch (error) {
         console.error("Error checking flights:", error);
