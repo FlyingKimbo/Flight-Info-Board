@@ -500,31 +500,23 @@ function Update_cells_values(staticData) {
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
     if (existingRow) {
-        // 1. Check if status changed and requires blinking
+        // 1. Check if status changed
         const statusCell = existingRow.cells[3];
-        const isStatusChanging = statusCell &&
-            statusCell.textContent !== flightPayload.flightStatus &&
-            shouldBlink(flightPayload.flightStatus);
+        const isStatusChanged = statusCell && statusCell.textContent !== flightPayload.flightStatus;
+        const blinkClass = getBlinkingClass(flightPayload.flightStatus);
 
-        // 2. If blinking needed
-        if (isStatusChanging) {
-            // A. Remove previous blinking IMMEDIATELY
-            [existingRow, ...existingRow.cells].forEach(el => {
-                el.className = el.className.split(' ')
-                    .filter(cls => !cls.startsWith('blink-'))
-                    .join(' ');
-            });
+        // 2. Always reset animation state (critical for reliability)
+        [existingRow, ...existingRow.cells].forEach(el => {
+            // Force restart animation
+            el.style.animation = 'none';
+            void el.offsetWidth; // Trigger reflow
+        });
 
-            // B. Apply new blinking class
-            const blinkClass = getBlinkingClass(flightPayload.flightStatus);
+        // 3. Re-apply blinking if status changed and requires it
+        if (isStatusChanged && blinkClass) {
             existingRow.classList.add(blinkClass);
-
-            // C. Update content AFTER blink duration (3000ms)
-            setTimeout(() => {
-                updateFlightRow(existingRow, flightPayload);
-            }, 3000);
         }
-        // 3. If no blinking needed
+
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
@@ -537,11 +529,6 @@ function Update_cells_values(staticData) {
 }
 
 // Helper function to find matching row
-
-function shouldBlink(status) {
-    return status && !["-", "Deboarding Completed"].includes(status);
-}
-
 function findMatchingFlightRow(aircraft, flightNumber) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
     for (const row of rows) {
