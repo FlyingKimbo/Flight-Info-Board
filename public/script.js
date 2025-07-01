@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 4. Optional: Update the status text
             const statusText = document.querySelector('.cell-content span');
             if (statusText) {
-                statusText.textContent = "No flights available";
+                statusText.textContent = "Waiting for Happiness";
             }
         }
     } catch (error) {
