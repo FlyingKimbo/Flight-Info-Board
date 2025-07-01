@@ -283,6 +283,7 @@ function updateEteDist2ArrBar(flightData) {
         const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
         GreenbarPercentage = etePercentage; // Update the global variable
         elements.eteBar.style.width = `${etePercentage}%`;
+        updatePositions();
         elements.eteBar.style.opacity = '1';
 
         // Update aircraft image
@@ -322,7 +323,7 @@ function updateEteDist2ArrBar(flightData) {
                 flightData.ambient_precipstate === 8 ? '/Image/Precip/snow1.gif' : '';
         elements.precipImage.style.opacity =
             [4, 8].includes(flightData.ambient_precipstate) ? '1' : '0';
-        updatePositions();
+       
     } catch (error) {
         console.error('Error updating ETE display:', error);
     }
