@@ -565,14 +565,16 @@ function updateFlightRow(row, flightData) {
 
             console.log('Blinking removed after delay');
         }, 3000); // 300ms delay to allow ongoing animation to complete
-        updateCellsAfterBlinking(row, flightData);
+        
         // Refresh after delay
-        setTimeout(() => {
-            window.location.reload();
-        }, 1000);
+        //setTimeout(() => {
+         //   window.location.reload();
+        //}, 1000);
+
+        updateCellsAfterBlinking(row, flightData);
         return;
     }
-
+    updateCellsAfterBlinking(row, flightData);
     // 1. Aircraft Cell (cell[0])
     const aircraftCell = row.cells[0];
     if (aircraftCell) {
