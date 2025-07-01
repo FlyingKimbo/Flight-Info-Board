@@ -647,6 +647,9 @@ function updateCellsAfterBlinking(row, flightData) {
         const cellIndex = parseInt(index);
         if (row.cells[cellIndex] && value !== undefined) {
             row.cells[cellIndex].textContent = value;
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
         }
     });
 
