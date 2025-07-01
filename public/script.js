@@ -294,18 +294,11 @@ function updateEteDist2ArrBar(flightData) {
         // Handle aircraft image - MODIFIED SECTION
         const aircraftType = flightData.current_flight?.split(' ')[0] || '';
         if (flightData.flight_status === "Deboarding Completed") {
-            elements.eteBar.style.opacity = '0';
+            
             // Special case for deboarding completed
-            elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
-            elements.aircraftImage.style.opacity = '1'; // Slightly transparent
-        } else if (aircraftType) {
-            // Normal operation for other statuses
-            elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
-            elements.aircraftImage.style.opacity = '1';
-        } else {
-            // Fallback for empty/missing aircraft type
-            elements.aircraftImage.src = '/Image/Aircraft_Type/default_aircraft.png';
-            elements.aircraftImage.style.opacity = '1';
+            //elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
+            elements.aircraftImage.style.opacity = '0'; // Slightly transparent
+        
         }
 
         
