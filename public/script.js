@@ -147,9 +147,9 @@ function updatePositions() {
     const barWidth = eteBar.getBoundingClientRect().width;
     const containerRight = eteBar.parentElement.getBoundingClientRect().right;
     const barRight = containerRight - barWidth;
-    const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 105 + (Xoffset * XoffsetFix);
+    const imagePosition = barRight - (aircraftImage.offsetWidth / 1000) - 115 + (Xoffset * XoffsetFix);
     const textPosition = barRight - (eteText.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
-    const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 245 + (Xoffset * XoffsetFix);
+    const jetstream_imagePosition = barRight - (jetstream.offsetWidth / 1000) - 255 + (Xoffset * XoffsetFix);
     const cloud_imagePosition = barRight - (cloud.offsetWidth / 1000) - 150 + (Xoffset * XoffsetFix);
     const precip_imagePosition = barRight - (precipImage.offsetWidth / 1000) - 110 + (Xoffset * XoffsetFix); // Position the precipitation image the same as cloud
 
