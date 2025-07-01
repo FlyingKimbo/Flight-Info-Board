@@ -484,7 +484,7 @@ const setupStaticRealtimeUpdates = () => {
         .subscribe();
 };
 
-function Update_cells_values(staticData, flightData) {
+function Update_cells_values(staticData) {
     if (!staticData) return;
 
     // Convert data names to match your CreateNewRow expectations
@@ -537,6 +537,11 @@ function Update_cells_values(staticData, flightData) {
 }
 
 // Helper function to find matching row
+
+function shouldBlink(status) {
+    return status && !["-", "Deboarding Completed"].includes(status);
+}
+
 function findMatchingFlightRow(aircraft, flightNumber) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
     for (const row of rows) {
