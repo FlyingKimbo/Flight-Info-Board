@@ -297,7 +297,7 @@ function updateEteDist2ArrBar(flightData) {
             
             // Special case for deboarding completed
             //elements.aircraftImage.src = '/Image/Aircraft_Type/default_ground.png'; // Special "parked" image
-            elements.aircraftImage.style.opacity = '0'; // Slightly transparent
+            elements.aircraftImage.style.opacity = '1'; // Slightly transparent
         
         }
 
