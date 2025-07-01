@@ -321,7 +321,7 @@ function updateEteDist2ArrBar(flightData) {
                 flightData.ambient_precipstate === 8 ? '/Image/Precip/snow1.gif' : '';
         elements.precipImage.style.opacity =
             [4, 8].includes(flightData.ambient_precipstate) ? '1' : '0';
-
+        updatePositions();
     } catch (error) {
         console.error('Error updating ETE display:', error);
     }
