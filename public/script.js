@@ -240,7 +240,7 @@ function updateEteDist2ArrBar(flightData) {
         console.log(`dist_to_destination at Update_ETE_Dist2Arr_Bar : ${flightData.dist_to_destination}`);
         console.log(`flight_state at Update_ETE_Dist2Arr_Bar : ${flightData.flight_state}`);
         console.log(`airplane_in_cloud at Update_ETE_Dist2Arr_Bar : ${flightData.airplane_in_cloud}`);
-        updatePositions();
+        
 
         // Get DOM elements
         const elements = {
@@ -281,6 +281,7 @@ function updateEteDist2ArrBar(flightData) {
 
         // Update ETE bar width
         const etePercentage = Math.min((flightData.dist_to_destination / flightData.start_distance) * 100, 100);
+        GreenbarPercentage = etePercentage; // Update the global variable
         elements.eteBar.style.width = `${etePercentage}%`;
         elements.eteBar.style.opacity = '1';
 
