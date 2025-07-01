@@ -512,7 +512,7 @@ function Update_cells_values(staticData) {
 }
 
 // Helper function to find matching row
-function findMatchingFlightRow(aircraft, flightNumber) {
+function findMatchingFlightRow(aircraft, flightNumber, flightData) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
     for (const row of rows) {
         const rowAircraft = row.cells[0]?.textContent.trim().replace(/^[^\w]*/, '');
