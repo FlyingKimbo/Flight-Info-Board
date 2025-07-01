@@ -436,7 +436,7 @@ const setupStaticRealtimeUpdates = () => {
                             // Refresh after delay
                             setTimeout(() => {
                                 window.location.reload();
-                            }, 1000);
+                            }, 100);
                         }
                     });
 
