@@ -499,9 +499,36 @@ function Update_cells_values(staticData, flightData) {
     
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
-    if (existingRow) {
-        if (flightData && typeof updateCellsAfterBlinking === 'function') {
-            updateCellsAfterBlinking(row, flightData);
+    if (existingRow) {      
+        // 1. FIRST apply blinking if status changed
+        const statusCell = existingRow.cells[3];
+        const isStatusChanged = statusCell && statusCell.textContent !== flightPayload.flightStatus;
+
+        if (isStatusChanged &&
+            flightPayload.flightStatus &&
+            !["-", "Deboarding Completed"].includes(flightPayload.flightStatus)) {
+
+            const blinkClass = getBlinkingClass(flightPayload.flightStatus);
+            if (blinkClass) {
+                // Clear previous blinking
+                Array.from(existingRow.cells).forEach(cell => {
+                    cell.className = cell.className
+                        .split(' ')
+                        .filter(cls => !cls.startsWith('blink-'))
+                        .join(' ');
+                });
+
+                // Apply new blinking
+                Array.from(existingRow.cells).forEach(cell => {
+                    cell.classList.add(blinkClass);
+                });
+
+                // Auto-remove blinking after 3 seconds
+                setTimeout(() => {
+                    updateFlightRow(existingRow, flightPayload);
+                }, 3000);
+                return;
+            }
         }
         updateFlightRow(existingRow, flightPayload);
     } else {
