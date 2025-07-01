@@ -478,6 +478,21 @@ const setupStaticRealtimeUpdates = () => {
                 const defaultImg = document.querySelector('#flight-image-container .flight-image[src*="default.png"]');
                 if (defaultImg) defaultImg.remove();
             } else {
+
+                // NEW: Special handling for Deboarding Completed -> - transition
+                if (payload.old?.flightstatus === "Deboarding Completed" &&
+                    payload.new.flightstatus === "-") {
+                    const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
+                    if (row) {
+                        // Clone and replace row to reset DOM state
+                        const newRow = row.cloneNode(true);
+                        row.parentNode.replaceChild(newRow, row);
+                        void newRow.offsetWidth; // Force reflow
+                    }
+                }
+
+
+
                 Update_cells_values(payload.new); // Original update logic
             }
         })
@@ -500,23 +515,6 @@ function Update_cells_values(staticData) {
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
     if (existingRow) {
-        // 1. Check if status changed
-        const statusCell = existingRow.cells[3];
-        const isStatusChanged = statusCell && statusCell.textContent !== flightPayload.flightStatus;
-        const blinkClass = getBlinkingClass(flightPayload.flightStatus);
-
-        // 2. Always reset animation state (critical for reliability)
-        [existingRow, ...existingRow.cells].forEach(el => {
-            // Force restart animation
-            el.style.animation = 'none';
-            void el.offsetWidth; // Trigger reflow
-        });
-
-        // 3. Re-apply blinking if status changed and requires it
-        if (isStatusChanged && blinkClass) {
-            existingRow.classList.add(blinkClass);
-        }
-
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
@@ -547,6 +545,18 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 }
 
 // Helper function to update row cells
+
+function refreshRowAfterDeboarding(row) {
+    // 1. Clone the row to reset DOM state
+    const newRow = row.cloneNode(true);
+    row.parentNode.replaceChild(newRow, row);
+
+    // 2. Force reflow to ensure animations restart
+    void newRow.offsetWidth;
+
+    return newRow; // Return the fresh row
+}
+
 function updateFlightRow(row, flightData) {
     console.log('🟢 DEBUG updateFlightRow:', flightData.flightStatus);
     
