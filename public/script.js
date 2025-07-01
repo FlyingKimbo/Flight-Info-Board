@@ -530,7 +530,7 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 // Helper function to update row cells
 function updateFlightRow(row, flightData) {
     console.log('🟢 DEBUG updateFlightRow:', flightData.flightStatus);
-    updateCellsAfterBlinking(row, flightData);
+    
     // First check if status is changing
     const statusCell = row.cells[3];
     const isStatusChanging = statusCell && statusCell.textContent !== flightData.flightStatus;
@@ -692,9 +692,9 @@ function updateCellsAfterBlinking(row, flightData) {
         cell.style.animation = 'none';
     });
 
-    // 4. Visual feedback
-    //row.classList.add('blink-updated');
-    //setTimeout(() => row.classList.remove('blink-updated'), 500);
+     //4. Visual feedback
+    row.classList.add('blink-updated');
+    setTimeout(() => row.classList.remove('blink-updated'), 500);
 }
 
 // Function to check if the flights_static table is empty
