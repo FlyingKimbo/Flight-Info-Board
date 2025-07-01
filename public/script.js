@@ -488,7 +488,7 @@ const setupStaticRealtimeUpdates = () => {
         .subscribe();
 };
 
-function Update_cells_values(staticData) {
+function Update_cells_values(staticData, flightData) {
     if (!staticData) return;
 
     // Convert data names to match your CreateNewRow expectations
