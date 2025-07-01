@@ -296,8 +296,10 @@ function updateEteDist2ArrBar(flightData) {
         if (flightData.flight_status === "Deboarding Completed") {
             
             // Special case for deboarding completed
-            
-            
+            elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
+            elements.aircraftImage.style.opacity = '0';
+            elements.eteText.textContent = `${flightData.ete_srgs.trim()} | ${flightData.dist_to_destination} KM`;
+            elements.eteText.style.opacity = '0';
         } else if (aircraftType) {
             // Normal operation for other statuses
             elements.aircraftImage.src = `/Image/Aircraft_Type/${aircraftType}.png`;
