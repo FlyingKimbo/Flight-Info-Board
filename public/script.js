@@ -517,7 +517,7 @@ function Update_cells_values(staticData) {
 }
 
 // Helper function to find matching row
-function findMatchingFlightRow(aircraft, flightNumber) {
+function findMatchingFlightRow(aircraft, flightNumber, flightData) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
     for (const row of rows) {
         const rowAircraft = row.cells[0]?.textContent.trim().replace(/^[^\w]*/, '');
@@ -526,8 +526,30 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
         if (rowAircraft === aircraft &&
             rowFlightNumber === flightNumber) {
-            // Safely update if flightData exists
-            updateCellsAfterBlinking(row, flightData);
+            // Found matching row - now handle updates if flightData exists
+            if (flightData) {
+                // Get reference to the specific row's cells
+                const rowCells = {
+                    aircraft: row.cells[0],
+                    flightNumber: row.cells[1],
+                    departure: row.cells[2],
+                    flightStatus: row.cells[3],
+                    destination: row.cells[4]
+                };
+
+                // Prepare the flight data for update
+                const updatePayload = {
+                    aircraft: flightData.aircraft,
+                    flightNumber: flightData.flightNumber,
+                    departure: flightData.departure,
+                    flightStatus: flightData.flightStatus,
+                    destination: flightData.destination,
+                    image: `/Image/Aircraft_Type/${flightData.aircraft}.png`
+                };
+
+                // Update the row
+                updateCellsAfterBlinking(row, updatePayload);
+            }
             return row;
         }
     }
