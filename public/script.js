@@ -413,6 +413,9 @@ const setupRealtimeUpdates = () => {
         .subscribe();
 };
 
+
+
+
 let hasRows = false; // Track if we had rows initially
 const setupStaticRealtimeUpdates = () => {
     return supabase
@@ -479,19 +482,6 @@ const setupStaticRealtimeUpdates = () => {
                 if (defaultImg) defaultImg.remove();
             } else {
 
-                // NEW: Special handling for Deboarding Completed -> - transition
-                if (realtime_flightstatus === "Deboarding Completed") {
-                    const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
-                    if (row) {
-                        // Clone and replace row to reset DOM state
-                        const newRow = row.cloneNode(true);
-                        row.parentNode.replaceChild(newRow, row);
-                        void newRow.offsetWidth; // Force reflow
-                    }
-                }
-
-
-
                 Update_cells_values(payload.new); // Original update logic
             }
         })
@@ -513,7 +503,8 @@ function Update_cells_values(staticData) {
     
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
-    if (existingRow) {
+    if (existingRow && realtime_flightstatus === "Boarding") {
+        updateCellsAfterBlinking(row, flightData);
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
@@ -545,16 +536,7 @@ function findMatchingFlightRow(aircraft, flightNumber) {
 
 // Helper function to update row cells
 
-function refreshRowAfterDeboarding(row) {
-    // 1. Clone the row to reset DOM state
-    const newRow = row.cloneNode(true);
-    row.parentNode.replaceChild(newRow, row);
 
-    // 2. Force reflow to ensure animations restart
-    void newRow.offsetWidth;
-
-    return newRow; // Return the fresh row
-}
 
 function updateFlightRow(row, flightData) {
     console.log('🟢 DEBUG updateFlightRow:', flightData.flightStatus);
