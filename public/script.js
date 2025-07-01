@@ -648,17 +648,16 @@ function updateCellsAfterBlinking(row, flightData) {
 
 // Function to check if the flights_static table is empty
 async function isFlightsTableEmpty() {
-    const { data, error } = await supabase
+    const { data } = await supabase
         .from('flights_static')
         .select('*')
-        .limit(1); // Just check if any row exists
-
-    return data?.length === 0; // true if empty, false if data exists
+        .limit(1);
+    return data?.length === 0;
 }
 
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const isEmpty = await isFlightsTableEmpty();
     const flightImageContainer = document.getElementById('flight-image-container');
     if (isEmpty) {
