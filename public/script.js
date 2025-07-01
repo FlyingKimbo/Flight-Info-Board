@@ -498,13 +498,10 @@ function Update_cells_values(staticData, flightData) {
     };
     
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
-
+    
     if (existingRow) {
-        if (flightData) {
-            setTimeout(() => {
-                updateCellsAfterBlinking(row, flightData);
-            }, 2000);
-
+        if (flightData && typeof updateCellsAfterBlinking === 'function') {
+            updateCellsAfterBlinking(row, flightData);
         }
         updateFlightRow(existingRow, flightPayload);
     } else {
@@ -518,7 +515,7 @@ function Update_cells_values(staticData, flightData) {
 }
 
 // Helper function to find matching row
-function findMatchingFlightRow(aircraft, flightNumber, flightData) {
+function findMatchingFlightRow(aircraft, flightNumber) {
     const rows = document.querySelectorAll('#flightTable tbody tr');
     for (const row of rows) {
         const rowAircraft = row.cells[0]?.textContent.trim().replace(/^[^\w]*/, '');
@@ -527,12 +524,8 @@ function findMatchingFlightRow(aircraft, flightNumber, flightData) {
 
         if (rowAircraft === aircraft &&
             rowFlightNumber === flightNumber) {
-            if (flightData) {
-                setTimeout(() => {
-                    updateCellsAfterBlinking(row, flightData);
-                }, 2000);
+            // Safely update if flightData exists
             
-            }
             return row;
         }
     }
