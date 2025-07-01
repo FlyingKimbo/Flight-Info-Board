@@ -479,21 +479,24 @@ const setupStaticRealtimeUpdates = () => {
                 if (defaultImg) defaultImg.remove();
             } else {
 
-                // NEW: Detect ANY status transition to "-"
-                if (payload.old?.flightstatus &&
-                    payload.old.flightstatus !== "-" &&
-                    payload.new.flightstatus === "-") {
+                const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
+                if (row) {
+                    const statusCell = row.cells[3]; // Status cell
+                    const currentStatus = statusCell?.textContent.trim();
+                    const newStatus = payload.new.flightstatus;
 
-                    const row = findMatchingFlightRow(payload.new.aircraft, payload.new.flightnumber);
-                    if (row) {
-                        // Clone and replace row to reset DOM state
+                    // Case A: Transition to "-"
+                    if (currentStatus && currentStatus !== "-" && newStatus === "-") {
                         const newRow = row.cloneNode(true);
                         row.parentNode.replaceChild(newRow, row);
-                        void newRow.offsetWidth; // Force reflow
-
-                        // Update the fresh row
-                        Update_cells_values(payload.new);
-                        return;
+                        void newRow.offsetWidth;
+                    }
+                    // Case B: Normal blinking case
+                    else if (currentStatus && currentStatus !== newStatus) {
+                        [row, ...row.cells].forEach(el => {
+                            el.style.animation = 'none';
+                            void el.offsetWidth;
+                        });
                     }
                 }
 
