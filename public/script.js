@@ -425,19 +425,20 @@ const setupStaticRealtimeUpdates = () => {
             // Original logic (preserved exactly)
             if (payload.eventType === 'INSERT') {
 
-                // Check if this is the first row being inserted
-                const { count } = await supabase
+                supabase
                     .from('flights_static')
-                    .select('*', { count: 'exact', head: true });
+                    .select('*', { count: 'exact', head: true })
+                    .then(({ count }) => {
+                        if (count === 1) {  // Was empty, now has 1 row
+                            // Optional: Add visual feedback
+                            document.body.classList.add('page-refreshing');
 
-                if (count === 1) {  // Only refresh if this is the first row
-                  
-
-                    // Refresh after a short delay (1 second)
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                }
+                            // Refresh after delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    });
 
 
 
