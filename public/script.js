@@ -503,8 +503,8 @@ function Update_cells_values(staticData, flightData) {
     
     const existingRow = findMatchingFlightRow(flightPayload.aircraft, flightPayload.flightNumber);
     
-    if (existingRow && realtime_flightstatus === "Boarding") {
-        updateCellsAfterBlinking(row, flightData);
+    if (existingRow) {
+        
         updateFlightRow(existingRow, flightPayload);
     } else {
         flightPayload.departure = flightPayload.destination;
