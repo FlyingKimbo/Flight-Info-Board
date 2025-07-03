@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url('https://flight-info-board.vercel.app/Image/indexBkgrd.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .button {
+            font-family: 'Orbitron', sans-serif;
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://yddzgledjhsvpriyrjkf.supabase.co'; // Replace with your Supabase project URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZHpnbGVkamhzdnByaXlyamtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3ODM3ODYsImV4cCI6MjA0NzM1OTc4Nn0.HdfYsCeq75colO5To6o_xtHD6uRGTz3VyJCv-VCstFc'; // Replace with your Supabase anon key
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Function to check if a user is registered in Supabase
+        const isUserRegistered = async () => {
+            const username = localStorage.getItem("username"); // Assuming you store the username locally
+            if (!username) {
+                return false;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('users') // Your Supabase table name
+                    .select('username')
+                    .eq('username', username);
+
+                if (error) {
+                    console.error("Supabase error:", error);
+                    return false;
+                }
+
+                return data && data.length > 0;
+            } catch (err) {
+                console.error("Error checking Supabase user registration:", err);
+                return false;
+            }
+        };
+
+        // Event listener for restricted button clicks
+        const handleRestrictedButtonClick = async (event, targetPage) => {
+            event.preventDefault(); // Prevent default link behavior
+
+            const isRegistered = await isUserRegistered();
+
+            if (isRegistered) {
+                // Redirect to the target page
+                window.location.href = targetPage;
+            } else {
+                // Redirect to signup page
+                alert("You are not signed up yet! Redirecting to the signup page...");
+                window.location.href = "login-signup.html";
+            }
+        };
+
+        // Event listener for unrestricted button clicks
+        const handleUnrestrictedButtonClick = (event, targetPage) => {
+            event.preventDefault();
+            window.location.href = targetPage;
+        };
+    </script>
+</head>
+<body>
+    <main class="container">
+        <h1>SAME-DAY-DELIVERY</h1>
+        <div class="button-container">
+            <a href="my-missions.html" class="button" onclick="handleRestrictedButtonClick(event, 'my-missions.html')">My Missions</a>
+            <a href="create-mission.html" class="button" onclick="handleRestrictedButtonClick(event, 'create-mission.html')">Create Mission</a>
+            <a href="active-missions.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'active-missions.html')">Active Missions</a>
+            <a href="about.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'about.html')">About</a>
+            <a href="login-signup.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
+        </div>
+    </main>
+</body>
+</html>
