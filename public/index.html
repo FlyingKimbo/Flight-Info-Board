@@ -1,692 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-    <script>
-        /* refresh once when in focus, not in tab or minimized will not refresh */
-        if (!sessionStorage.getItem('refreshed')) {
-            const handleVisibilityChange = () => {
-                if (document.visibilityState === 'visible') {
-                    sessionStorage.setItem('refreshed', 'true');
-                    window.location.reload();
-                    document.removeEventListener('visibilitychange', handleVisibilityChange);
-                }
-            };
-
-            document.addEventListener('visibilitychange', handleVisibilityChange);
-
-            // Also check immediately in case page is already visible
-            if (document.visibilityState === 'visible') {
-                sessionStorage.setItem('refreshed', 'true');
-                window.location.reload();
-            }
-        }
-    </script>
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Same Day Delivery</title>
+    <title>My Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Base Styles */
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             margin: 0;
-            padding: 0;
-            background: #0a749c;
-            color: #333;
-            transition: all 0.3s ease;
+            background: url('https://flight-info-board.vercel.app/Image/indexBkgrd.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
         }
-
-            body.night-mode {
-                background: #121212;
-                color: #f0f0f0;
-            }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header Section */
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .logo-container {
-            height: 277px;
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-img {
-            height: 100%;
-            width: auto;
-            max-width: 1000px;
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 30px;
-        }
-
-            .toggle-switch input {
-                opacity: 0;
-                width: 0;
-                height: 0;
-            }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #25262c;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-            .slider:before {
-                position: absolute;
-                content: "";
-                height: 22px;
-                width: 22px;
-                left: 4px;
-                bottom: 4px;
-                background-color: white;
-                transition: .4s;
-                border-radius: 50%;
-            }
-
-        input:checked + .slider {
-            background-color: #333;
-        }
-
-            input:checked + .slider:before {
-                transform: translateX(30px);
-            }
-
-        .toggle-icon {
-            font-size: 20px;
-        }
-
-        .sun-icon {
-            color: white;
-        }
-
-        .moon-icon {
-            color: white;
-        }
-
-        /* Flight Progress */
-        .flight-progress-container {
-            background: #7fd5f8;
-            padding: 5px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            margin-bottom: 1px;
-            transition: all 0.3s ease;
-        }
-
-        .night-mode .flight-progress-container {
-            background: #1e1e1e;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-
-        .progress-container {
-            width: 90%;
-            margin: 0 auto;
-        }
-
-        /* SVG Flight Path */
-        .route-map {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-            height: 80px;
-        }
-
-        .flight-path-container {
-            flex-grow: 1;
-            height: 100%;
-            position: relative;
-        }
-
-        .airport {
-            background: #0066ff;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-weight: bold;
-            min-width: 50px;
             text-align: center;
-            margin: 0 10px;
-            transition: all 0.3s ease;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            border-radius: 10px;
         }
 
-        .night-mode .airport {
-            background: #4dabf7;
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
         }
 
-        /* Mission Grid */
-        .missions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
+        .button-container {
             margin-top: 20px;
         }
 
-        .mission-card {
-            background: #7fd5f8;
-            border-radius: 10px;
-            padding: 18px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .night-mode .mission-card {
-            background: #1e1e1e;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-        }
-
-        .mission-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }
-
-        .night-mode .mission-card:hover {
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        }
-
-        .badge {
+        .button {
+            font-family: 'Orbitron', sans-serif;
             display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .money-badge {
-            background: linear-gradient(90deg, #ffd700, #ffcc00);
-            color: #8a6d00;
-        }
-
-        .popular-badge {
-            background: linear-gradient(90deg, #ff6b6b, #ff4757);
-            color: white;
-        }
-
-        .mission-card h3 {
-            margin: 0 0 8px;
-            color: #575757;
+            padding: 10px 20px;
+            margin: 10px;
             font-size: 16px;
-            transition: color 0.3s ease;
-        }
-
-        .night-mode .mission-card h3 {
-            color: #4dabf7;
-        }
-
-        .mission-meta {
-            color: #666;
-            font-size: 14px;
-            margin: 8px 0;
-            transition: color 0.3s ease;
-        }
-
-        .night-mode .mission-meta {
-            color: #aaa;
-        }
-
-        /* Popup Styles */
-        .popup {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .popup-content {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .night-mode .popup-content {
-            background: #1e1e1e;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.3s ease;
-        }
-
-        .night-mode .close-btn {
-            color: #666;
-        }
-
-        .popup h2 {
-            margin-top: 0;
-            color: #0066cc;
-            transition: color 0.3s ease;
-        }
-
-        .night-mode .popup h2 {
-            color: #4dabf7;
-        }
-
-        .popup-info {
-            margin: 15px 0;
-        }
-
-            .popup-info p {
-                margin: 8px 0;
-                color: #333;
-                transition: color 0.3s ease;
-            }
-
-        .night-mode .popup-info p {
-            color: #ddd;
-        }
-
-        .popup-info strong {
-            color: #0066cc;
-            transition: color 0.3s ease;
-        }
-
-        .night-mode .popup-info strong {
-            color: #4dabf7;
-        }
-
-        .accept-btn {
-            background: linear-gradient(90deg, #0066ff, #00aaff);
-            color: white;
+            color: #fff;
+            background-color: #007bff;
             border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
+            text-decoration: none;
         }
 
-        .night-mode .accept-btn {
-            background: linear-gradient(90deg, #4dabf7, #90caf9);
-        }
-
-        /* Responsive */
-        @media (max-width: 2600px) {
-            .header-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .logo-container {
-                width: 100%;
-                max-width: 2600px;
-                height: 0;
-                padding-top: 10.65%;
-                position: relative;
-            }
-
-            .logo-img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-            }
-
-            .theme-toggle {
-                align-self: flex-end;
-                margin-top: -50px;
-                margin-bottom: 20px;
-            }
-
-            #airplane {
-                aspect-ratio: unset !important; /* Override any CSS aspect-ratio */
-                transform: none !important; /* Remove any transforms */
-            }
+        .button:hover {
+            background-color: #0056b3;
         }
     </style>
-</head>
-<body>
-    <!-- Header with Logo and Theme Toggle -->
-    <div class="container">
-        <div class="header-container">
-            <div class="logo-container">
-                <img src="E:/FS_VS_prj/source/SDD/SDD_logo.png"
-                     alt="Same Day Delivery"
-                     class="logo-img">
-            </div>
-            <div class="theme-toggle">
-                <span class="toggle-icon sun-icon">☀️</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="themeToggle">
-                    <span class="slider"></span>
-                </label>
-                <span class="toggle-icon moon-icon">🌙</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- My Flight Progress with Upward Curve -->
-    <div class="flight-progress-container">
-        <div class="progress-container">
-            <div class="route-map">
-                <div class="airport departure">SIN</div>
-                <div class="flight-path-container">
-                    <svg width="100%" height="100%" viewBox="0 0 1600 60">
-                        <!-- Background path (gray) -->
-                        <path id="flightPath" d="M0,30 L100,30 Q750,-30 1500,30 L1600,30"
-                              stroke="#e0e8f5"
-                              stroke-width="2"
-                              fill="none" />
-
-                        <!-- Progress path (blue) -->
-                        <path id="progressPath" d="M0,30 L100,30 Q750,-30 1500,30 L1600,30"
-                              stroke="#0066ff"
-                              stroke-width="2"
-                              fill="none"
-                              stroke-dasharray="1000"
-                              stroke-dashoffset="1000" />
-
-                        <!-- Airplane following the path -->
-                        <image id="airplane"
-                               href="E:/FS_VS_prj/source/SDD/images/default_aircraft.png"
-                               width="200"
-                               height="60"
-                               x="-10"
-                               y="0"
-                               preserveAspectRatio="xMidYMid meet">
-                        </image>
-                    </svg>
-                </div>
-                <div class="airport destination">JFK</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mission Grid -->
-    <div class="container">
-        <div class="missions-grid" id="missionsContainer">
-            <!-- Mission blocks will be inserted here by JavaScript -->
-        </div>
-    </div>
-
-    <!-- Popup Template -->
-    <div class="popup" id="missionPopup">
-        <div class="popup-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="popupTitle">Mission Title</h2>
-            <div id="popupBadge" class="badge money-badge">💰 $500 REWARD</div>
-            <div class="popup-info">
-                <p><strong>Cargo:</strong> <span id="popupCargo">20T Electronics</span></p>
-                <p><strong>Passengers:</strong> <span id="popupPax">0</span></p>
-                <p><strong>Route:</strong> <span id="popupRoute">Singapore (SIN) → New York (JFK)</span></p>
-                <p><strong>Details:</strong> <span id="popupDetails">Time-sensitive delivery of consumer electronics</span></p>
-            </div>
-            <button class="accept-btn" id="acceptBtn">Accept Mission</button>
-        </div>
-    </div>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script>
-        // Initialize Supabase
-      
+        // Initialize Supabase client
+        const SUPABASE_URL = 'https://yddzgledjhsvpriyrjkf.supabase.co'; // Replace with your Supabase project URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZHpnbGVkamhzdnByaXlyamtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE3ODM3ODYsImV4cCI6MjA0NzM1OTc4Nn0.HdfYsCeq75colO5To6o_xtHD6uRGTz3VyJCv-VCstFc'; // Replace with your Supabase anon key
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const supabaseUrl = 'https://jwwaxqfckxmppsncvfbo.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3d2F4cWZja3htcHBzbmN2ZmJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA0MTY2MzUsImV4cCI6MjA2NTk5MjYzNX0.6fdsBgcAmjG9uwVbkyKhLW3sc7uCa1rwGj8aWBFgkFo';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-        // Then define other functions that use supabase
-        function subscribeToFlightUpdates() {
-            const channel = supabaseClient
-                .channel('flight-updates')
-                .on(
-                    'postgres_changes',
-                    {
-                        event: '*',
-                        schema: 'public',
-                        table: 'flights_realtime',
-                        filter: 'id=eq.1'
-                    },
-                    (payload) => {
-                        const startDistance = payload.new.start_distance;
-                        const distToDestination = payload.new.dist_to_destination;
-
-                        if (typeof startDistance === 'number' && typeof distToDestination === 'number') {
-                            updateFlightProgress(startDistance, distToDestination);
-                        }
-                    }
-                )
-                .subscribe();
-
-            
-        }
-
-
-        // Theme Toggle Functionality
-        const themeToggle = document.getElementById('themeToggle');
-        themeToggle.addEventListener('change', function () {
-            document.body.classList.toggle('night-mode');
-            updateSvgColors();
-            localStorage.setItem('nightMode', this.checked);
-        });
-
-        if (localStorage.getItem('nightMode') === 'true') {
-            themeToggle.checked = true;
-            document.body.classList.add('night-mode');
-        }
-
-        function updateSvgColors() {
-            const isNightMode = document.body.classList.contains('night-mode');
-            document.getElementById('flightPath').stroke = isNightMode ? '#333' : '#e0e8f5';
-            document.getElementById('progressPath').stroke = isNightMode ? '#4dabf7' : '#0066ff';
-        }
-
-        // Track previous values to detect changes
-        let prevStartDistance = null;
-        let prevDistToDestination = null;
-       
-
-        function updateFlightProgress(startDistance, distToDestination) {
-            // Validate distances
-            
-
-            // Calculate progress (0-1)
-            const progress = (startDistance - distToDestination) / startDistance;
-            if (distToDestination > startDistance || progress > 0.89) {
-                console.warn(`Invalid distances: dist_to_destination (${distToDestination}) > start_distance (${startDistance})`);
-                return; // Skip visualization update
+        // Function to check if a user is registered in Supabase
+        const isUserRegistered = async () => {
+            const username = localStorage.getItem("username"); // Assuming you store the username locally
+            if (!username) {
+                return false;
             }
-          
-            // Clamp between 0 and 1 (redundant safety)
-            const clampedProgress = Math.min(1, Math.max(0, progress));
-             
-            console.log(`Progress: ${(clampedProgress * 100).toFixed(1)}% 
-        (${startDistance}nm start - ${distToDestination}nm remaining)`);
-
-            updateFlightVisualization(clampedProgress);
-        }
-
-        function updateFlightVisualization(progress) {
-            // Only proceed if we have valid SVG elements
-            const path = document.getElementById('flightPath');
-            const airplane = document.getElementById('airplane');
-            const progressPath = document.getElementById('progressPath');
-
-            if (!path || !airplane || !progressPath) {
-                console.error("Missing SVG elements for flight visualization");
-                return;
-            }
-
-            const totalLength = path.getTotalLength();
-            const pathPosition = totalLength * progress;
 
             try {
-                // Update airplane position
-                const point = path.getPointAtLength(pathPosition);
-                airplane.setAttribute('x', point.x - 20);
-                airplane.setAttribute('y', point.y - 25);
+                const { data, error } = await supabase
+                    .from('users') // Your Supabase table name
+                    .select('username')
+                    .eq('username', username);
 
-                // Update progress path
-                progressPath.setAttribute('stroke-dasharray', totalLength);
-                progressPath.setAttribute('stroke-dashoffset', totalLength * (1 - progress));
-            } catch (error) {
-                console.error("Error updating flight visualization:", error);
-            }
-        }
-
-        // Add this after Supabase initialization
-        async function initializeFlightPosition() {
-            const { data, error } = await supabaseClient
-                .from('flights_realtime')
-                .select('start_distance, dist_to_destination')
-                .eq('id', '1')
-                .single();
-
-            if (data && !error) {
-                updateFlightProgress(data.start_distance, data.dist_to_destination);
-            } else {
-                // Fallback to starting position if no data
-                updateFlightVisualization(0);
-            }
-        }
-
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
-            updateSvgColors();
-
-            
-
-            initializeFlightPosition(); // ← This replaces animateFlightProgress(0)
-            subscribeToFlightUpdates();
-
-            // For demo purposes, we'll simulate updates if Supabase isn't configured
-            //if (supabaseUrl === 'https://jwwaxqfckxmppsncvfbo.supabase.co') {
-            //console.warn('Supabase not configured - using simulated flight progress');
-            //simulateFlightProgress();
-            //}
-        });
-
-        // Sample mission data
-        const missions = [
-            { id: 1, title: "Amazon Priority Shipment", reward: "$500", cargo: "20T Electronics", pax: 0, route: "SIN → JFK", details: "Time-sensitive delivery to New York", type: "money" },
-            { id: 2, title: "FedEx Medical Supplies", reward: "$300", cargo: "10T Vaccines", pax: 0, route: "LAX → SYD", details: "Urgent medical delivery to Australia", type: "money" },
-            { id: 3, title: "UN Humanitarian Aid", reward: "None", cargo: "15T Food", pax: 0, route: "CDG → KBL", details: "Disaster relief mission to Kabul", participants: 85, type: "popular" },
-            { id: 4, title: "Player's Cargo Challenge", reward: "None", cargo: "8T Mixed", pax: 0, route: "HKG → LHR", details: "Community cargo delivery event", participants: 42, type: "popular" },
-            { id: 5, title: "DHL Express Delivery", reward: "$150", cargo: "5T Documents", pax: 0, route: "FRA → NRT", details: "Corporate document transfer", type: "money" },
-            { id: 6, title: "VIP Aircraft Transfer", reward: "$750", cargo: "Private Jet", pax: 12, route: "MIA → LAX", details: "Celebrity transport with security", type: "money" },
-            { id: 7, title: "Oil Rig Supply Run", reward: "None", cargo: "25T Equipment", pax: 8, route: "ABZ → RIG01", details: "Offshore platform resupply", participants: 36, type: "popular" },
-            { id: 8, title: "Auto Parts Delivery", reward: "$200", cargo: "12T Parts", pax: 0, route: "DET → MEX", details: "Just-in-time manufacturing delivery", type: "money" },
-            { id: 9, title: "Arctic Research Supply", reward: "None", cargo: "30T Gear", pax: 5, route: "YEG → YRB", details: "Scientific expedition supplies", participants: 28, type: "popular" },
-            { id: 10, title: "Emergency Evacuation", reward: "$1000", cargo: "Medevac", pax: 30, route: "KWI → BER", details: "Warzone civilian evacuation", type: "money" }
-        ];
-
-        // Render mission blocks
-        const container = document.getElementById('missionsContainer');
-        missions.forEach(mission => {
-            const card = document.createElement('div');
-            card.className = 'mission-card';
-            card.innerHTML = `
-                            <div class="badge ${mission.type === 'money' ? 'money-badge' : 'popular-badge'}">
-                                ${mission.type === 'money' ? '💰 ' + mission.reward : '🔥 ' + mission.participants + ' pilots'}
-                            </div>
-                            <h3>${mission.title}</h3>
-                            <div class="mission-meta">${mission.cargo} | ${mission.pax} passengers</div>
-                            <div class="mission-meta">${mission.route}</div>
-                        `;
-            card.addEventListener('click', () => showPopup(mission));
-            container.appendChild(card);
-        });
-
-        // Popup functionality
-        const popup = document.getElementById('missionPopup');
-        const closeBtn = document.querySelector('.close-btn');
-
-        function showPopup(mission) {
-            document.getElementById('popupTitle').textContent = mission.title;
-            document.getElementById('popupBadge').className = `badge ${mission.type === 'money' ? 'money-badge' : 'popular-badge'}`;
-            document.getElementById('popupBadge').textContent = mission.type === 'money' ? `💰 ${mission.reward} REWARD` : `🔥 ${mission.participants} PILOTS JOINED`;
-            document.getElementById('popupCargo').textContent = mission.cargo;
-            document.getElementById('popupPax').textContent = mission.pax;
-            document.getElementById('popupRoute').textContent = mission.route;
-            document.getElementById('popupDetails').textContent = mission.details;
-            popup.style.display = 'flex';
-        }
-
-        closeBtn.addEventListener('click', () => {
-            popup.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === popup) {
-                popup.style.display = 'none';
-            }
-        });
-
-        document.getElementById('acceptBtn').addEventListener('click', () => {
-            alert('Mission accepted! Good luck!');
-            popup.style.display = 'none';
-        });
-
-        // Simulation function for demo purposes
-        function simulateFlightProgress() {
-            let simulatedProgress = 0;
-            const simulationInterval = setInterval(() => {
-                simulatedProgress += 0.005;
-                if (simulatedProgress >= 1) {
-                    clearInterval(simulationInterval);
-                    simulatedProgress = 1;
+                if (error) {
+                    console.error("Supabase error:", error);
+                    return false;
                 }
 
-                // Simulate distance values
-                const totalDistance = 10000; // Example total distance
-                const startDistance = totalDistance * simulatedProgress;
-                const distToDestination = totalDistance * (1 - simulatedProgress);
+                return data && data.length > 0;
+            } catch (err) {
+                console.error("Error checking Supabase user registration:", err);
+                return false;
+            }
+        };
 
-                updateFlightProgress(startDistance, distToDestination);
-            }, 1000);
-        }
+        // Event listener for restricted button clicks
+        const handleRestrictedButtonClick = async (event, targetPage) => {
+            event.preventDefault(); // Prevent default link behavior
+
+            const isRegistered = await isUserRegistered();
+
+            if (isRegistered) {
+                // Redirect to the target page
+                window.location.href = targetPage;
+            } else {
+                // Redirect to signup page
+                alert("You are not signed up yet! Redirecting to the signup page...");
+                window.location.href = "login-signup.html";
+            }
+        };
+
+        // Event listener for unrestricted button clicks
+        const handleUnrestrictedButtonClick = (event, targetPage) => {
+            event.preventDefault();
+            window.location.href = targetPage;
+        };
     </script>
+</head>
+<body>
+    <main class="container">
+        <h1>SAME-DAY-DELIVERY</h1>
+        <div class="button-container">
+            <a href="my-missions.html" class="button" onclick="handleRestrictedButtonClick(event, 'my-missions.html')">My Missions</a>
+            <a href="create-mission.html" class="button" onclick="handleRestrictedButtonClick(event, 'create-mission.html')">Create Mission</a>
+            <a href="active-missions.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'active-missions.html')">Active Missions</a>
+            <a href="about.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'about.html')">About</a>
+            <a href="login-signup.html" class="button" onclick="handleUnrestrictedButtonClick(event, 'login-signup.html')">Login / Sign Up</a>
+        </div>
+    </main>
 </body>
 </html>
